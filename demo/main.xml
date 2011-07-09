@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans>
+
+    <bean id="gtkBuilderAdapter" class="GtkBuilderAdapter" singleton="true" /> 
+
+    <bean id="app" class="App" singleton="true">
+        <property name="factory">
+            <bean class="GtkBuilderFactory">
+                <property name="fileName" value="../demo/main.ui" />
+                <property name="widgetName" value="window2" />
+                <property name="gtkBuilderAdapter" ref="gtkBuilderAdapter" />
+            </bean>
+        </property>
+    </bean>
+
+<!-- ===================================================================================== -->
+
+    <map id="machineContext" class="VariantMap" singleton="true">
+        <entry key="factory">
+            <bean class="GtkBuilderFactory">
+                <property name="widgetName" value="window1" />
+                <property name="gtkBuilderAdapter" ref="gtkBuilderAdapter" />
+            </bean>        
+        </entry>
+    </map>
+
+    <bean id="machine" class="Machine" singleton="true">
+        <constructor-arg>
+            <ref bean="machineContext" />
+        </constructor-arg>
+
+        <property name="listener">
+            <bean class="MachineListener">
+                <property name="path" value="/machine"/>
+            </bean>
+        </property>
+
+        <property name="initialStateName" value="init"/>
+        
+<!--         <property name="states"> -->
+<!--             <list class="StateList"> -->
+<!--                 <ref bean="initState"/> -->
+<!--             </list> -->
+<!--         </property> -->
+<!--     </bean> -->
+
+<!--     <bean id="initState" class="State" singleton="true"> -->
+<!--         <property name="name" value="init"/> -->
+        
+<!--         <property name="transitions"> -->
+<!--             <list class="TransitionList"> -->
+<!--                 <bean class="Transition"> -->
+<!--                     <property name="toState" value="level1"/> -->
+<!--                     <property name="condition"> -->
+<!--                         <bean class="K202Condition"> -->
+<!--                             <property name="code" value="$!signal == 'play'"/> -->
+<!--                         </bean> -->
+<!--                     </property> -->
+<!--                 </bean> -->
+<!--                 <bean class="Transition"> -->
+<!--                     <property name="toState" value="quit"/> -->
+<!--                     <property name="condition"> -->
+<!--                         <bean class="K202Condition"> -->
+<!--                             <property name="code" value="$!signal == 'quit'"/> -->
+<!--                         </bean> -->
+<!--                     </property> -->
+<!--                 </bean> -->
+<!--             </list> -->
+<!--         </property> -->
+
+<!--         <property name="entryActions"> -->
+<!--             <list class="ActionList"> -->
+<!--                 <bean class="K202Action"> -->
+<!--                     <property name="code" value="$factory.create (true)"/> -->
+<!--                 </bean> -->
+<!--             </list> -->
+<!--         </property> -->
+        
+<!--         <property name="exitActions"> -->
+<!--             <list class="ActionList"> -->
+<!--                 <bean class="K202Action"> -->
+<!--                     <property name="code" value="$app.debug ('menuState.exitActions')"/> -->
+<!--                 </bean> -->
+<!--             </list> -->
+<!--         </property> -->
+    </bean>
+
+</beans>
