@@ -6,27 +6,24 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <cassert>
-#include "App.h"
-#include "../view/IUIFactory.h"
+#ifndef GTKFORMS_H_
+#define GTKFORMS_H_
+
+#include <ApiMacro.h>
 
 namespace GtkForms {
 
-/****************************************************************************/
+/**
+ * Converts GValue to Core::Variant.
+ */
+extern TILIAE_API Core::Variant gValueToVariant (GValue const *gVal);
 
-void App::run ()
-{
-#if 0
-        GtkWidget *widget = factory->create ();
-        assert (widget);
-        gtk_widget_show (widget);
-#endif
-
-#if 0
-        std::cerr << "App::run" << std::endl;
-#endif
-
-        gtk_main ();
-}
+/**
+ * Converts Core::Variant to GValue. Returned GValue must be unset after use to free
+ * memory. Use g_value_unset (&val);
+ */
+extern TILIAE_API GValue *variantToGValue (GValue *gVal, Core::Variant const &);
 
 }
+
+#	endif /* GTKFORMS_H_ */

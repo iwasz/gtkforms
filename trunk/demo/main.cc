@@ -14,6 +14,7 @@
 #include <gtk/gtk.h>
 
 using namespace Container;
+using namespace GtkForms;
 
 /**
  *
@@ -23,9 +24,6 @@ int main (int argc, char **argv)
         try {
                 GtkBootstrap::init (&argc, &argv);
                 Ptr <BeanFactoryContainer> container = XmlContainerFactory::createContainer ("../demo/main.xml");
-
-//                container->getBean ("machine");
-
                 Ptr <App> app = vcast <Ptr <App> > (container->getBean ("app"));
                 app->run ();
         }
