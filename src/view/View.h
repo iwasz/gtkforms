@@ -6,27 +6,12 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <cassert>
-#include "App.h"
-#include "../view/IUIFactory.h"
+#ifndef UIFACTORY_H_
+#define UIFACTORY_H_
 
-namespace GtkForms {
+#include "IUIFactory.h"
+#include "GtkBuilderAdapter.h"
+#include "WidgetAdapter.h"
+#include "ViewAdapter.h"
 
-/****************************************************************************/
-
-void App::run ()
-{
-#if 0
-        GtkWidget *widget = factory->create ();
-        assert (widget);
-        gtk_widget_show (widget);
-#endif
-
-#if 0
-        std::cerr << "App::run" << std::endl;
-#endif
-
-        gtk_main ();
-}
-
-}
+#	endif /* UIFACTORY_H_ */

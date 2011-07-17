@@ -11,6 +11,8 @@
 
 #include <ApiMacro.h>
 
+namespace GtkForms {
+
 /**
  * Used to init gtk before any other classes get instantiated.
  */
@@ -20,5 +22,7 @@ public:
         static void init (int *argc, char ***argv);
 
 };
+
+}
 
 #	endif /* GTKBOOTSTRAP_H_ */

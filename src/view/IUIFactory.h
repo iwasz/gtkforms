@@ -6,27 +6,21 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <cassert>
-#include "App.h"
-#include "../view/IUIFactory.h"
+#ifndef IUIFACTORY_H_
+#define IUIFACTORY_H_
+
+#include <gtk/gtk.h>
+#include <ApiMacro.h>
+#include <Object.h>
 
 namespace GtkForms {
 
-/****************************************************************************/
-
-void App::run ()
-{
-#if 0
-        GtkWidget *widget = factory->create ();
-        assert (widget);
-        gtk_widget_show (widget);
-#endif
-
-#if 0
-        std::cerr << "App::run" << std::endl;
-#endif
-
-        gtk_main ();
-}
+class TILIAE_API IUIFactory : public Core::Object {
+public:
+        virtual ~IUIFactory () {}
+        virtual GtkWidget *create () = 0;
+};
 
 }
+
+#	endif /* IUIFACTORY_H_ */

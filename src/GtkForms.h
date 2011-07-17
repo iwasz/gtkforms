@@ -9,7 +9,7 @@
 #ifndef GTKFORMS_H_
 #define GTKFORMS_H_
 
-#include "uiFactory/UIFactory.h"
+#include "view/View.h"
 #include "application/Application.h"
 
 #	endif /* GTKFORMS_H_ */

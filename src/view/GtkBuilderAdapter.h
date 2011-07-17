@@ -6,38 +6,36 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef APP_H_
-#define APP_H_
+#ifndef GTKBUILDERADAPTER_H_
+#define GTKBUILDERADAPTER_H_
 
-#include <Pointer.h>
-#include <Reflection.h>
+#include <gtk/gtk.h>
+#include <cstddef>
 #include <ApiMacro.h>
+#include <Reflection.h>
 
 namespace GtkForms {
-class IUIFactory;
 
 /**
- * Main object.
+ * Wrapper for GtkBuilder. GtkBuilder instance holds all data gathered from
+ * various *.ui files, thus it shoud be shared across multiple GtkBuilderFactories,
+ * which adds new ui files descriptions to it.
  */
-class TILIAE_API App {
+class TILIAE_API GtkBuilderAdapter {
 public:
-        __c (void)
 
-        virtual ~App () {}
-         void run ();
+        GtkBuilderAdapter ();
+        virtual ~GtkBuilderAdapter ();
 
-///*--------------------------------------------------------------------------*/
-//
-//        Ptr <IUIFactory> getFactory () const { return factory; }
-//        _s (setFactory) void setFactory (Ptr <IUIFactory> f) { factory = f; }
-//
-//private:
-//
-//        Ptr <IUIFactory> factory;
+        GtkBuilder *getBuilder () const { return builder; }
 
-        _e (App)
+private:
+
+        GtkBuilder *builder;
+
+        __e (GtkBuilderAdapter)
 };
 
 }
 
-#	endif /* APP_H_ */
+#	endif /* GTKBUILDERADAPTER_H_ */

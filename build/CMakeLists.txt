@@ -51,11 +51,24 @@ ENABLE_TESTING ()
 INCLUDE_DIRECTORIES (../src)      
 
 AUX_SOURCE_DIRECTORY (../src LIB_SOURCES)
-AUX_SOURCE_DIRECTORY (../src/uiFactory LIB_SOURCES)
+AUX_SOURCE_DIRECTORY (../src/view LIB_SOURCES)
 AUX_SOURCE_DIRECTORY (../src/application LIB_SOURCES)
 AUX_SOURCE_DIRECTORY (../src/application/init LIB_SOURCES)
-#MESSAGE (${LIB_SOURCES})
+AUX_SOURCE_DIRECTORY (../src/tools LIB_SOURCES)
 add_library (gtkforms SHARED ${LIB_SOURCES})
+
+## --------------------------------------------------------
+## TEST
+## --------------------------------------------------------
+
+AUX_SOURCE_DIRECTORY (../src/test TEST_SOURCES)
+     
+add_executable (test_forms ${TEST_SOURCES})
+TARGET_LINK_LIBRARIES (test_forms ${GTK_LIBRARIES})
+TARGET_LINK_LIBRARIES (test_forms ${XML_LIBRARIES})
+TARGET_LINK_LIBRARIES (test_forms ${TILIAE_LIBRARIES})
+TARGET_LINK_LIBRARIES (test_forms gtkforms)
+TARGET_LINK_LIBRARIES (test_forms boost_unit_test_framework-gcc44)
 
 ## --------------------------------------------------------
 ## DEMO
@@ -68,3 +81,4 @@ TARGET_LINK_LIBRARIES (demo ${GTK_LIBRARIES})
 TARGET_LINK_LIBRARIES (demo ${XML_LIBRARIES})
 TARGET_LINK_LIBRARIES (demo ${TILIAE_LIBRARIES})
 TARGET_LINK_LIBRARIES (demo gtkforms)
+
