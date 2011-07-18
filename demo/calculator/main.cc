@@ -20,7 +20,7 @@ int main (int argc, char **argv)
 {
         try {
                 GtkBootstrap::init (&argc, &argv);
-                Ptr <BeanFactoryContainer> container = XmlContainerFactory::createContainer ("../demo/main.xml");
+                Ptr <BeanFactoryContainer> container = XmlContainerFactory::createContainer ("../demo/calculator/main.xml");
                 Ptr <App> app = vcast <Ptr <App> > (container->getBean ("app"));
                 app->run ();
         }

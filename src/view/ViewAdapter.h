@@ -11,17 +11,12 @@
 
 #include <ApiMacro.h>
 #include <Reflection.h>
-#include <string>
 #include <K202.h>
-#include <beanWrapper/BeanWrapper.h>
+#include <string>
 #include "IUIFactory.h"
 #include "GtkBuilderAdapter.h"
 #include "WidgetAdapter.h"
-#include "Mapping.h"
-
-namespace k202 {
-class K202;
-}
+#include "../mapping/Mapper.h"
 
 namespace GtkForms {
 
@@ -62,38 +57,27 @@ public:
          * (not necessarily) a model.
          */
         Ptr <Core::VariantMap> getContext () const { return context; }
-        _s (setContext) void setContext (Ptr <Core::VariantMap> c) { context = c; }
+        _m (setContext) void setContext (Ptr <Core::VariantMap> c) { context = c; }
 
         /**
          * K202 script language interpretter, which is used to execute signal
          * handlers from views. If none provided, K202::instance will be used.
          */
         Ptr <k202::K202> getK202 () const { return k202; }
-        _s (setK202) void setK202 (Ptr <k202::K202> k) { k202 = k; }
-
-        /**
-         * Bean wrapper which will be used for transfering model properties
-         * to view properties and back. If none is set, BeanWrapper::create
-         * will be used.
-         */
-        Ptr<Wrapper::BeanWrapper> getBeanWrapper () const { return beanWrapper; }
-        _s (setBeanWrapper) void setBeanWrapper (Ptr<Wrapper::BeanWrapper> beanWrapper) { this->beanWrapper = beanWrapper; }
+        _m (setK202) void setK202 (Ptr <k202::K202> k) { k202 = k; }
 
         /**
          * View <-> Model mappings.
          */
-        Ptr <MappingVector> getMappings () const { return mappings; }
-        _s (setMappings) void setMappings (Ptr <MappingVector> mappings) { this->mappings = mappings; }
+        Ptr <Mapper> getMapper () const { return mapper; }
+        _m (setMapper) void setMapper (Ptr <Mapper> mapper) { this->mapper = mapper; }
 
 /*--------------------------------------------------------------------------*/
-
-private:
 
         friend void handler (std::string const &sourceCode,
                              ViewAdapter *viewAdapter,
                              Core::VariantVector const &paramVector);
 
-        Wrapper::BeanWrapper *myBeanWrapper () const;
         k202::K202 *myK202Script () const;
 
 private:
@@ -101,10 +85,9 @@ private:
         std::string fileName;
         std::string widgetName;
         Ptr <GtkBuilderAdapter> gtkBuilderAdapter;
-        Ptr <Core::VariantMap> context;
+        Ptr <Mapper> mapper;
         Ptr <k202::K202> k202;
-        Ptr <MappingVector> mappings;
-        mutable Ptr <Wrapper::BeanWrapper> beanWrapper;
+        Ptr <Core::VariantMap> context;
 
         _e (ViewAdapter)
 };

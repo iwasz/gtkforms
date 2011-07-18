@@ -55,23 +55,10 @@ void handler (std::string const &sourceCode,
         Variant ret = k->run (sourceCode, domain, paramVector);
 
 #if 0
-        std::cerr << ret << std::endl;
+        std::cerr << "Model : " << ret << std::endl;
 #endif
 
-        Wrapper::BeanWrapper *bw = viewAdapter->myBeanWrapper ();
-        Common::Context ctx;
-
-        for (MappingVector::const_iterator i = viewAdapter->getMappings ()->begin (); i != viewAdapter->getMappings ()->end (); ++i) {
-                bw->setWrappedObject (ret);
-                Variant modelProperty = bw->get ((*i)->getModelProp (), &ctx); // Discard errors
-
-                if (modelProperty.isNone ()) {
-                        continue;
-                }
-
-                bw->setWrappedObject (domain);
-                bw->set ((*i)->getViewProp (), modelProperty, &ctx);
-        }
+        viewAdapter->getMapper ()->m2v (ret);
 }
 
 /**
@@ -185,10 +172,6 @@ GtkWidget *ViewAdapter::create ()
         if (!gtk_widget_get_visible (window)) {
                 gtk_widget_show_all (window);
         }
-        else {
-                gtk_widget_destroy (window);
-                window = NULL;
-        }
 
         return window;
 }
@@ -218,17 +201,6 @@ Core::Variant ViewAdapter::get (const std::string &name) const
 {
         Ptr <WidgetAdapter> a = getWidget (name);
         return ((a) ? (Core::Variant (a)) : (Core::Variant ()));
-}
-
-/****************************************************************************/
-
-Wrapper::BeanWrapper *ViewAdapter::myBeanWrapper () const
-{
-        if (!beanWrapper) {
-                beanWrapper = Wrapper::BeanWrapper::create ();
-        }
-
-        return beanWrapper.get ();
 }
 
 /****************************************************************************/

@@ -29,7 +29,7 @@
     <map id="machineContext" class="VariantMap" singleton="true">
         <entry key="view">
             <bean class="ViewAdapter">
-                <property name="fileName" value="../demo/main.ui" />
+                <property name="fileName" value="../demo/calculator/main.ui" />
                 <property name="widgetName" value="window3" />
                 <property name="gtkBuilderAdapter" ref="gtkBuilderAdapter" />
                 <property name="context" ref="machineContext" />
