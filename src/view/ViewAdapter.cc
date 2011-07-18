@@ -23,8 +23,11 @@ using namespace Core;
 /****************************************************************************/
 
 struct Helper {
+
+        Helper () : viewAdapter (NULL) {}
+
         std::string source;
-        Core::VariantMap *context;
+        ViewAdapter *viewAdapter;
 };
 
 /**
@@ -35,9 +38,9 @@ struct Helper {
  * @param paramVector Argumenty sygnału GTK skonwertowane na Variant. Odwołujemy się
  * za pomocą %1, %2, etc.
  */
-static void handler (std::string const &sourceCode,
-                     Core::VariantMap *context,
-                     Core::VariantVector const &paramVector)
+void handler (std::string const &sourceCode,
+              ViewAdapter *viewAdapter,
+              Core::VariantVector const &paramVector)
 {
 #if 0
         std::cerr << "handler here : " << sourceCode << std::endl;
@@ -47,13 +50,28 @@ static void handler (std::string const &sourceCode,
         }
 #endif
 
-        k202::K202 *k = k202::K202::instance ();
-        Core::Variant domain = Core::Variant (context);
+        k202::K202 *k = viewAdapter->myK202Script ();
+        Core::Variant domain = Core::Variant (viewAdapter->getContext ().get ());
         Variant ret = k->run (sourceCode, domain, paramVector);
 
 #if 0
         std::cerr << ret << std::endl;
 #endif
+
+        Wrapper::BeanWrapper *bw = viewAdapter->myBeanWrapper ();
+        Common::Context ctx;
+
+        for (MappingVector::const_iterator i = viewAdapter->getMappings ()->begin (); i != viewAdapter->getMappings ()->end (); ++i) {
+                bw->setWrappedObject (ret);
+                Variant modelProperty = bw->get ((*i)->getModelProp (), &ctx); // Discard errors
+
+                if (modelProperty.isNone ()) {
+                        continue;
+                }
+
+                bw->setWrappedObject (domain);
+                bw->set ((*i)->getViewProp (), modelProperty, &ctx);
+        }
 }
 
 /**
@@ -90,7 +108,7 @@ static void gClosureMarshal (GClosure *closure,
 #endif
 
         typedef void (*HandlerType) (std::string const &sourceCode,
-                                     Core::VariantMap *context,
+                                     ViewAdapter *viewAdapter,
                                      Core::VariantVector const &paramVector);
 
         GCClosure *cc = (GCClosure*) closure;
@@ -105,11 +123,12 @@ static void gClosureMarshal (GClosure *closure,
         }
 
         Helper *helper = static_cast <Helper *> (closure->data);
-        callback (helper->source, helper->context, params);
+        callback (helper->source, helper->viewAdapter, params);
 }
 
 /**
- * To jest handler podawany do gtk_builder_connect_signals_full.
+ * To jest handler podawany do gtk_builder_connect_signals_full. Odpala się
+ * per sygnał.
  */
 static void myConnectFunc (GtkBuilder *builder,
                            GObject *object,
@@ -124,7 +143,8 @@ static void myConnectFunc (GtkBuilder *builder,
 #endif
 
         Helper *helper = new Helper ();
-        helper->context = static_cast <Core::VariantMap *> (user_data);
+//        helper->context = static_cast <Core::VariantMap *> (user_data);
+        helper->viewAdapter = static_cast <ViewAdapter *> (user_data);
         helper->source = handler_name;
 
         // Podać jako parametr tam gdzie user_data
@@ -157,7 +177,7 @@ GtkWidget *ViewAdapter::create ()
                         return NULL;
                 }
 
-                gtk_builder_connect_signals_full (builder, myConnectFunc, context.get ());
+                gtk_builder_connect_signals_full (builder, myConnectFunc, this);
                 window = GTK_WIDGET (gtk_builder_get_object (builder, widgetName.c_str ()));
                 g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
         }

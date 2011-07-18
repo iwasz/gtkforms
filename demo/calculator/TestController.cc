@@ -22,34 +22,6 @@ void TestController::clearBuffer ()
 
 /****************************************************************************/
 
-void TestController::onClick ()
-{
-        std::cerr << "TestController::onClick" << std::endl;
-}
-
-/****************************************************************************/
-
-void TestController::onClick2 ()
-{
-        std::cerr << "TestController::onClick2" << std::endl;
-}
-
-/****************************************************************************/
-
-void TestController::valueChanged (double d)
-{
-        std::cerr << "TestController::valueChanged (" << d << ")" << std::endl;
-}
-
-/****************************************************************************/
-
-void TestController::bufferChanged (std::string const &s)
-{
-        std::cerr << "TestController::bufferChanged (" << s << ")" << std::endl;
-}
-
-/****************************************************************************/
-
 std::string TestController::digit (int digit)
 {
         buffer += boost::lexical_cast <std::string> (digit);
@@ -63,7 +35,6 @@ void TestController::plus ()
         updateOperand ();
         clearBuffer ();
         operation = PLUS;
-        std::cerr << "+" << std::endl;
 }
 
 /****************************************************************************/
@@ -73,7 +44,6 @@ void TestController::minus ()
         updateOperand ();
         clearBuffer ();
         operation = MINUS;
-        std::cerr << "-" << std::endl;
 }
 
 /****************************************************************************/
@@ -83,7 +53,6 @@ void TestController::multi ()
         updateOperand ();
         clearBuffer ();
         operation = MULTI;
-        std::cerr << "*" << std::endl;
 }
 
 /****************************************************************************/
@@ -93,12 +62,11 @@ void TestController::div ()
         updateOperand ();
         clearBuffer ();
         operation = DIV;
-        std::cerr << "/" << std::endl;
 }
 
 /****************************************************************************/
 
-void TestController::result ()
+std::string TestController::result ()
 {
         double oper1 = operand;
         updateOperand ();
@@ -122,43 +90,46 @@ void TestController::result ()
         }
 
         clearBuffer ();
-        std::cerr << "=" << operand << std::endl;
+        return boost::lexical_cast <std::string> (operand);;
 }
 
 /****************************************************************************/
 
-void TestController::dot ()
+std::string TestController::dot ()
 {
         buffer += ".";
-        std::cerr << buffer << std::endl;
+        return buffer;
 }
 
 /****************************************************************************/
 
-void TestController::plusMinus ()
+std::string TestController::plusMinus ()
 {
-
+        return "-" + buffer;
 }
 
 /****************************************************************************/
 
-void TestController::clr ()
-{
-        clearBuffer ();
-        operand = 0;
-}
-
-/****************************************************************************/
-
-void TestController::ce ()
+std::string TestController::clr ()
 {
         clearBuffer ();
         operand = 0;
+        return buffer;
 }
 
 /****************************************************************************/
 
-void TestController::back ()
+std::string TestController::ce ()
 {
+        clearBuffer ();
+        operand = 0;
+        return buffer;
+}
 
+/****************************************************************************/
+
+std::string TestController::back ()
+{
+//        buffer.
+        return buffer;
 }

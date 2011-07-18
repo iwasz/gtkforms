@@ -17,6 +17,7 @@
 #include "IUIFactory.h"
 #include "GtkBuilderAdapter.h"
 #include "WidgetAdapter.h"
+#include "Mapping.h"
 
 namespace k202 {
 class K202;
@@ -78,9 +79,19 @@ public:
         Ptr<Wrapper::BeanWrapper> getBeanWrapper () const { return beanWrapper; }
         _s (setBeanWrapper) void setBeanWrapper (Ptr<Wrapper::BeanWrapper> beanWrapper) { this->beanWrapper = beanWrapper; }
 
+        /**
+         * View <-> Model mappings.
+         */
+        Ptr <MappingVector> getMappings () const { return mappings; }
+        _s (setMappings) void setMappings (Ptr <MappingVector> mappings) { this->mappings = mappings; }
+
 /*--------------------------------------------------------------------------*/
 
 private:
+
+        friend void handler (std::string const &sourceCode,
+                             ViewAdapter *viewAdapter,
+                             Core::VariantVector const &paramVector);
 
         Wrapper::BeanWrapper *myBeanWrapper () const;
         k202::K202 *myK202Script () const;
@@ -92,6 +103,7 @@ private:
         Ptr <GtkBuilderAdapter> gtkBuilderAdapter;
         Ptr <Core::VariantMap> context;
         Ptr <k202::K202> k202;
+        Ptr <MappingVector> mappings;
         mutable Ptr <Wrapper::BeanWrapper> beanWrapper;
 
         _e (ViewAdapter)

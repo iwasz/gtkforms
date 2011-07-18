@@ -33,6 +33,14 @@
                 <property name="widgetName" value="window3" />
                 <property name="gtkBuilderAdapter" ref="gtkBuilderAdapter" />
                 <property name="context" ref="machineContext" />
+                <property name="mappings">
+                    <list class="MappingVector">
+                        <bean class="Mapping">
+                            <property name="viewProp" value="view.entry.text"/>
+                            <property name="modelProp" value=""/>
+                        </bean>
+                    </list>
+                </property>
             </bean>        
         </entry>
         
