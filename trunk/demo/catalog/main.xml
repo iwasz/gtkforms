@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans>
+
+    <bean id="beanWrapper" class="BeanWrapper" singleton="true">
+        <property name="pluginList">
+            <list class="BeanWrapperPluginList">
+                <bean class="PropertyRWBeanWrapperPlugin"/>
+                <bean class="GetPutMethodRWBeanWrapperPlugin"/>
+                <bean class="MethodPlugin"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="k202Factory" class="K202Factory" />
+    <bean id="k202" factory="k202Factory" singleton="true">
+        <property name="beanWrapper" ref="beanWrapper"/>
+    </bean>
+
+<!-- ===================================================================================== -->
+
+    <bean id="gtkBuilderAdapter" class="GtkBuilderAdapter" singleton="true" /> 
+    <bean id="app" class="App" singleton="true" lazy-init="true"/>
+
+    <bean id="testController" class="TestController"/>
+
+<!-- ===================================================================================== -->
+
+    <map id="machineContext" class="VariantMap" singleton="true">
+        <entry key="view">
+            <bean class="ViewAdapter">
+                <property name="fileName" value="../demo/main.ui" />
+                <property name="widgetName" value="window3" />
+                <property name="gtkBuilderAdapter" ref="gtkBuilderAdapter" />
+                <property name="context" ref="machineContext" />
+                <property name="mappings">
+                    <list class="MappingVector">
+                        <bean class="Mapping">
+                            <property name="viewProp" value="view.entry.text"/>
+                            <property name="modelProp" value=""/>
+                        </bean>
+                    </list>
+                </property>
+            </bean>        
+        </entry>
+        
+        <entry key="controller">
+            <ref bean="testController" />
+        </entry>
+    </map>
+
+    <bean id="machine" class="Machine" singleton="true" init-method="runOnce">
+        <constructor-arg>
+            <ref bean="machineContext" />
+        </constructor-arg>
+
+        <property name="listener">
+            <bean class="MachineListener">
+                <property name="path" value="/machine"/>
+            </bean>
+        </property>
+
+        <property name="initialStateName" value="init"/>
+        
+        <property name="states">
+            <list class="StateList">
+                <ref bean="initState"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="initState" class="State" singleton="true">
+        <property name="name" value="init"/>
+        
+<!--         <property name="transitions"> -->
+<!--             <list class="TransitionList"> -->
+<!--                 <bean class="Transition"> -->
+<!--                     <property name="toState" value="level1"/> -->
+<!--                     <property name="condition"> -->
+<!--                         <bean class="K202Condition"> -->
+<!--                             <property name="code" value="$!signal == 'play'"/> -->
+<!--                         </bean> -->
+<!--                     </property> -->
+<!--                 </bean> -->
+<!--                 <bean class="Transition"> -->
+<!--                     <property name="toState" value="quit"/> -->
+<!--                     <property name="condition"> -->
+<!--                         <bean class="K202Condition"> -->
+<!--                             <property name="code" value="$!signal == 'quit'"/> -->
+<!--                         </bean> -->
+<!--                     </property> -->
+<!--                 </bean> -->
+<!--             </list> -->
+<!--         </property> -->
+
+        <property name="entryActions">
+            <list class="ActionList">
+                <bean class="K202Action">
+                    <property name="code" value="$view.create ()"/>
+                </bean>
+            </list>
+        </property>
+        
+<!--         <property name="exitActions"> -->
+<!--             <list class="ActionList"> -->
+<!--                 <bean class="K202Action"> -->
+<!--                     <property name="code" value="$app.debug ('menuState.exitActions')"/> -->
+<!--                 </bean> -->
+<!--             </list> -->
+<!--         </property> -->
+    </bean>
+
+</beans>

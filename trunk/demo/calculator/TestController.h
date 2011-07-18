@@ -17,22 +17,17 @@ public:
 
         __c (void)
 
-        _m (onClick) void onClick ();
-        _m (onClick2) void onClick2 ();
-        _m (valueChanged) void valueChanged (double);
-        _m (bufferChanged) void bufferChanged (std::string const &);
-
         _m (digit) std::string digit (int digit);
         _m (plus) void plus ();
         _m (minus) void minus ();
         _m (multi) void multi ();
         _m (div) void div ();
-        _m (result) void result ();
-        _m (dot) void dot ();
-        _m (plusMinus) void plusMinus ();
-        _m (clr) void clr ();
-        _m (ce) void ce ();
-        _m (back) void back ();
+        _m (result) std::string result ();
+        _m (dot) std::string dot ();
+        _m (plusMinus) std::string plusMinus ();
+        _m (clr) std::string clr ();
+        _m (ce) std::string ce ();
+        _m (back) std::string back ();
 
 private:
 

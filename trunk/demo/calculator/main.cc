@@ -7,11 +7,8 @@
  ****************************************************************************/
 
 #include <iostream>
-#include <Pointer.h>
 #include <Container.h>
-#include <boost/make_shared.hpp>
 #include "../src/GtkForms.h"
-#include <gtk/gtk.h>
 
 using namespace Container;
 using namespace GtkForms;
