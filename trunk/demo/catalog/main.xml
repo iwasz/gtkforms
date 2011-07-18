@@ -22,30 +22,56 @@
     <bean id="gtkBuilderAdapter" class="GtkBuilderAdapter" singleton="true" /> 
     <bean id="app" class="App" singleton="true" lazy-init="true"/>
 
-    <bean id="testController" class="TestController"/>
-
 <!-- ===================================================================================== -->
+
+    <bean id="bookDAO" class="BookDAO" singleton="true" />
 
     <map id="machineContext" class="VariantMap" singleton="true">
         <entry key="view">
             <bean class="ViewAdapter">
-                <property name="fileName" value="../demo/main.ui" />
-                <property name="widgetName" value="window3" />
+                <property name="fileName" value="../demo/catalog/catalog.ui" />
+                <property name="widgetName" value="editWindow" />
                 <property name="gtkBuilderAdapter" ref="gtkBuilderAdapter" />
                 <property name="context" ref="machineContext" />
-                <property name="mappings">
-                    <list class="MappingVector">
-                        <bean class="Mapping">
-                            <property name="viewProp" value="view.entry.text"/>
-                            <property name="modelProp" value=""/>
-                        </bean>
-                    </list>
-                </property>
+                <property name="mapper" ref="mapper"/>                    
             </bean>        
         </entry>
         
+        <entry key="mapper">
+            <bean id="mapper" class="Mapper">
+                <property name="context" ref="machineContext" />
+                <property name="modelName" value="model" />
+                <property name="mappings">
+                    <list class="MappingVector">
+                        <bean class="Mapping">
+                            <property name="viewProp" value="view.title.text"/>
+                            <property name="modelProp" value="model.title"/>
+                        </bean>
+                        <bean class="Mapping">
+                            <property name="viewProp" value="view.firstname.text"/>
+                            <property name="modelProp" value="model.author.firstname"/>
+                        </bean>
+                        <bean class="Mapping">
+                            <property name="viewProp" value="view.lastname.text"/>
+                            <property name="modelProp" value="model.author.lastname"/>
+                        </bean>
+                        <bean class="Mapping">
+                            <property name="viewProp" value="view.isbn.text"/>
+                            <property name="modelProp" value="model.isbn"/>
+                        </bean>
+                        <bean class="Mapping">
+                            <property name="viewProp" value="view.publisherName.text"/>
+                            <property name="modelProp" value="model.publisher.name"/>
+                        </bean>
+                    </list>
+                </property>
+            </bean>
+        </entry>        
+        
         <entry key="controller">
-            <ref bean="testController" />
+            <bean id="testController" class="EditController">
+                <property name="bookDAO" ref="bookDAO"/>
+            </bean>
         </entry>
     </map>
 
@@ -97,6 +123,9 @@
             <list class="ActionList">
                 <bean class="K202Action">
                     <property name="code" value="$view.create ()"/>
+                </bean>
+                <bean class="K202Action">
+                    <property name="code" value="$mapper.m2v ($controller.onFormShow ())"/>
                 </bean>
             </list>
         </property>

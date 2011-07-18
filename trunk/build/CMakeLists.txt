@@ -5,6 +5,11 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
+SET(BUILD_LIB               1)
+SET(BUILD_TEST              0)
+SET(BUILD_CALCULATOR        0)
+SET(BUILD_CATALOG           1)
+
 SET (CMAKE_VERBOSE_MAKEFILE 0) 
 ADD_DEFINITIONS (-g -fvisibility=hidden -DTILIAE_DLL -Wall)
 ADD_DEFINITIONS (-DTILIAE_DEBUG)
@@ -48,37 +53,55 @@ ENABLE_TESTING ()
 ## LIB
 ## --------------------------------------------------------
 
-INCLUDE_DIRECTORIES (../src)      
-
-AUX_SOURCE_DIRECTORY (../src LIB_SOURCES)
-AUX_SOURCE_DIRECTORY (../src/view LIB_SOURCES)
-AUX_SOURCE_DIRECTORY (../src/application LIB_SOURCES)
-AUX_SOURCE_DIRECTORY (../src/application/init LIB_SOURCES)
-AUX_SOURCE_DIRECTORY (../src/tools LIB_SOURCES)
-add_library (gtkforms SHARED ${LIB_SOURCES})
+IF (BUILD_LIB)
+    INCLUDE_DIRECTORIES (../src)      
+    
+    AUX_SOURCE_DIRECTORY (../src LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (../src/view LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (../src/application LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (../src/application/init LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (../src/tools LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (../src/mapping LIB_SOURCES)
+    add_library (gtkforms SHARED ${LIB_SOURCES})
+ENDIF()
 
 ## --------------------------------------------------------
 ## TEST
 ## --------------------------------------------------------
 
-AUX_SOURCE_DIRECTORY (../src/test TEST_SOURCES)
-     
-add_executable (test_forms ${TEST_SOURCES})
-TARGET_LINK_LIBRARIES (test_forms ${GTK_LIBRARIES})
-TARGET_LINK_LIBRARIES (test_forms ${XML_LIBRARIES})
-TARGET_LINK_LIBRARIES (test_forms ${TILIAE_LIBRARIES})
-TARGET_LINK_LIBRARIES (test_forms gtkforms)
-TARGET_LINK_LIBRARIES (test_forms boost_unit_test_framework-gcc44)
+IF(BUILD_TEST)
+    AUX_SOURCE_DIRECTORY (../src/test TEST_SOURCES)
+         
+    add_executable (test_forms ${TEST_SOURCES})
+    TARGET_LINK_LIBRARIES (test_forms ${GTK_LIBRARIES})
+    TARGET_LINK_LIBRARIES (test_forms ${XML_LIBRARIES})
+    TARGET_LINK_LIBRARIES (test_forms ${TILIAE_LIBRARIES})
+    TARGET_LINK_LIBRARIES (test_forms gtkforms)
+    TARGET_LINK_LIBRARIES (test_forms boost_unit_test_framework-gcc44)
+ENDIF()
 
 ## --------------------------------------------------------
-## DEMO
+## DEMOS
 ## --------------------------------------------------------
 
-AUX_SOURCE_DIRECTORY (../demo DEMO_SOURCES)
-     
-add_executable (demo ${DEMO_SOURCES})
-TARGET_LINK_LIBRARIES (demo ${GTK_LIBRARIES})
-TARGET_LINK_LIBRARIES (demo ${XML_LIBRARIES})
-TARGET_LINK_LIBRARIES (demo ${TILIAE_LIBRARIES})
-TARGET_LINK_LIBRARIES (demo gtkforms)
+IF(BUILD_CALCULATOR)
+    AUX_SOURCE_DIRECTORY (../demo/calculator DEMO_SOURCES)    
+    add_executable (calculator ${DEMO_SOURCES})
+    TARGET_LINK_LIBRARIES (calculator ${GTK_LIBRARIES})
+    TARGET_LINK_LIBRARIES (calculator ${XML_LIBRARIES})
+    TARGET_LINK_LIBRARIES (calculator ${TILIAE_LIBRARIES})
+    TARGET_LINK_LIBRARIES (calculator gtkforms)
+ENDIF()
 
+IF(BUILD_CATALOG)
+    SET(DEMO_SOURCES)
+    AUX_SOURCE_DIRECTORY (../demo/catalog DEMO_SOURCES)    
+    AUX_SOURCE_DIRECTORY (../demo/catalog/model DEMO_SOURCES)    
+    AUX_SOURCE_DIRECTORY (../demo/catalog/controller DEMO_SOURCES)    
+    AUX_SOURCE_DIRECTORY (../demo/catalog/dao DEMO_SOURCES)    
+    add_executable (catalog ${DEMO_SOURCES})
+    TARGET_LINK_LIBRARIES (catalog ${GTK_LIBRARIES})
+    TARGET_LINK_LIBRARIES (catalog ${XML_LIBRARIES})
+    TARGET_LINK_LIBRARIES (catalog ${TILIAE_LIBRARIES})
+    TARGET_LINK_LIBRARIES (catalog gtkforms)
+ENDIF()

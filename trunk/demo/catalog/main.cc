@@ -9,6 +9,7 @@
 #include <iostream>
 #include <Container.h>
 #include "../src/GtkForms.h"
+#include "model/Model.h"
 
 using namespace Container;
 using namespace GtkForms;
@@ -20,7 +21,7 @@ int main (int argc, char **argv)
 {
         try {
                 GtkBootstrap::init (&argc, &argv);
-                Ptr <BeanFactoryContainer> container = XmlContainerFactory::createContainer ("../demo/main.xml");
+                Ptr <BeanFactoryContainer> container = XmlContainerFactory::createContainer ("../demo/catalog/main.xml");
                 Ptr <App> app = vcast <Ptr <App> > (container->getBean ("app"));
                 app->run ();
         }
