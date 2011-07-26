@@ -19,6 +19,7 @@ class TILIAE_API IUIFactory : public Core::Object {
 public:
         virtual ~IUIFactory () {}
         virtual GtkWidget *create () = 0;
+        virtual void show () = 0;
 };
 
 }

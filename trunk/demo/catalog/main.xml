@@ -21,11 +21,10 @@
 
     <bean id="gtkBuilderAdapter" class="GtkBuilderAdapter" singleton="true" /> 
     <bean id="app" class="App" singleton="true" lazy-init="true"/>
-
-<!-- ===================================================================================== -->
-
     <bean id="bookDAO" class="BookDAO" singleton="true" />
 
+<!-- ===================================================================================== -->
+<!-- 
     <map id="machineContext" class="VariantMap" singleton="true">
         <entry key="view">
             <bean class="ViewAdapter">
@@ -36,7 +35,7 @@
                 <property name="mapper" ref="mapper"/>                    
             </bean>        
         </entry>
-        
+     
         <entry key="mapper">
             <bean id="mapper" class="Mapper">
                 <property name="context" ref="machineContext" />
@@ -97,27 +96,6 @@
 
     <bean id="initState" class="State" singleton="true">
         <property name="name" value="init"/>
-        
-<!--         <property name="transitions"> -->
-<!--             <list class="TransitionList"> -->
-<!--                 <bean class="Transition"> -->
-<!--                     <property name="toState" value="level1"/> -->
-<!--                     <property name="condition"> -->
-<!--                         <bean class="K202Condition"> -->
-<!--                             <property name="code" value="$!signal == 'play'"/> -->
-<!--                         </bean> -->
-<!--                     </property> -->
-<!--                 </bean> -->
-<!--                 <bean class="Transition"> -->
-<!--                     <property name="toState" value="quit"/> -->
-<!--                     <property name="condition"> -->
-<!--                         <bean class="K202Condition"> -->
-<!--                             <property name="code" value="$!signal == 'quit'"/> -->
-<!--                         </bean> -->
-<!--                     </property> -->
-<!--                 </bean> -->
-<!--             </list> -->
-<!--         </property> -->
 
         <property name="entryActions">
             <list class="ActionList">
@@ -129,14 +107,94 @@
                 </bean>
             </list>
         </property>
+    </bean>
+ -->
+<!-- ===================================================================================== -->
+
+    <map id="machineContext" class="VariantMap" singleton="true" lazy-init="true">
+        <entry key="view">
+            <bean class="ViewAdapter">
+                <property name="fileName" value="../demo/catalog/catalog.ui" />
+                <property name="widgetName" value="listWindow" />
+                <property name="gtkBuilderAdapter" ref="gtkBuilderAdapter" />
+                <property name="context" ref="machineContext" />
+                <property name="mapper" ref="mapper"/>                    
+            </bean>        
+        </entry>
+
+        <entry key="mapper">
+            <bean id="mapper" class="Mapper">
+                <property name="context" ref="machineContext" />
+                <property name="modelName" value="model" />
+                <property name="mappings">
+                    <list class="MappingVector">
+                        <bean class="TableMapping">
+                            <property name="storePath" value="view.list.model"/>
+                            <property name="cells">
+                                <list class="CellVector">
+                                    <bean class="Cell">
+                                        <property name="modelProp" value="title"/>
+                                        <property name="viewRow" value="0"/>
+                                    </bean>
+                                    <bean class="Cell">
+                                        <property name="modelProp" value="isbn"/>
+                                        <property name="viewRow" value="1"/>
+                                    </bean>
+                                    <bean class="Cell">
+                                        <property name="modelProp" value="author.firstname"/>
+                                        <property name="viewRow" value="2"/>
+                                    </bean>
+                                    <bean class="Cell">
+                                        <property name="modelProp" value="author.lastname"/>
+                                        <property name="viewRow" value="3"/>
+                                    </bean>
+                                    <bean class="Cell">
+                                        <property name="modelProp" value="publisher.name"/>
+                                        <property name="viewRow" value="4"/>
+                                    </bean>
+                                </list>
+                            </property>
+                        </bean>
+                    </list>
+                </property>
+            </bean>
+        </entry>        
         
-<!--         <property name="exitActions"> -->
-<!--             <list class="ActionList"> -->
-<!--                 <bean class="K202Action"> -->
-<!--                     <property name="code" value="$app.debug ('menuState.exitActions')"/> -->
-<!--                 </bean> -->
-<!--             </list> -->
-<!--         </property> -->
+        <entry key="controller">
+            <bean class="ListController" init-method="init">
+                <property name="bookDAO" ref="bookDAO"/>
+            </bean>
+        </entry>
+    </map>
+
+    <bean id="machine2" class="Machine" singleton="true" init-method="runOnce">
+        <constructor-arg>
+            <ref bean="machineContext" />
+        </constructor-arg>
+
+        <property name="listener">
+            <bean class="MachineListener">
+                <property name="path" value="/machine"/>
+            </bean>
+        </property>
+
+        <property name="initialStateName" value="init"/>
+        
+        <property name="states">
+            <list class="StateList">
+                <bean class="State" singleton="true">
+                    <property name="name" value="init"/>
+            
+                    <property name="entryActions">
+                        <list class="ActionList">
+                            <bean class="K202Action">
+                                <property name="code" value="$view.create (); $mapper.m2v ($controller.onFormShow ()); $view.show ()"/>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
     </bean>
 
 </beans>

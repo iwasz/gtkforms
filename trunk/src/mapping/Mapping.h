@@ -13,16 +13,26 @@
 #include <Reflection.h>
 #include <string>
 #include <vector>
+#include "mapping/IMapping.h"
+#include "mapping/MapperDTO.h"
 
 namespace GtkForms {
 
 /**
  *
  */
-class TILIAE_API Mapping {
+class TILIAE_API Mapping : public IMapping {
 public:
 
         __c (void)
+        virtual ~Mapping () {}
+
+/*--------------------------------------------------------------------------*/
+
+        virtual void m2v (MapperDTO *dto);
+        virtual void v2m (MapperDTO *dto);
+
+/*--------------------------------------------------------------------------*/
 
         std::string const &getModelProp () const { return modelProp; }
         _m (setModelProp) void setModelProp (std::string const &modelProp) { this->modelProp = modelProp; }
@@ -37,9 +47,6 @@ private:
 
         _e (Mapping)
 };
-
-typedef std::vector <Ptr <Mapping> > MappingVector;
-_g (MappingVector)
 
 }
 

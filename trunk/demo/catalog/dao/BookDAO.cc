@@ -13,7 +13,7 @@
 
 namespace Catalog {
 
-Ptr <Book> BookDAO::getBook (unsigned int id)
+Ptr <Book> BookDAO::createTestData () const
 {
         // To że niby pobieramy z bazy danych, albo coś:
         Ptr <Author> author = boost::make_shared <Author> ();
@@ -30,6 +30,37 @@ Ptr <Book> BookDAO::getBook (unsigned int id)
         author->setLastname ("Modan");
 
         return book;
+}
+
+/****************************************************************************/
+
+Ptr <Book> BookDAO::getBook (unsigned int id) const
+{
+        return createTestData ();
+}
+
+/****************************************************************************/
+
+Ptr <BookVector> BookDAO::getBooks () const
+{
+        Ptr <BookVector> ret = boost::make_shared <BookVector> ();
+
+        Ptr <Book> book = createTestData ();
+        ret->push_back (book);
+
+        book = createTestData ();
+        book->setTitle ("Mikropolis");
+        ret->push_back (book);
+
+        book = createTestData ();
+        book->setTitle ("Niebieskie pigułki");
+        ret->push_back (book);
+
+        book = createTestData ();
+        book->setTitle ("Deszcz");
+        ret->push_back (book);
+
+        return ret;
 }
 
 } /* namespace Catalog */

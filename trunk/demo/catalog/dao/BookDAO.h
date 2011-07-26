@@ -19,7 +19,13 @@ class BookDAO {
 public:
 
         virtual ~BookDAO () {}
-        Ptr <Book> getBook (unsigned int id);
+
+        Ptr <Book> getBook (unsigned int id) const;
+        Ptr <BookVector> getBooks () const;
+
+private:
+
+        Ptr <Book> createTestData () const;
 
         __e (BookDAO)
 };

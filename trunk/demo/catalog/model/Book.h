@@ -14,6 +14,7 @@
 #include <IToStringEnabled.h>
 #include "Publisher.h"
 #include "Author.h"
+#include <vector>
 
 namespace Catalog {
 
@@ -53,6 +54,9 @@ private:
         Ptr <Author> author;
         _e (Book)
 };
+
+typedef std::vector <Ptr <Book> > BookVector;
+_g (BookVector)
 
 }
 

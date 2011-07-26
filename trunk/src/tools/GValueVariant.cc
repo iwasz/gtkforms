@@ -16,9 +16,16 @@ TILIAE_API Variant gValueToVariant (GValue const *gVal)
 {
 #if 0
         std::cerr << G_VALUE_TYPE_NAME (gVal) << std::endl;
+        std::cerr << "Button : " << GTK_TYPE_TOOL_BUTTON << ", " << G_VALUE_TYPE (gVal) << std::endl;
+        std::cerr << "G_TYPE_IS_ABSTRACT() : " << G_TYPE_IS_ABSTRACT (G_VALUE_TYPE (gVal)) << std::endl;
+        std::cerr << "G_TYPE_IS_DERIVED() : " << G_TYPE_IS_DERIVED(G_VALUE_TYPE (gVal)) << std::endl;
+        std::cerr << "G_TYPE_IS_OBJECT() : " << G_TYPE_IS_OBJECT(G_VALUE_TYPE (gVal)) << std::endl;
 #endif
 
-        switch (gVal->g_type) {
+        switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE (gVal))) {
+        case G_TYPE_OBJECT:
+        case G_TYPE_INTERFACE:
+                return Variant (G_OBJECT (g_value_get_object (gVal)));
         case G_TYPE_STRING:
                 return Variant (std::string (g_value_get_string (gVal)));
         case G_TYPE_INT:
@@ -30,8 +37,6 @@ TILIAE_API Variant gValueToVariant (GValue const *gVal)
         case G_TYPE_POINTER:
                 // gpointer
                 return Variant (g_value_get_pointer (gVal));
-        case G_TYPE_OBJECT:
-                return Variant (G_OBJECT (g_value_get_object (gVal)));
         case G_TYPE_BOOLEAN:
                 return Variant ((bool)g_value_get_boolean (gVal));
         case G_TYPE_UINT:
@@ -60,32 +65,20 @@ TILIAE_API Variant gValueToVariant (GValue const *gVal)
         case G_TYPE_PARAM:
                 // GParamSpec*
                 return Variant (g_value_get_param (gVal));
-
-        case G_TYPE_INTERFACE:
         case G_TYPE_INVALID:
         case G_TYPE_NONE:
         default:
-                if (G_VALUE_HOLDS_GTYPE (gVal->g_type)) {
-                        // Gtype, czyli gulong
-                        return Variant ((unsigned long)g_value_get_gtype (gVal));
-                }
-
-                return Variant ();
+                return Core::Variant ();
         }
 }
 
 /****************************************************************************/
 
-/*
- * TODO void* pointer
- */
-GValue *variantToGValue (GValue *gVal, Core::Variant const &vVal)
+TILIAE_API GValue *variantToGValue (GValue *gVal, Core::Variant const &vVal)
 {
         if (!gVal) {
                 return gVal;
         }
-
-        gVal->g_type = 0;
 
         switch (vVal.getType ()) {
         case Variant::STRING:
@@ -113,22 +106,21 @@ GValue *variantToGValue (GValue *gVal, Core::Variant const &vVal)
                 g_value_set_string (gVal, vcast <Core::String> (vVal).c_str ());
                 break;
         case Variant::POINTER:
-//                g_value_init (gVal, G_TYPE_POINTER);
-//                g_value_set_pointer (gVal, vcast <void *> (vVal));
-                break;
-        case Variant::POINTER_CONST:
+                g_value_init (gVal, G_TYPE_POINTER);
+                g_value_set_pointer (gVal, vcast <void *> (vVal));
                 break;
         case Variant::SMART:
+                g_value_init (gVal, G_TYPE_POINTER);
+                g_value_set_pointer (gVal, vcast <void *> (vVal));
                 break;
-        case Variant::SMART_CONST:
                 break;
         case Variant::OBJECT:
-                break;
-        case Variant::OBJECT_CONST:
+                g_value_init (gVal, G_TYPE_POINTER);
+                g_value_set_pointer (gVal, vcast <void *> (vVal));
                 break;
         case Variant::SMART_OBJECT:
-                break;
-        case Variant::SMART_OBJECT_CONST:
+                g_value_init (gVal, G_TYPE_POINTER);
+                g_value_set_pointer (gVal, vcast <void *> (vVal));
                 break;
         case Variant::BOOL:
                 g_value_init (gVal, G_TYPE_BOOLEAN);

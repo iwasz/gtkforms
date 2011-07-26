@@ -12,19 +12,26 @@
 #include <Reflection.h>
 #include "../model/Book.h"
 #include "../dao/BookDAO.h"
+#include "view/GObjectAdapter.h"
+#include <ApiMacro.h>
+
+namespace Wrapper {
+class BeanWrapper;
+}
 
 namespace Catalog {
 
-class EditController {
+class ListController {
 public:
 
         __c (void)
-        EditController () : bookDAO (NULL) {}
-        virtual ~EditController () {}
+        ListController () : bookDAO (NULL) {}
+        virtual ~ListController () {}
 
-        _m (onFormShow) Ptr <Book> onFormShow() const;
-//        _m (onFormShow) Core::VariantMap onFormShow() const;
-        _m (onOk) void onOk(Ptr <Book> book);
+        _m (init) void init ();
+        _m (onFormShow) Ptr <BookVector> onFormShow () const;
+        _m (onOk) void onOk (Ptr <GtkForms::GObjectAdapter> widget, std::string const &name);
+        _m (onTable) void onTable (Ptr <GtkForms::GObjectAdapter> table);
 
         BookDAO *getBookDAO () const { return bookDAO; }
         _s (setBookDAO) void setBookDAO (BookDAO *bookDAO) { this->bookDAO = bookDAO; }
@@ -32,7 +39,8 @@ public:
 private:
 
         BookDAO *bookDAO;
-        _e (EditController)
+
+        _e (ListController)
 };
 
 }
