@@ -6,12 +6,30 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef UIFACTORY_H_
-#define UIFACTORY_H_
+#ifndef MAPPERDTO_H_
+#define MAPPERDTO_H_
 
-#include "IUIFactory.h"
-#include "GtkBuilderAdapter.h"
-#include "GObjectAdapter.h"
-#include "ViewAdapter.h"
+#include <cstddef>
 
-#	endif /* UIFACTORY_H_ */
+namespace Wrapper {
+class BeanWrapper;
+}
+
+namespace GtkForms {
+
+/**
+ * Everythong that mapper will need to perform its taks. Stis stuff is
+ * set and passed by Mapper to every IMapping it runs.
+ */
+struct MapperDTO {
+
+        MapperDTO () : beanWrapper (NULL) {}
+
+        Wrapper::BeanWrapper *beanWrapper;
+        Core::Variant model;
+
+};
+
+}
+
+#	endif /* MAPPERDTO_H_ */

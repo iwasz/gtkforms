@@ -6,15 +6,15 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include "WidgetAdapter.h"
+#include "GObjectAdapter.h"
 #include "tools/GValueVariant.h"
 
 namespace GtkForms {
 
-Core::Variant WidgetAdapter::get (const std::string &name) const
+Core::Variant GObjectAdapter::get (const std::string &name) const
 {
         char const *param = name.c_str ();
-        GParamSpec *spec = g_object_class_find_property (G_OBJECT_GET_CLASS (widget), param);
+        GParamSpec *spec = g_object_class_find_property (G_OBJECT_GET_CLASS (object), param);
 
         if (!param) {
                 return Core::Variant ();
@@ -24,7 +24,7 @@ Core::Variant WidgetAdapter::get (const std::string &name) const
         GValue propValue = {0};
 
         g_value_init (&propValue, propType);
-        g_object_get_property (G_OBJECT (widget), param, &propValue);
+        g_object_get_property (object, param, &propValue);
         Core::Variant v = gValueToVariant (&propValue);
         g_value_unset (&propValue);
 
@@ -33,11 +33,11 @@ Core::Variant WidgetAdapter::get (const std::string &name) const
 
 /****************************************************************************/
 
-void WidgetAdapter::set (const std::string &name, const Core::Variant &object)
+void GObjectAdapter::set (const std::string &name, const Core::Variant &val)
 {
         GValue gVal = {0};
-        variantToGValue (&gVal, object);
-        g_object_set_property (G_OBJECT (widget), name.c_str (), &gVal);
+        variantToGValue (&gVal, val);
+        g_object_set_property (object, name.c_str (), &gVal);
         g_value_unset (&gVal);
 }
 

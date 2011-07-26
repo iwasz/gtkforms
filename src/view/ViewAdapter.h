@@ -15,20 +15,23 @@
 #include <string>
 #include "IUIFactory.h"
 #include "GtkBuilderAdapter.h"
-#include "WidgetAdapter.h"
+#include "GObjectAdapter.h"
 #include "../mapping/Mapper.h"
 
 namespace GtkForms {
 
 /**
- * Odpowiada jednemu (?) oknu GTK ładowanemu z pliku *.ui.
+ * Odpowiada (tylko) jednemu oknu GTK ładowanemu z pliku *.ui.
  */
 class TILIAE_API ViewAdapter : public IUIFactory {
 public:
         __c (void)
 
+        ViewAdapter () : window (NULL) {}
         virtual ~ViewAdapter () {}
+
         _m (create) virtual GtkWidget *create ();
+        _m (show) virtual void show ();
 
 /*--------------------------------------------------------------------------*/
 
@@ -39,7 +42,7 @@ public:
          * of a widget will be passed to GtkBuilder.
          */
         _m (get) virtual Core::Variant get (const std::string &name) const;
-        Ptr <WidgetAdapter> getWidget (const std::string &name) const;
+        Ptr <GObjectAdapter> getGObject (const std::string &name) const;
 
 /*--------------------------------------------------------------------------*/
 
@@ -76,7 +79,8 @@ public:
 
         friend void handler (std::string const &sourceCode,
                              ViewAdapter *viewAdapter,
-                             Core::VariantVector const &paramVector);
+                             Core::VariantVector const &paramVector,
+                             Core::VariantMap const &argsMap);
 
         k202::K202 *myK202Script () const;
 
@@ -88,6 +92,7 @@ private:
         Ptr <Mapper> mapper;
         Ptr <k202::K202> k202;
         Ptr <Core::VariantMap> context;
+        GtkWidget *window; // Main window.
 
         _e (ViewAdapter)
 };

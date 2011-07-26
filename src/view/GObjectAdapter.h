@@ -20,24 +20,24 @@ namespace GtkForms {
  * Wrapper over GtkWidget *, which enables BeanWrapper interoperation.
  * agt and set methods can get and set widget Properties.
  */
-class TILIAE_API WidgetAdapter {
+class TILIAE_API GObjectAdapter {
 public:
         __c (void)
-        WidgetAdapter (GtkWidget *w = NULL) : widget (w) {}
-        virtual ~WidgetAdapter () {}
+        GObjectAdapter (GObject *w = NULL) : object (w) {}
+        virtual ~GObjectAdapter () {}
 
         _m (get) virtual Core::Variant get (const std::string &name) const;
         _m (set) virtual void set (const std::string &name, const Core::Variant &object);
 
 /*--------------------------------------------------------------------------*/
 
-        GtkWidget *getWidget () const { return widget; }
-        void setWidget (GtkWidget *widget) { this->widget = widget; }
+        GObject *getGObject () const { return object; }
+        void setGObject (GObject *widget) { this->object = widget; }
 
 private:
 
-        GtkWidget *widget;
-        _e (WidgetAdapter)
+        GObject *object;
+        _e (GObjectAdapter)
 };
 
 }

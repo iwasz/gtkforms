@@ -40,7 +40,8 @@ struct Helper {
  */
 void handler (std::string const &sourceCode,
               ViewAdapter *viewAdapter,
-              Core::VariantVector const &paramVector)
+              Core::VariantVector const &paramVector,
+              Core::VariantMap const &argsMap)
 {
 #if 0
         std::cerr << "handler here : " << sourceCode << std::endl;
@@ -52,7 +53,7 @@ void handler (std::string const &sourceCode,
 
         k202::K202 *k = viewAdapter->myK202Script ();
         Core::Variant domain = Core::Variant (viewAdapter->getContext ().get ());
-        Variant ret = k->run (sourceCode, domain, paramVector);
+        Variant ret = k->run (sourceCode, domain, paramVector, argsMap);
 
 #if 0
         std::cerr << "Model : " << ret << std::endl;
@@ -96,7 +97,8 @@ static void gClosureMarshal (GClosure *closure,
 
         typedef void (*HandlerType) (std::string const &sourceCode,
                                      ViewAdapter *viewAdapter,
-                                     Core::VariantVector const &paramVector);
+                                     Core::VariantVector const &paramVector,
+                                     Core::VariantMap const &argsMap);
 
         GCClosure *cc = (GCClosure*) closure;
         HandlerType callback;
@@ -105,12 +107,20 @@ static void gClosureMarshal (GClosure *closure,
 
         Core::VariantVector params;
 
-        for (unsigned int i = 0; i < n_param_values; ++i) {
+        for (unsigned int i = 1; i < n_param_values; ++i) {
                 params.push_back (GtkForms::gValueToVariant (param_values + i));
         }
 
+        Core::VariantMap args;
+
+        if (n_param_values > 0 && G_VALUE_HOLDS_OBJECT (param_values)) {
+                GObject *object = G_OBJECT (g_value_get_object (param_values));
+                Ptr <GObjectAdapter> adapter = boost::make_shared <GObjectAdapter> (object);
+                args["this"] = Variant (adapter);
+        }
+
         Helper *helper = static_cast <Helper *> (closure->data);
-        callback (helper->source, helper->viewAdapter, params);
+        callback (helper->source, helper->viewAdapter, params, args);
 }
 
 /**
@@ -130,7 +140,6 @@ static void myConnectFunc (GtkBuilder *builder,
 #endif
 
         Helper *helper = new Helper ();
-//        helper->context = static_cast <Core::VariantMap *> (user_data);
         helper->viewAdapter = static_cast <ViewAdapter *> (user_data);
         helper->source = handler_name;
 
@@ -149,7 +158,7 @@ GtkWidget *ViewAdapter::create ()
         std::cerr << "GtkBuilderFactory::create " << this << std::endl;
 #endif
 
-        static GtkWidget *window = NULL;
+        window = NULL;
         GError *err = NULL;
 
         if (!window) {
@@ -169,37 +178,42 @@ GtkWidget *ViewAdapter::create ()
                 g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
         }
 
+        return window;
+}
+/****************************************************************************/
+
+void ViewAdapter::show ()
+{
         if (!gtk_widget_get_visible (window)) {
                 gtk_widget_show_all (window);
         }
-
-        return window;
 }
 
 /****************************************************************************/
 
-Ptr <WidgetAdapter> ViewAdapter::getWidget (const std::string &name) const
+Ptr <GObjectAdapter> ViewAdapter::getGObject (const std::string &name) const
 {
         GtkBuilder *builder = gtkBuilderAdapter->getBuilder ();
 
         if (!builder) {
-                return Ptr <WidgetAdapter> ();
+                return Ptr <GObjectAdapter> ();
         }
 
-        GtkWidget *widget = GTK_WIDGET (gtk_builder_get_object (builder, name.c_str ()));
+//        GtkWidget *widget = GTK_WIDGET (gtk_builder_get_object (builder, name.c_str ()));
+        GObject *object = gtk_builder_get_object (builder, name.c_str ());
 
-        if (!widget) {
-                return Ptr <WidgetAdapter> ();
+        if (!object) {
+                return Ptr <GObjectAdapter> ();
         }
 
-        return boost::make_shared <WidgetAdapter> (widget);
+        return boost::make_shared <GObjectAdapter> (object);
 }
 
 /****************************************************************************/
 
 Core::Variant ViewAdapter::get (const std::string &name) const
 {
-        Ptr <WidgetAdapter> a = getWidget (name);
+        Ptr <GObjectAdapter> a = getGObject (name);
         return ((a) ? (Core::Variant (a)) : (Core::Variant ()));
 }
 
