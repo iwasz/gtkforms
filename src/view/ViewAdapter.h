@@ -9,9 +9,9 @@
 #ifndef GTKBUILDERFACTORY_H_
 #define GTKBUILDERFACTORY_H_
 
-#include <ApiMacro.h>
-#include <Reflection.h>
-#include <K202.h>
+#include <core/ApiMacro.h>
+#include <reflection/Reflection.h>
+#include <k202/K202.h>
 #include <string>
 #include "IUIFactory.h"
 #include "GtkBuilderAdapter.h"

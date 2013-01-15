@@ -9,11 +9,11 @@
 #ifndef MAPPER_H_
 #define MAPPER_H_
 
-#include <ApiMacro.h>
-#include <Reflection.h>
-#include <Pointer.h>
+#include <core/ApiMacro.h>
+#include <reflection/Reflection.h>
+#include <core/Pointer.h>
 #include <beanWrapper/BeanWrapper.h>
-#include <variant/Cast.h>
+#include <core/variant/Cast.h>
 #include "Mapping.h"
 #include "../Defs.h"
 

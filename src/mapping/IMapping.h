@@ -9,12 +9,12 @@
 #ifndef IMAPPING_H_
 #define IMAPPING_H_
 
-#include <Object.h>
-#include <ApiMacro.h>
+#include <core/Object.h>
+#include <core/ApiMacro.h>
 #include <vector>
-#include <Reflection.h>
+#include <reflection/Reflection.h>
 #include "mapping/MapperDTO.h"
-#include <Pointer.h>
+#include <core/Pointer.h>
 
 namespace GtkForms {
 

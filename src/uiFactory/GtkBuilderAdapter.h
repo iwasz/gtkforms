@@ -11,8 +11,8 @@
 
 #include <gtk/gtk.h>
 #include <cstddef>
-#include <ApiMacro.h>
-#include <Reflection.h>
+#include <core/ApiMacro.h>
+#include <reflection/Reflection.h>
 
 /**
  * Wrapper for GtkBuilder. GtkBuilder instance holds all data gathered from

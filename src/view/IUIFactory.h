@@ -10,8 +10,8 @@
 #define IUIFACTORY_H_
 
 #include <gtk/gtk.h>
-#include <ApiMacro.h>
-#include <Object.h>
+#include <core/ApiMacro.h>
+#include <core/Object.h>
 
 namespace GtkForms {
 

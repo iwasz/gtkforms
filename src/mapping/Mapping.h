@@ -9,8 +9,8 @@
 #ifndef MAPPING_H_
 #define MAPPING_H_
 
-#include <ApiMacro.h>
-#include <Reflection.h>
+#include <core/ApiMacro.h>
+#include <reflection/Reflection.h>
 #include <string>
 #include <vector>
 #include "mapping/IMapping.h"

@@ -9,7 +9,7 @@
 #ifndef GTKFORMS_H_
 #define GTKFORMS_H_
 
-#include <ApiMacro.h>
+#include <core/ApiMacro.h>
 
 namespace GtkForms {
 
