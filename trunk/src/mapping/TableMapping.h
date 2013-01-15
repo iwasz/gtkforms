@@ -9,8 +9,8 @@
 #ifndef TABLEMAPPING_H_
 #define TABLEMAPPING_H_
 
-#include <ApiMacro.h>
-#include <Reflection.h>
+#include <core/ApiMacro.h>
+#include <reflection/Reflection.h>
 #include "mapping/IMapping.h"
 #include "mapping/MapperDTO.h"
 

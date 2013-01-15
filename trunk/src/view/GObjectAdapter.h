@@ -9,10 +9,10 @@
 #ifndef WIDGETADAPTER_H_
 #define WIDGETADAPTER_H_
 
-#include <Reflection.h>
+#include <reflection/Reflection.h>
 #include <string>
 #include <gtk/gtk.h>
-#include <ApiMacro.h>
+#include <core/ApiMacro.h>
 
 namespace GtkForms {
 

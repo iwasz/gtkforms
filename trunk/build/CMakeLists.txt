@@ -37,15 +37,17 @@ pkg_check_modules (XML "gtk+-2.0")
 INCLUDE_DIRECTORIES (${GTK_INCLUDE_DIRS})
 link_directories(${GTK_LIBRARY_DIRS})
 
-include (FindPkgConfig)
 pkg_check_modules (TILIAE "tiliae")
 INCLUDE_DIRECTORIES (${TILIAE_INCLUDE_DIRS})
+message (${TILIAE_INCLUDE_DIRS})
 link_directories(${TILIAE_LIBRARY_DIRS})
 
-include (FindPkgConfig)
 pkg_check_modules (XML "libxml-2.0")
 INCLUDE_DIRECTORIES (${XML_INCLUDE_DIRS})
 link_directories(${XML_LIBRARY_DIRS})
+
+pkg_check_modules (SPARSE_HASH REQUIRED "libsparsehash")
+INCLUDE_DIRECTORIES (${SPARSE_HASH_INCLUDE_DIRS})
 
 ENABLE_TESTING ()
 

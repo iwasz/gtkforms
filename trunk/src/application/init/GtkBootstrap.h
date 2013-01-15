@@ -9,7 +9,7 @@
 #ifndef GTKBOOTSTRAP_H_
 #define GTKBOOTSTRAP_H_
 
-#include <ApiMacro.h>
+#include <core/ApiMacro.h>
 
 namespace GtkForms {
 

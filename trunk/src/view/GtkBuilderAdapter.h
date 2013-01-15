@@ -11,8 +11,8 @@
 
 #include <gtk/gtk.h>
 #include <cstddef>
-#include <ApiMacro.h>
-#include <Reflection.h>
+#include <core/ApiMacro.h>
+#include <reflection/Reflection.h>
 
 namespace GtkForms {
 

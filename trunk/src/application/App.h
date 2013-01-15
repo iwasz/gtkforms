@@ -9,9 +9,9 @@
 #ifndef APP_H_
 #define APP_H_
 
-#include <Pointer.h>
-#include <Reflection.h>
-#include <ApiMacro.h>
+#include <core/Pointer.h>
+#include <reflection/Reflection.h>
+#include <core/ApiMacro.h>
 
 namespace GtkForms {
 class IUIFactory;
