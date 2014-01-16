@@ -10,6 +10,7 @@
 #define ICONTROLLER_H_
 
 #include <string>
+#include <Tiliae.h>
 
 class App;
 
@@ -61,6 +62,10 @@ struct IController {
          * getApp()->merge ()) among other actions like back, forward and quit.
          */
         virtual App *getApp () = 0;
+
+        Core::VariantMap &getSessionScope () = 0;
+        Core::VariantMap &getUnitScope () = 0;
+        Core::VariantMap &getFlashSchope () = 0;
 };
 
 #endif /* ICONTROLLER_H_ */

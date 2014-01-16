@@ -13,8 +13,7 @@
 
 class AbstractController : public IController {
 public:
-        AbstractController ();
-        virtual ~AbstractController ();
+        virtual ~AbstractController () {}
 
         App *getApp () { return app; }
         void setApp (App *app) { this->app = app; }

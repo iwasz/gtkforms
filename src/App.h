@@ -6,17 +6,19 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef APP_H_
-#define APP_H_
+#ifndef GTK_FORMS_APP_H_
+#define GTK_FORMS_APP_H_
 
 #include <string>
 
 /**
- * Main obkect (singleton) in a GtkForms application. It can perofrm operations on main aspects
+ * Main object (singleton) of a GtkForms application. It can perofrm operations on main aspects
  * of the app, most notably it manages Units and Pages.
  */
 class App {
 public:
+
+        App (std::string const &configurationFile);
 
         /*
          * Uruchamiamy funkcję start z kontrolerem.
@@ -29,7 +31,9 @@ public:
          * Merge another unit with unit that currently is active. It means that currently active unit
          * will not be discarded, but the two will be merged instead.
          */
-        void merge (std::string const &unitName) {}
+        void join (std::string const &unitName) {}
+
+        void split (std::string const &unitName) {}
 
 //        /**
 //         * Ends current unit. If this is a root controller, whole application
@@ -72,8 +76,8 @@ public:
         /**
          *
          */
-        void showPage (std::string const &page) {}
-        void closePage (std::string const &page) {}
+        void show (std::string const &page) {}
+        void hide (std::string const &page) {}
 
 private:
 

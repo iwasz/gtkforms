@@ -8,6 +8,11 @@
 
 #include "App.h"
 
+App::App (std::string const &configurationFile)
+{
+
+}
+
 void App::start (std::string const &unitName)
 {
 /*
