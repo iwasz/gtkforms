@@ -25,6 +25,54 @@ What it is not
 It is not another widget toolkit. It uses GTK for display views. Low level GUI stuff still has to
 be done in GTK+ by hand.
 
+Dependencies
+============
+1. GTK+ version 3.0+
+#. Boost
+#. libtiliae
+
+How to compile
+==============
+
+Lets assume, that you unpacked the source to $GTK_FORMS_DIR. Lets cd to this directory: ::
+
+cd $GTK_FORMS_DIR
+ 
+To make sure that previous setup won't interfere with your changes perform (but if you build for the ferst time
+you may skip this since there is no CMakeFiles folder and CMakeCache.txt yet): ::
+
+cd build
+rm -Rf CMakeFiles/ CMakeCache.txt 
+
+To build you can simply invoke: ::
+
+cmake .
+
+But you may customze a few things as well. First, you may specify where to install newly built files. Use ``-DCMAKE_INSTALL_PREFIX``
+for this. Without this switch cmake would want to install gtkforms into default directory like ``/usr/lib`` which is OK for
+most of the cases. Secondly you may to specify what kond of build that will be. There are "Debug" and "Release" options available.
+
+cmake -DCMAKE_INSTALL_PREFIX:=/home/iwasz/local/ -DCMAKE_BUILD_TYPE=Debug .
+
+You can use cmake-gui application if you wish, and set all available cmake options inside nice GUI. Among standard cmake
+variables, one may set a few specific ones :
+
++------------------+-----------------------------+
+| BUILD_LIB        | Build the GtkForms library. |
++------------------+-----------------------------+
+| BUILD_TEST       | Build unit tests.           |       
++------------------+-----------------------------+
+| BUILD_CALCULATOR | Build first demo app.       |
++------------------+-----------------------------+
+| BUILD_CATALOG    | Build second demo app.      |
++------------------+-----------------------------+
+
+Simply invoke: ::
+
+cmake-gui .
+
+To run cmake-gui app.  
+
 Functionality list
 ==================
 Those are main building blocks of a GtkForms app:
@@ -35,6 +83,10 @@ This term refers to converting model objects to values appropriate for display i
 from GTK form to model object. Model object fields are converted one by one depending on what set of
 data is required on the view. For instance if one has a view with single GtkEntry which is bind to some
 field of complex model object, only this one value should be converted and the others left intact.
+
+Application flow
+----------------
+
 
 Controller management
 ---------------------

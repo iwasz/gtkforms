@@ -8,14 +8,3 @@
 
 #include "AbstractController.h"
 
-AbstractController::AbstractController ()
-{
-        // TODO Auto-generated constructor stub
-
-}
-
-AbstractController::~AbstractController ()
-{
-        // TODO Auto-generated destructor stub
-}
-

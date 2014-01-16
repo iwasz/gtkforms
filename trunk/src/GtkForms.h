@@ -9,6 +9,7 @@
 #ifndef GTKFORMS_H_
 #define GTKFORMS_H_
 
+#include "App.h"
 #include "controller/Controller.h"
 #include "view/View.h"
 
