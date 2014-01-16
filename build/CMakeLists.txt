@@ -8,12 +8,11 @@ endif(COMMAND cmake_policy)
 SET(BUILD_LIB               1)
 SET(BUILD_TEST              0)
 SET(BUILD_CALCULATOR        0)
-SET(BUILD_CATALOG           1)
+SET(BUILD_CATALOG           0)
 
 SET (CMAKE_VERBOSE_MAKEFILE 0) 
-ADD_DEFINITIONS (-g -fvisibility=hidden -DTILIAE_DLL -Wall)
-ADD_DEFINITIONS (-DTILIAE_DEBUG)
-ADD_DEFINITIONS (-O0)
+#ADD_DEFINITIONS (-g -fvisibility=hidden -DTILIAE_DLL -Wall)
+ADD_DEFINITIONS (-g -Wall -O0 -std=c++11)
 
 INSTALL (
     DIRECTORY "${PROJECT_SOURCE_DIR}/../src/"
@@ -52,11 +51,12 @@ IF (BUILD_LIB)
     INCLUDE_DIRECTORIES (../src)      
     
     AUX_SOURCE_DIRECTORY (../src LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/view LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/application LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/application/init LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/tools LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/mapping LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (../src/controller LIB_SOURCES)
+#    AUX_SOURCE_DIRECTORY (../src/view LIB_SOURCES)
+#    AUX_SOURCE_DIRECTORY (../src/application LIB_SOURCES)
+#    AUX_SOURCE_DIRECTORY (../src/application/init LIB_SOURCES)
+#    AUX_SOURCE_DIRECTORY (../src/tools LIB_SOURCES)
+#    AUX_SOURCE_DIRECTORY (../src/mapping LIB_SOURCES)
     add_library (gtkforms SHARED ${LIB_SOURCES})
 ENDIF()
 
