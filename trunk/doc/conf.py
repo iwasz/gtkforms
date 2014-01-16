@@ -20,6 +20,10 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
+sys.path.append ("/home/iwasz/local/share/breathe-master")
+breathe_projects = { "myproject": "xml" }
+breathe_default_project = "myproject"
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -268,6 +272,3 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
 
-sys.path.append( "/home/iwasz/Downloads/breathe-master/breathe" )
-breathe_projects = { "myproject": "/home/iwasz/Documents/workspace-CDT/gtkforms/doc/xml" }
-breathe_default_project = "myproject"
