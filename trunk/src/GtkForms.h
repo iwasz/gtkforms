@@ -10,6 +10,7 @@
 #define GTKFORMS_H_
 
 #include "App.h"
+#include "ReflectionMacros.h"
 #include "controller/Controller.h"
 #include "view/View.h"
 

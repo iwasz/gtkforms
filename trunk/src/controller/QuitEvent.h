@@ -6,27 +6,15 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef PAGE_H_
-#define PAGE_H_
+#ifndef QUITEVENT_H_
+#define QUITEVENT_H_
 
-#include "view/IView.h"
+#include "IEvent.h"
 
-class Page {
+class QuitEvent : public IEvent {
 public:
-        Page ();
-        virtual ~Page ();
-
-        std::string getName () const {}
-
-        ViewMap replace (Page *unit) {}
-
-        ViewMap remove (Page *unit) {}
-
-        IView *getView (std::string const &viewName) { return views[viewName]; }
-
-private:
-
-        ViewMap views;
+        virtual ~QuitEvent ();
+        void run (App *app);
 };
 
-#endif /* PAGE_H_ */
+#endif /* QUITEVENT_H_ */

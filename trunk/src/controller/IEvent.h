@@ -6,27 +6,20 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef PAGE_H_
-#define PAGE_H_
+#ifndef IEVENT_H_
+#define IEVENT_H_
 
-#include "view/IView.h"
+#include <stack>
+#include <memory>
 
-class Page {
+class App;
+
+class IEvent {
 public:
-        Page ();
-        virtual ~Page ();
-
-        std::string getName () const {}
-
-        ViewMap replace (Page *unit) {}
-
-        ViewMap remove (Page *unit) {}
-
-        IView *getView (std::string const &viewName) { return views[viewName]; }
-
-private:
-
-        ViewMap views;
+        virtual ~IEvent () {}
+        virtual void run (App *app) = 0;
 };
 
-#endif /* PAGE_H_ */
+typedef std::stack <std::unique_ptr <IEvent>> EventStack;
+
+#endif /* IEVENT_H_ */

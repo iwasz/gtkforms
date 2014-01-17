@@ -11,6 +11,8 @@
 
 #include <string>
 #include <vector>
+#include <set>
+#include <map>
 #include <Tiliae.h>
 
 class App;
@@ -66,12 +68,24 @@ struct IController {
 
         virtual Core::VariantMap &getSessionScope () = 0;
         virtual Core::VariantMap &getUnitScope () = 0;
-        virtual Core::VariantMap &getFlashSchope () = 0;
+        virtual Core::VariantMap &getFlashScope () = 0;
+
+        virtual std::string getName () const = 0;
 };
 
 /**
  * Vector of pointers to controllers.
  */
 typedef std::vector <IController *> ControllerVector;
+
+/**
+ * Set of pointers to controllers.
+ */
+typedef std::set <IController *> ControllerSet;
+
+/**
+ * Map of pointers to controllers.
+ */
+typedef std::map <std::string, IController *> ControllerMap;
 
 #endif /* ICONTROLLER_H_ */

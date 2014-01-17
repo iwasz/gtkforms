@@ -6,27 +6,16 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef PAGE_H_
-#define PAGE_H_
+#ifndef SUBMITEVENT_H_
+#define SUBMITEVENT_H_
 
-#include "view/IView.h"
+#include "IEvent.h"
 
-class Page {
+class SubmitEvent : public IEvent {
 public:
-        Page ();
-        virtual ~Page ();
-
-        std::string getName () const {}
-
-        ViewMap replace (Page *unit) {}
-
-        ViewMap remove (Page *unit) {}
-
-        IView *getView (std::string const &viewName) { return views[viewName]; }
-
-private:
-
-        ViewMap views;
+        SubmitEvent () {}
+        virtual ~SubmitEvent (){}
+        void run (App *app);
 };
 
-#endif /* PAGE_H_ */
+#endif /* SUBMITEVENT_H_ */
