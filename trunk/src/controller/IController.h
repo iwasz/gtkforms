@@ -10,6 +10,7 @@
 #define ICONTROLLER_H_
 
 #include <string>
+#include <vector>
 #include <Tiliae.h>
 
 class App;
@@ -63,9 +64,14 @@ struct IController {
          */
         virtual App *getApp () = 0;
 
-        Core::VariantMap &getSessionScope () = 0;
-        Core::VariantMap &getUnitScope () = 0;
-        Core::VariantMap &getFlashSchope () = 0;
+        virtual Core::VariantMap &getSessionScope () = 0;
+        virtual Core::VariantMap &getUnitScope () = 0;
+        virtual Core::VariantMap &getFlashSchope () = 0;
 };
+
+/**
+ * Vector of pointers to controllers.
+ */
+typedef std::vector <IController *> ControllerVector;
 
 #endif /* ICONTROLLER_H_ */
