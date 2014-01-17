@@ -19,6 +19,7 @@ class App {
 public:
 
         App (std::string const &configurationFile);
+        ~App ();
 
         /*
          * Uruchamiamy funkcję start z kontrolerem.
@@ -31,9 +32,12 @@ public:
          * Merge another unit with unit that currently is active. It means that currently active unit
          * will not be discarded, but the two will be merged instead.
          */
-        void join (std::string const &unitName) {}
+        void join (std::string const &unitName);
 
-        void split (std::string const &unitName) {}
+        /**
+         * Units to be substracted from current unit.
+         */
+        void split (std::string const &unitName);
 
 //        /**
 //         * Ends current unit. If this is a root controller, whole application
@@ -79,7 +83,15 @@ public:
         void show (std::string const &page) {}
         void hide (std::string const &page) {}
 
+        /**
+         * Method which has to be invoked in your main application loop.
+         */
+        void run ();
+
 private:
+
+        struct Impl;
+        Impl *impl;
 
 //        IController *currentController
 //        IView *currentView;
