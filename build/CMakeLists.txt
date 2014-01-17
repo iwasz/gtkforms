@@ -23,6 +23,8 @@ SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG} CACHE INTERNAL "cxx compiler flags"
 SET(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "c release compiler flags")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -std=c++11 -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "cxx release compiler flags")
 
+ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
+
 INSTALL (
     DIRECTORY "${PROJECT_SOURCE_DIR}/../src/"
     DESTINATION "include/${CMAKE_PROJECT_NAME}" 

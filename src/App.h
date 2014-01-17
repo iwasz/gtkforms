@@ -11,6 +11,9 @@
 
 #include <string>
 
+class Unit;
+class Page;
+
 /**
  * Main object (singleton) of a GtkForms application. It can perofrm operations on main aspects
  * of the app, most notably it manages Units and Pages.
@@ -78,6 +81,13 @@ public:
         }
 
         /**
+         * Users can request a submit using this action. It not perform any actions, only
+         * sends an SubmitEvent to be processed in the next main loop iteration. doSubmit
+         * performs all the work.
+         */
+        void submit (std::string const &controllerName, std::string const &formName);
+
+        /**
          *
          */
         void show (std::string const &page) {}
@@ -87,6 +97,27 @@ public:
          * Method which has to be invoked in your main application loop.
          */
         void run ();
+
+private:
+
+        /**
+         * Gets a unit with given name. Hides implementation details, so units can be stored on some static
+         * list or created with new. At this point this is not known.
+         */
+        Unit *getUnit (std::string const &name) {}
+
+        /**
+         * Gets a page. Same notes as in case of Units apply.
+         */
+        Page *getPage (std::string const &name) {}
+
+        /**
+         * Deals with SubmitEvents.
+         */
+        void doSubmit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName);
+
+        friend class SubmitEvent;
+        friend class QuitEvent;
 
 private:
 
