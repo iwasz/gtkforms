@@ -51,6 +51,9 @@ struct IController {
          */
         virtual std::string onSubmit () = 0;
 
+        void onQuit () {}
+        void onIdle () {}
+
         /**
          * Gets called by managing objects when controller is about to be closed. Returns name
          * of the page to be hidden. This method, should not be used by users.

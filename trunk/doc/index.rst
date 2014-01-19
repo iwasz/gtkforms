@@ -96,7 +96,65 @@ Yes
 View management
 ----------------
 
-Views are created and destroyed.
+Views are created and destroyed. 
+
+Klasa IView ma nazwę. GtkView z daną nazwą będzie miała podpięty GtkBuilder i będzie z nigo wyciągać widget 
+o tej nazwie. To bedzie główny widget tego widoku. Poza tym niektóre widoki bedą miały konfigurację : tiles.
+Ona będzie mówić który widget ma się wkleić w inny widget. Na przykład: ::
+
+<!-- W pliku *.ui będzie widget typu GtkWindow (lub inny GtkContainer) o nazwie loginView. Kiedy zrobimy
+view->show (), to on się załaduje i pokaże.  
+<GtkView name="loginView" builder="@gtkBuilder" embed="">
+        <Tile add-to="tiles" widget="toolbaView" targetWidget="sidePane"/>
+        <Tile add-to="tiles" widget="headerView" targetWidget="upperPane"/>        
+</GtkView>
+
+<GtkView name="toolbarView">
+<GtkView name="headerView">
+
+Forms
+-----
+Formularze mozna submitować. Mamy na przykład GtkContainer, a w nim mamy 2 pola GtkEntry o nazwach 
+form.login i form.pasword. Pod nimi, w tym samym kontenerze mamy guzik, o nazwie submit.loginController.
+Podczas ładowania się widoku następuje łączenie sygnałow w ten sposób, że ów guzik podłączony zostanie 
+do funkcji, która wykona submit: ::
+
+GtkView::show ()
+{
+        getApp ()->submit (this->GtkView::getName () /*widok ma nazwę */, "", controllerName /* nazwa kontrolera to jest to co jest po 'submit'*/);
+}
+
+Pusty argument to jest dataRange. Pusty oznacza, że chcemy konwertować wszystko co jest w formularzu.
+Funkcja musi przeszukać zadziałać tak.
+
+
+Dla widoku o nazwie viewName:
+Znaleźć wszystkie guziki, których nazwa zaczyna się od "submit.". Odciąć to co jest po kropce i zapisać
+to w zmiennej controllerName. Następnie pobrać kontener GtkContainer w którym jest ten guzik. Potem przeiterować
+po widgetach w tym GtkContenerze i znaleźć wszystikie inne widgety. Z nich będzzie konwertował dane. Czyli 
+taki automatyczy formularz to jest GtkContainer, pola z danymi i guzik. Bierze każdy widget , p;obiera
+jego nazwę viewProperty i próbuje dokonać konwersji:
+
+1. próbuje zrobic value = view->getProperty (viewProperty)
+2. mapper->view2Model (viewProperty, value);
+
+To się może nie udać, bo na przykład nie da się pobrać wartości z jakiegoś widgetu dekoracyjnego typu
+obrazek. Mogą być przecież widgty, które są na formularzu, ale 
+
+sposób 2 
+
+guzik ma podpieta akcję $app->submit ('loginView', 'form.*', 'loginController')
+
+Czyli pierwszym argumentem jest nazwa widoku, potem jest dataRange, a potem nazwa kontrolera do którego ma 
+trafić ten submitEvent.
+
+Model - view mapping
+--------------------
+Istnieje coś takiego jak IAccessor. To hermetyzuje sposób w jaki jest pobierana wartość z formularza
+i w jaki sposób jest zapisywana. Domyślny Accessor działa tak, że pobiera i ustawia dane z dla danego
+propery (bo widgety Gtk mają property. Na przykład GtkEntry ma property "text" i to jest zawartość
+tego GtkEntry.
+
 
 Session
 -------
