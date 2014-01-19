@@ -17,7 +17,16 @@ What it is
 
 It is a MVC library highly inspierd by some Java technologies that I used for years, most notably
 Spring MVC and Struts. It is intended to help to make high level GUI applications (having GTK+ as
-a frontend).
+a frontend). There are two main areas that it covers:
+ 
+1. Form submission and converting data between GTK widgets on the form and model objects. Conversion
+works in both directions.
+2. View loading, view display and composition views together to form bigger views. Composition of views
+is performed automatically based on XML configuration. For example if you have main view with a empty 
+GtkFrame, you may configure it in sucha way, that if someone shows some another view (be it a window, 
+or smoe other container widget), it will be automatically embedded (reparented) into that frame. This
+way users have only to wory about showing and hiding thier views when appropriate, and composition is
+handled by the lib.  
 
 What it is not
 ==============
@@ -77,13 +86,6 @@ Functionality list
 ==================
 Those are main building blocks of a GtkForms app:
 
-Data binding
-------------
-This term refers to converting model objects to values appropriate for display in GTK form, and back
-from GTK form to model object. Model object fields are converted one by one depending on what set of
-data is required on the view. For instance if one has a view with single GtkEntry which is bind to some
-field of complex model object, only this one value should be converted and the others left intact.
-
 Application flow
 ----------------
 
@@ -94,7 +96,7 @@ Controller management
 Yes
 
 View management
-----------------
+---------------
 
 Views are created and destroyed. 
 
@@ -102,35 +104,66 @@ Klasa IView ma nazwę. GtkView z daną nazwą będzie miała podpięty GtkBuilde
 o tej nazwie. To bedzie główny widget tego widoku. Poza tym niektóre widoki bedą miały konfigurację : tiles.
 Ona będzie mówić który widget ma się wkleić w inny widget. Na przykład: ::
 
-<!-- W pliku *.ui będzie widget typu GtkWindow (lub inny GtkContainer) o nazwie loginView. Kiedy zrobimy
-view->show (), to on się załaduje i pokaże.  
-<GtkView name="loginView" builder="@gtkBuilder" embed="">
-        <Tile add-to="tiles" widget="toolbaView" targetWidget="sidePane"/>
-        <Tile add-to="tiles" widget="headerView" targetWidget="upperPane"/>        
-</GtkView>
+ <!-- W pliku *.ui będzie widget typu GtkWindow (lub inny GtkContainer) o nazwie loginView. Kiedy zrobimy
+ view->show (), to on się załaduje i pokaże.  
+ <GtkView name="loginView" builder="@gtkBuilder" embed="">
+         <Tile add-to="tiles" widget="toolbaView" targetWidget="sidePane"/>
+         <Tile add-to="tiles" widget="headerView" targetWidget="upperPane"/>        
+ </GtkView>
+ 
+ <GtkView name="toolbarView">
+ <GtkView name="headerView">
 
-<GtkView name="toolbarView">
-<GtkView name="headerView">
+Model, view and controller communication
+========================================
 
-Forms
------
-Formularze mozna submitować. Mamy na przykład GtkContainer, a w nim mamy 2 pola GtkEntry o nazwach 
-form.login i form.pasword. Pod nimi, w tym samym kontenerze mamy guzik, o nazwie submit.loginController.
-Podczas ładowania się widoku następuje łączenie sygnałow w ten sposób, że ów guzik podłączony zostanie 
-do funkcji, która wykona submit: ::
+There are only two options here: 
 
-GtkView::show ()
-{
-        getApp ()->submit (this->GtkView::getName () /*widok ma nazwę */, "", controllerName /* nazwa kontrolera to jest to co jest po 'submit'*/);
-}
+1. *Data binding* is performed during form submission just like any other MVC framework does. Data put
+   by the user into inputs (the term *input* is derived from web environment, where you place <input .../> elements
+   inside <form>. In GTK+ application, and in GtkForms in particular inputs are simple GTK+ widgets with
+   special name) is converted and passed further to your *model* (the term *model* refers to all so called business 
+   data you use. We split M, V and C here). Special beeings called *mappings* describe how to convert *input* 
+   values and where to put those values in the model.
+#. *Expression language, K202*. You may use a simple `expression language <http://en.wikipedia.org/wiki/Unified_Expression_Language>`_ 
+   called K202 to quickly connect signals on the view to methods of a controller. You simply write down simple expressions 
+   in Glade's (GTK+ gui editor) "signal" tab.
 
-Pusty argument to jest dataRange. Pusty oznacza, że chcemy konwertować wszystko co jest w formularzu.
-Funkcja musi przeszukać zadziałać tak.
+.. #. *Signals and slots* <- to jest komunikacja między kontrolerami.
 
+Data binding and forms
+----------------------
+
+This term refers to converting model objects to values appropriate for display in GTK form, and back
+from GTK form to model object. 
+
+.. Model object fields are converted one by one depending on what set of
+data is required on the view. For instance if one has a view with single GtkEntry which is bind to some
+field of complex model object, only this one value should be converted and the others left intact.
+
+
+Form is a virtual beeing in GtkForms, because elements of a form (called inputs) may be laid out everywhere
+on the window, making virtually entire vindow a form. GtkForms distingusig inputs and other GtkWindgets by
+name. **Every widget whise name starts with an exclamation mark is an input**.  
+
+To submit a form you must invoke special function : ``$app->submit (...)```. You may do it specifying 
+a callback of some button, or you may do it programmaticaly in your custom ``IView`` implementation (I mean
+concrete class derived from ``IView``. Example of a callback may look like this: ::
+ 
+ $app->submit ('loginView', '', 'loginController')
+
+Arguments of this call have the following meaning:
+
+1. ``'loginView'`` is a name ov a view from data will be get. It may be view which contains the button shich was used
+   to submit a form, or some other view available in current ``Page``. If current page does not contain view with given 
+   name, an exception will be thrown.
+#. ``''`` second argument in above example, which is an empty string is called a *dataRange*. It tells the library which
+   part of the form to process. Data ranges can contain special wildcard character \*. Emty data range means that we
+   want to get all input fields from the form (i.e. all ``GtkWidgets`` whise name starts with an ``!``). 
+#. ``'loginController'`` is a name of controller to submit converted data to.
 
 Dla widoku o nazwie viewName:
-Znaleźć wszystkie guziki, których nazwa zaczyna się od "submit.". Odciąć to co jest po kropce i zapisać
-to w zmiennej controllerName. Następnie pobrać kontener GtkContainer w którym jest ten guzik. Potem przeiterować
+Następnie pobrać kontener GtkContainer w którym jest ten guzik. Potem przeiterować
 po widgetach w tym GtkContenerze i znaleźć wszystikie inne widgety. Z nich będzzie konwertował dane. Czyli 
 taki automatyczy formularz to jest GtkContainer, pola z danymi i guzik. Bierze każdy widget , p;obiera
 jego nazwę viewProperty i próbuje dokonać konwersji:
@@ -146,7 +179,15 @@ sposób 2
 guzik ma podpieta akcję $app->submit ('loginView', 'form.*', 'loginController')
 
 Czyli pierwszym argumentem jest nazwa widoku, potem jest dataRange, a potem nazwa kontrolera do którego ma 
-trafić ten submitEvent.
+trafić ten submitEvent. Działa to tak:
+
+1. App pobiera z aktualnego Page widok o podanej nazwie. Jeśli nie ma takiego widoku, to wyjątek.
+#. Na podstawie dataRange jest podejmowana decyzja jakie wartości pobieramy z widoku. Są trzy możliwosći:
+ a) dataRange jest szczegółowy, to znaczy jest tam konkretna nazwa jakiegoś widgetu na przykłąd form.login.
+ #) dataRange zawiera gwiazdkę, na przykład form.*. Wówczas pobierane są wartości wszystkiech widgetów, których
+ nazwa zaczyna się od form.
+ #) data range jest puste - wówczas iterujemy po wszystkich widgetach z GtkContainera w którym znajduje się guzik,
+ który wysłał SubmitEvent i używamy domyślnego accessora. 
 
 Model - view mapping
 --------------------
@@ -155,9 +196,13 @@ i w jaki sposób jest zapisywana. Domyślny Accessor działa tak, że pobiera i 
 propery (bo widgety Gtk mają property. Na przykład GtkEntry ma property "text" i to jest zawartość
 tego GtkEntry.
 
+Mapowania. Widok ma podpięte mapowania. Może to wygladać jakoś tak: ::
 
-Session
--------
+ Patrz config.xml
+
+
+Session (context)
+-----------------
 
 Like HttpSession. This is a storage place for various objects. Be it model objects, or view stuff. All
 views and controllers have access to it. In fact data binding process looks for model objects just there.
