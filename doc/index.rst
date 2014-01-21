@@ -290,6 +290,8 @@ Załozenia:
 #. Założenie bazy danych. *15*
 #. Komunikacja z bazą danych, mapowanie bazy danych na model (ogólne helpery uzywane przez poszczególne DAO). *50*
 
+*1060*
+
 Faza 2
 ======
 1. Obstylowanie, żeby wyglądało jak na mockupach Walerego. 
