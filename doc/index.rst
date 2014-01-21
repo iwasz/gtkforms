@@ -226,3 +226,74 @@ Indices and tables
 
 .. doxygenstruct:: IController
 
+Wycena Faza 1
+=============
+Skala trudności 1-100.
+
+Załozenia:
+- Standardowy zestaw kontrolek ze standardowym wyglądem.
+
+1. ``01a`` Ekran startu DKKapp /ekran Logowania
+    a) Test komunikacji do Dkk (osobny wątek do USB) *25*
+    #) Serwis do subskrypcji (i.e.. odpowiedź do kiedy jest subskrypcja). *15*
+    #) Serwis i DAO do uztkowników (logowanie, sprawdzanie poprawniści hasła) *30*
+    #) Zapis ostatniego poprawnego logowania *5*
+#. ``01b`` Ekran zablokowanej sesji
+    a) Timer zablokowanego ekranu. *20*
+#. ``01c`` Ekran wyłączenia
+    a) Historia logowania użytkownika (serwis, dao). *30*
+    #) Podłączenie się do systemu, żeby w ogóle można było wyłączyć cały komputer (konfiguracja uprawnień), serwis. *40* 
+#. ``02a`` Ekran wyboru/wyszukiwania Pacjenta
+    a) Mapowanie danych modelu biznesowego na tabelę (czyli wyświetlanie w tabeli). *50*
+    #) Stronicowanie. *10*
+    #) Wyszukiwanie : serwis i dao pacjentów (wyszukiwanie po PESEL, wszsycy pacjenci zakładu etc). *20*
+#. ``02b`` Wyniki wyszukiwania pacjenta
+    a) Zakładam, że to jest ten sam ekran co ``02a``, więc zakłaadm, że nie będę go robić.
+#. ``03a`` Ekran badań pacjenta
+    a) Serwis i DAO do badań per pacjent. *30*
+    #) Mapowanie z modelu na widok. Tabela. *40*
+    #) Podpięcie się do tabeli. Podgląd i kasowanie. Sygnały. *15*
+#. ``03b`` Usuwanie badania pacjenta
+#. ``03c`` Ekran wyników zewnętrznych badań pacjenta
+    a) Zakładamy że badania będą dodawane z systemu zewnętrznego i tu są tylko read-only. Mapowanie model-widok (tabela) + obrazek w tabeli w zależności od typu. *45*
+    #) Wyświetlanie dokumentów tekstowych (zakładam txt z bazy danych). *20*
+    #) Wyświetlanie zdjęć (zakłądam formaty jpg, png, gif z bazy danych). *40* 
+#. ``03d`` Zmiana/ustalenie grupy pacjenta
+    a) Mapowanie widok-model. *30*
+    #) Obsługa słownika "stan". *10*
+#. ``04a`` Ekran rejestracji badania
+    a) Grid z paskami wychylenia (zakładam, że liczby na dole są statyczne, zakłądam tez standardowe widgety, więc **paski jednokolorowe** i bez tych poziomych kresek. Zwykłe paski postępu). *20*
+    #) Pokazanie ogólnego kąta przechylenia (standardowy widget, nie ludzik). *20* 
+#. ``04b`` Rejestracja badania
+    a) Dodatkowe rzędy liczb - **co to jest - maxymalne wychylenia**? *10* ?
+    #) Pomiar czasu badania. *20*
+    #) Licznik odczytów. *5*
+    #) Opcje - **co to jest**?
+    #) Zapis do danych w odpowiednim formacie. *20*
+    #) Sam pomiar i wyświetlanie *50*
+#. ``04c`` Ekran odtwarzania badania.
+    #) Odtwarzanie badania z bazy danych z możliwościa play/stop. *50*
+#. ``04d`` Zmiana trybu wyświetlania wyników badania
+    #) **Fazie 2**
+#. ``04e`` Wprowadzanie danch pacjenta przed/po badaniu
+    a) Przy założeniu, że poziom bólu ustawiamy suwaczkiem. Mapowanie model-widok. *35*
+    #) Zapis do bazy *10*
+#. ``05a`` Ekran wyświetlania instruktarzu.
+    a) Odtwarzanie wideo z play, pauza, rewind. Plik wideo zakładamy że jest na dysku. *45* 
+#. Każdy ekran (z powyższych).
+    a) Ładowanie definicji ekranu z plików, wyciagnięcie danych formularza *.ui *75* 
+    #) Nawigacja miedzy oknami. *40*
+    #) Menu górne (nazwa aktualnego gabinetu, subskrypcja, ikona, przejście do innych badań lub brak, grupa pacjenta, inne dane). *50*
+    #) Boczny toolbar z przejściami (z konfiguracja które guziczki na którym ekranie). *25*  
+    #) Zegar i data. *10*
+#. Klawiatura ekranowa numeryczna. *35*
+#. Założenie bazy danych. *15*
+#. Komunikacja z bazą danych, mapowanie bazy danych na model (ogólne helpery uzywane przez poszczególne DAO). *50*
+
+Faza 2
+======
+1. Obstylowanie, żeby wyglądało jak na mockupach Walerego. 
+#. Widget do widoku pomiaru i odtwarzania.
+#. ``04d`` Widget po zmianie trybu wyswietlania (z wykresem).
+#. Widget z ludzikiem.
+ 
