@@ -6,12 +6,16 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include "SubmitEvent.h"
-#include "App.h"
+#ifndef LOGINSERVICE_H_
+#define LOGINSERVICE_H_
 
-void SubmitEvent::run (App *app)
-{
-//        app->doSubmit ();
-}
+#include <string>
 
+class LoginService {
+public:
 
+        bool checkLogin (std::string const &login, std::string const &password);
+
+};
+
+#endif /* LOGINSERVICE_H_ */

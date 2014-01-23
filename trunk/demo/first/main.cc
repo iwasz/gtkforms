@@ -6,12 +6,18 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include "SubmitEvent.h"
-#include "App.h"
+#include <GtkForms.h>
+#include <gtk/gtk.h>
 
-void SubmitEvent::run (App *app)
+int main (int argc, char **argv)
 {
-//        app->doSubmit ();
+        gtk_init (&argc, &argv);
+
+        App app {"../demo/first/config.xml"};
+        app.start ("login");
+        app.run ();
+
+        gtk_main ();
 }
 
 

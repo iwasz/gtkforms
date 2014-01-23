@@ -1,0 +1,260 @@
+/****************************************************************************
+ *                                                                          *
+ *  Author : lukasz.iwaszkiewicz@gmail.com                                  *
+ *  ~~~~~~~~                                                                *
+ *  License : see COPYING file for details.                                 *
+ *  ~~~~~~~~~                                                               *
+ ****************************************************************************/
+
+#include <iostream>
+#include <Container.h>
+#include "../src/GtkForms.h"
+
+// http://docutils.sourceforge.net/docs/user/rst/quickstart.html
+// http://docutils.sourceforge.net/docs/user/rst/quickref.html#example-foldin
+// http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#inline-markup
+
+
+
+
+
+
+/*--------------------------------------------------------------------------*/
+
+/*
+ * Kontroler klawiatury dla opcji 1.
+ * Po namyśle stwoerdzam, że nie do tego GtkForms służy. Tą klawiaturę
+ * trzeba zrobić inaczej.
+ */
+class KeyboardController: public IController {
+public:
+
+        std::string start ()
+        {
+                return "keyboard";
+        }
+        std::string onSubmit ()
+        {
+                return "";
+        }
+        Core::Variant end ()
+        {
+                return Core::Variant();
+        }
+
+        void onKeyPressed (std::string const &key)
+        {
+                buffer += key;
+
+                if (key == "back") {
+                        // usuń ostatni znak, no tak, ale jeśli kursor jest po środku :D ???
+                        // Wynika z tego, że klawiaturę trzeba oprogramować w widoku, w czystym GTK.
+                }
+
+                if (key == "close") {
+                        sender->emit("keyboardFinished");
+                        app->end();
+                }
+        }
+
+private:
+        // Zawsze buffer. Nie ma innej opcji.
+        std::string buffer;
+};
+
+/**
+ * Mimo, że nie uważam,zeby to było dobre rozwiązanie, to druga wersja kontrolera (blokujacy).
+ * Blokowanie trzeba ustawić chyba w konfiguracji (TODO a może jakaś metoda w kontrolerze, albo
+ * jakiś interfejs?)
+ */
+class KeyboardController: public IController {
+public:
+
+        std::string start ()
+        {
+                return "keyboard";
+        }
+        std::string onSubmit ()
+        {
+                return "";
+        }
+        Core::Variant end ()
+        {
+                return Core::Variant(buffer);
+        }
+
+        void onKeyPressed (std::string const &key)
+        {
+                buffer += key;
+
+                if (key == "back") {
+                        // usuń ostatni znak, no tak, ale jeśli kursor jest po środku :D ???
+                        // Wynika z tego, że klawiaturę trzeba oprogramować w widoku, w czystym GTK.
+                }
+
+                if (key == "close") {
+                        app->end();
+                }
+        }
+
+private:
+        // Zawsze buffer. Nie ma innej opcji.
+        std::string buffer;
+};
+
+/*--------------------------------------------------------------------------*/
+
+/*
+ * Kontrolery można tworzyć w kontenerze. Na przykład:
+ * <LoginController id="login" />
+ *
+ * Jeżeli potrzebujemy widoku, który nie wymaga kontrolera (na przykład okno About..., czy jakis dialog
+ * prosty, to uzywamy DummyController)
+ *
+ * <DummyController id="about" viewName="aboutDialog" />
+ *
+ * Jego implementacja może wyglądac tak:
+ */
+
+/**
+ * This is a ontroller for views which don't need a specialized one. There are cases when
+ * special functionality is not needed, and simply displaying a view is just sufficient, but
+ * in GtkForms views can't exists on its own. So one can use a DummyView, assign a viewname
+ * to it, and simply start it as usual.
+ */
+class DummyController: public IController {
+public:
+
+        std::string start ()
+        {
+                return viewName;
+        }
+        std::string onSubmit ()
+        {
+                return "";
+        }
+        Core::Variant end ()
+        {
+                return Core::Variant(buffer);
+        }
+
+private:
+
+        /**
+         * Name of a view to display for this controller. Remember that controllers specify
+         * which view to show by returning its name from start and onSubmit methids. Thus this
+         * DummyController simply returns viewName from those methods and that's all it does.
+         */
+        std:string p_ (viewName);
+};
+
+/*--------------------------------------------------------------------------*/
+
+/**
+ * Represents a view like window, or some container widget which can be embedded inside
+ * other views. Concrete implementations may add custom logic to enrich view experience here.
+ * For example you can put GTK+ low level code here, connect to GTK+ signals and so on as
+ * long as you not tie M and C to V. Remember, that GtkForms is meant to be for high level
+ * stuff like conversion of data between GTK+ form and your bussines model and any lower
+ * level GUI tasks which require pure GTK+ should go here.
+ */
+struct IView {
+
+        virtual ~IView ()
+        {
+        }
+        virtual void model2View () = 0;
+        virtual void view2Model () = 0;
+};
+
+// Przykłądowa implementacja customowych rzeczy na widoku:
+
+class ClockView: public AbstractView {
+public:
+
+        void init ()
+        {
+                GtkLabel *label;
+                label->setText("12:34");
+        }
+
+};
+
+/*--------------------------------------------------------------------------*/
+
+class MainWindowController: public IController {
+public:
+};
+
+std::string MainWindowController::start ()
+{
+        /*
+         * This is set here only to give a hint that form object is really a simple string.
+         * User would input a query term to find items.
+         */
+        getFlash()["form"] = "";
+
+        // Pobierz na kogo jest subskrypcja,albo aktualnie zalogowanego usera, czy sos takiego.
+        Clinic /*Customer*/*clinic = getSession()["customer"];
+        /*User*/Doctor *s = getSession()["currentUser"]
+
+        // Wszyscy pacjenci.
+        std::shared_ptr < std::vector<std::shared_ptr<Patients>>>patients = dao->getPatients(clinic);
+        getFlash()["patients"] = patients;
+
+        return "mainView";
+}
+
+/*
+ * Po konwersji wykonuje się metoda IController::onSubmit:
+ */
+std::string MainWindowController::onSumit ()
+{
+        std::string patientPesel = getFlash()["form"];
+
+        Clinic /*Customer*/*clinic = getSession()["customer"];
+        /*User*/Doctor *s = getSession()["currentUser"]
+
+        // Wszyscy pacjenci.
+        std::shared_ptr < std::vector<std::shared_ptr<Patients>>>patients = dao->getPatients(clinic, patientPesel);
+        getFlash()["patients"] = patients;
+
+        return "";
+}
+
+/*--------------------------------------------------------------------------*/
+
+/*
+ * Menu boczne : klawisze do nawigacji. Są następujące :
+ * - Wyłącz - pod to podepniemy na widoku akcję $app.show/start ('powerOff'), co spowoduje przejście na ekran zamknięcia aplikacji (a tam potwierdzenie).
+ * - Wyloguj - ten guzik jest dostępny z każdego ekranu. Analogicznie $app.show (poweroff). Wówczas przejdziemy na ekran potwierdzenia. Jeśli ok, to wyłączymy
+ * program i maszynę. Jeśli cancel, to musimy wrócić na poprzedni ekran! $app.back ()
+ * - Zablokuj ekran : $app.show ("lockScreenController"). Po zalogowaniu robimy back.
+ * - Home screen - przejście na ekran głowny. Znów podpięte na widoku pod guzik. Czyli bez żadnego potwierdzenia w tym przypadku. Aby było potwoerdzenie, trzebaby podpiąć do akcji
+ * kontrolera.
+ *
+ * Menu boczne ma set guzików, ale rózne guziki są widoczne na różnych ekranach. taką modyfikację widoku w locie można uzyskać na kilka sposobów:
+ * - Najbardziej oczywistym sposobem jest stworzenie customowegow widoku, a w nim metody, która pobiera z flash, lub session listę guzików do
+ * ukrycia/pokazania i ustawia im widoczność·
+ * - Drugim sposobem, który zaczyna wyglądać na PRZEKOMBINOWANY jest stworzenie konwertera (mappera jak to kiedyś nazwałem), który podczas standardowego
+ * round-tripu start/submit/onSubmit będzie konwertował tę listę (mapa booleanów nazwa guzika -> boolean) na wywołania show/hide. Standardowy mapper
+ * robi to samo, ale wywołuje inne metody. Wyobraxmy sobie formularz z czekboxami : modelem noże być własnie taka mapa. Tam gdzie jest true, checkbox jes
+ * zaznaczony. Tutaj podobnie, ale nie ustawiamy propery "chcecked", ale "visible".
+ */
+
+/*--------------------------------------------------------------------------*/
+
+int main (int argc, char **argv)
+{
+        try {
+                App app { "xmlFile" };
+                app.start("login");
+                gtk_main();
+        } catch (std::exception const &e) {
+                std::cerr << e.what() << std::endl;
+                return 1;
+        }
+
+        return 0;
+}
+

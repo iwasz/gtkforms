@@ -6,12 +6,9 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include "SubmitEvent.h"
-#include "App.h"
+#include "LoginService.h"
 
-void SubmitEvent::run (App *app)
+bool LoginService::checkLogin (std::string const &login, std::string const &password)
 {
-//        app->doSubmit ();
+        return (login == "iwasz" && password == "iwasz");
 }
-
-

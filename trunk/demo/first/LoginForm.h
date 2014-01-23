@@ -6,12 +6,17 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include "SubmitEvent.h"
-#include "App.h"
+#ifndef LOGINFORM_H_
+#define LOGINFORM_H_
 
-void SubmitEvent::run (App *app)
-{
-//        app->doSubmit ();
-}
+#include <Tiliae.h>
+#include <ReflectionMacros.h>
 
+struct LoginForm {
+        C__ (void)
+        std::string P_ (login);
+        std::string P_ (password);
+        E_ (LoginForm)
+};
 
+#endif /* LOGINFORM_H_ */
