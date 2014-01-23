@@ -9,6 +9,7 @@ endif(COMMAND cmake_policy)
 
 SET (BUILD_LIB                 ON CACHE BOOL "")
 SET (BUILD_TEST                OFF CACHE BOOL "")
+SET (BUILD_FIRST               ON CACHE BOOL "")
 SET (BUILD_CALCULATOR          OFF CACHE BOOL "")
 SET (BUILD_CATALOG             OFF CACHE BOOL "")
 
@@ -91,6 +92,16 @@ ENDIF()
 ## --------------------------------------------------------
 ## DEMOS
 ## --------------------------------------------------------
+
+IF(BUILD_FIRST)
+    AUX_SOURCE_DIRECTORY (../demo/first FIRST_SOURCES)    
+    add_executable (first ${FIRST_SOURCES})
+    TARGET_LINK_LIBRARIES (first ${GTK_LIBRARIES})
+    TARGET_LINK_LIBRARIES (first ${TILIAE_LIBRARIES})
+    TARGET_LINK_LIBRARIES (first ${CMAKE_PROJECT_NAME})
+    TARGET_LINK_LIBRARIES (${CMAKE_PROJECT_NAME} boost_log)
+    TARGET_LINK_LIBRARIES (${CMAKE_PROJECT_NAME} boost_log_setup)
+ENDIF()
 
 IF(BUILD_CALCULATOR)
     AUX_SOURCE_DIRECTORY (../demo/calculator DEMO_SOURCES)    

@@ -6,7 +6,6 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <Tiliae.h>
 #include <algorithm>
 #include <memory>
 #include "App.h"
@@ -17,6 +16,8 @@
 #include "controller/SubmitEvent.h"
 #include "controller/QuitEvent.h"
 #include "controller/IController.h"
+
+using namespace Container;
 
 /**
  *
@@ -38,11 +39,14 @@ struct App::Impl {
         Unit unit;
         // Current page;
         Page page;
+
+        Ptr <BeanFactoryContainer> container;
 };
 
 App::App (std::string const &configurationFile)
 {
         impl = new Impl;
+        createContainer (configurationFile);
 }
 
 App::~App ()
@@ -219,4 +223,25 @@ void App::split (std::string const &unitName)
 void App::submit (std::string const &controllerName, std::string const &formName)
 {
         impl->events.push (std::unique_ptr <IEvent> (new SubmitEvent {}));
+}
+
+void App::createContainer (std::string const &configFile)
+{
+        Ptr <MetaContainer> metaContainer = CompactMetaService::parseFile (configFile);
+        impl->container = ContainerFactory::create (metaContainer, true);
+
+//                impl->container->addConversion (typeid (Geometry::Point), Geometry::stringToPointVariant);
+//                impl->container->addConversion (typeid (Geometry::Point3), Geometry::stringToPoint3Variant);
+//                impl->container->addConversion (typeid (Geometry::LineString), Geometry::stringToLineStringVariant);
+//                impl->container->addConversion (typeid (Model::HAlign), Model::stringToHAlign);
+//                impl->container->addConversion (typeid (Model::VAlign), Model::stringToVAlign);
+//                impl->container->addConversion (typeid (Model::HGravity), Model::stringToHGravity);
+//                impl->container->addConversion (typeid (Model::VGravity), Model::stringToVGravity);
+//                impl->container->addConversion (typeid (Model::LinearGroup::Type), Model::stringToLinearGroupType);
+
+//        impl->container->addSingleton (i->first.c_str (), i->second);
+
+        ContainerFactory::init (impl->container.get (), metaContainer.get ());
+//        impl->config = vcast <U::Config *> (impl->container->getBean ("config"));
+//        config (impl->config);
 }

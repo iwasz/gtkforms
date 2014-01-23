@@ -10,6 +10,7 @@
 #define GTK_FORMS_APP_H_
 
 #include <string>
+#include <Tiliae.h>
 
 class Unit;
 class Page;
@@ -115,6 +116,11 @@ private:
          * Deals with SubmitEvents.
          */
         void doSubmit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName);
+
+        /**
+         * Creates a tiliae container instance (pointer is in Impl).
+         */
+        void createContainer (std::string const &configFile);
 
         friend class SubmitEvent;
         friend class QuitEvent;
