@@ -94,6 +94,8 @@ ENDIF()
 ## --------------------------------------------------------
 
 IF(BUILD_FIRST)
+    ADD_DEFINITIONS (-DREFLECTION_ENABLED)
+
     AUX_SOURCE_DIRECTORY (../demo/first FIRST_SOURCES)    
     add_executable (first ${FIRST_SOURCES})
     TARGET_LINK_LIBRARIES (first ${GTK_LIBRARIES})

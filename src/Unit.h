@@ -10,27 +10,19 @@
 #define UNIT_H_
 
 #include "controller/IController.h"
-
-/**
- * Stores information which controllers were added and which were removed durnig Unit operatons
- * (add, remove and morph).
- */
-struct UnitOperationResult {
-        ControllerMap added;
-        ControllerMap removed;
-
-        UnitOperationResult &operator += (UnitOperationResult const &) { return *this; }
-};
+#include "IUnit.h"
+#include "ReflectionMacros.h"
 
 /**
  * Single unit of work which consists of one or more controllers. Only one unit can be
  * active at a time, but two or more units can be merged to form a bigger unit (it retains
  * all the controllers of all units in such case).
  */
-class Unit {
+class Unit : public IUnit {
 public:
-        Unit ();
-        virtual ~Unit ();
+        ctr__ (void)
+
+        virtual ~Unit () {}
 
         /**
          * Add another unit to this unit. After this operstion it will have all its
@@ -39,20 +31,27 @@ public:
          * a controller which is already present in this unit, it will not be added, and
          * won't be returned in this list. Only controllers that are new will be returned;
          */
-        UnitOperationResult add (Unit *unit) {}
+        UnitOperationResult add (IUnit *unit);
 
-        UnitOperationResult replace (Unit *unit) {}
+        UnitOperationResult replace (IUnit *unit);
 
-        UnitOperationResult remove (Unit *unit) {}
+        UnitOperationResult remove (IUnit *unit);
 
-        std::string getName () const {}
+//        std::string getName () const {}
 
         IController *getController (std::string const &controllerName) { return controllers[controllerName]; }
 
+        ControllerMap &getControllers () { return controllers; }
+
+        friend std::ostream &operator<< (std::ostream &o, Unit const &u);
+
 private:
 
-//        ControllerVector controllers;
-        ControllerMap controllers;
+        ControllerMap prr_ (controllers);
+
+        end_ (Unit)
 };
+
+std::ostream &operator<< (std::ostream &o, Unit const &u);
 
 #endif /* UNIT_H_ */

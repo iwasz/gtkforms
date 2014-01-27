@@ -15,10 +15,13 @@
 
 class LoginController : public AbstractController {
 public:
+        ctr__ (void)
+        bse_ ("AbstractController")
+
         virtual ~LoginController () {}
 
         std::string start ();
-        std::string onSumit ();
+        std::string onSubmit ();
         std::string end ();
 
 private:
@@ -29,6 +32,8 @@ private:
 private:
 
         LoginService *loginService = 0;
+
+        end_ (LoginController)
 };
 
 #endif /* LOGINCONTROLLER_H_ */
