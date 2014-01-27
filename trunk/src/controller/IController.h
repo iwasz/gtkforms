@@ -14,6 +14,7 @@
 #include <set>
 #include <map>
 #include <Tiliae.h>
+#include "ReflectionMacros.h"
 
 class App;
 
@@ -25,7 +26,7 @@ class App;
  * where controller created first is called a "root controller" and the rest is called "child
  * controllers".
  */
-struct IController {
+struct IController : public Core::Object {
 
         /**
          * Method which gets called one time on controller start. It may construct a model,
@@ -50,9 +51,8 @@ struct IController {
          * views.
          */
         virtual std::string onSubmit () = 0;
-
-        void onQuit () {}
-        void onIdle () {}
+        virtual void onQuit () = 0;
+        virtual void onIdle () = 0;
 
         /**
          * Gets called by managing objects when controller is about to be closed. Returns name
@@ -90,5 +90,6 @@ typedef std::set <IController *> ControllerSet;
  * Map of pointers to controllers.
  */
 typedef std::map <std::string, IController *> ControllerMap;
+col_ (ControllerMap)
 
 #endif /* ICONTROLLER_H_ */

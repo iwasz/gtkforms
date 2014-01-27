@@ -12,12 +12,15 @@
 #include "Unit.h"
 #include "Page.h"
 #include "Logging.h"
+#include "Context.h"
 #include "controller/IEvent.h"
 #include "controller/SubmitEvent.h"
 #include "controller/QuitEvent.h"
 #include "controller/IController.h"
 
 using namespace Container;
+
+gboolean guiThread (gpointer user_data);
 
 /**
  *
@@ -26,7 +29,7 @@ struct App::Impl {
 
         Unit *getUnit (std::string );
 
-        Core::StringVector unitsToStart;
+        std::string unitToStart;
         Core::StringVector unitsToJoin;
         Core::StringVector unitsToSplit;
 
@@ -41,12 +44,14 @@ struct App::Impl {
         Page page;
 
         Ptr <BeanFactoryContainer> container;
+        Context context;
 };
 
 App::App (std::string const &configurationFile)
 {
         impl = new Impl;
         createContainer (configurationFile);
+        g_idle_add (guiThread, static_cast <gpointer> (this));
 }
 
 App::~App ()
@@ -56,27 +61,34 @@ App::~App ()
 
 void App::run ()
 {
+//        static int i = 0;
+//        if (++i > 10) {
+//                exit (0);
+//        }
+
         src::logger_mt& lg = logger::get();
-        BOOST_LOG (lg) << "Greetings from the global logger!";
+//        BOOST_LOG (lg) << "Greetings from the global logger!";
 
         UnitOperationResult result;
 
-        for (std::string const &unitName : impl->unitsToStart) {
-                Unit *unit = getUnit (unitName);
+        if (!impl->unitToStart.empty ()) {
+                IUnit *unit = getUnit (impl->unitToStart);
                 result += impl->unit.replace (unit);
         }
 
         for (std::string const &unitName : impl->unitsToJoin) {
-                Unit *unit = getUnit (unitName);
+                IUnit *unit = getUnit (unitName);
                 result += impl->unit.add (unit);
         }
 
         for (std::string const &unitName : impl->unitsToSplit) {
-                Unit *unit = getUnit (unitName);
+                IUnit *unit = getUnit (unitName);
                 result += impl->unit.remove (unit);
         }
 
-        impl->unitsToStart.clear ();
+        BOOST_LOG (lg) << impl->unit;
+
+        impl->unitToStart = "";
         impl->unitsToJoin.clear ();
         impl->unitsToSplit.clear ();
 
@@ -91,9 +103,7 @@ void App::run ()
                 event->run (this);
         }
 
-
         // Here we are dealing with pages and thier views to hide.
-
         for (ControllerMap::value_type const &entry : result.removed) {
                 IController *controller = entry.second;
                 std::string pageName = controller->end ();
@@ -105,7 +115,7 @@ void App::run ()
 
         ViewMap viewsToHide;
         for (std::string const &pageName : impl->pagesToHide) {
-                Page *page = getPage (pageName);
+                IPage *page = getPage (pageName);
                 ViewMap tmp = impl->page.remove (page);
                 std::copy (tmp.begin (), tmp.end (), std::inserter (viewsToHide, viewsToHide.end ()));
         }
@@ -128,7 +138,7 @@ void App::run ()
 
         ViewMap viewsToShow;
         for (std::string const &pageName : impl->pagesToShow) {
-                Page *page = getPage (pageName);
+                IPage *page = getPage (pageName);
                 ViewMap tmp = impl->page.replace (page);
                 std::copy (tmp.begin (), tmp.end (), std::inserter (viewsToShow, viewsToShow.end ()));
         }
@@ -207,7 +217,7 @@ void App::doSubmit (std::string const &viewName, std::string const &dataRange, s
 
 void App::start (std::string const &unitName)
 {
-        impl->unitsToStart.push_back (unitName);
+        impl->unitToStart = unitName;
 }
 
 void App::join (std::string const &unitName)
@@ -244,4 +254,32 @@ void App::createContainer (std::string const &configFile)
         ContainerFactory::init (impl->container.get (), metaContainer.get ());
 //        impl->config = vcast <U::Config *> (impl->container->getBean ("config"));
 //        config (impl->config);
+}
+
+Context &App::getContext ()
+{
+        return impl->context;
+}
+
+Context const &App::getContext () const
+{
+        return impl->context;
+}
+
+IUnit *App::getUnit (std::string const &name)
+{
+        IUnit * unit = ocast <IUnit *> (impl->container->getBean (name));
+        return unit;
+}
+
+IPage *App::getPage (std::string const &name)
+{
+
+}
+
+gboolean guiThread (gpointer userData)
+{
+        App *app = static_cast <App *> (userData);
+        app->run ();
+        return G_SOURCE_CONTINUE;
 }

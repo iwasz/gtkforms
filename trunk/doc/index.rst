@@ -98,7 +98,8 @@ Yes
 View management
 ---------------
 
-Views are created and destroyed. 
+- Views are created and destroyed.
+- Pages have to be defined as singletons in tiliae container. 
 
 Klasa IView ma nazwę. GtkView z daną nazwą będzie miała podpięty GtkBuilder i będzie z nigo wyciągać widget 
 o tej nazwie. To bedzie główny widget tego widoku. Poza tym niektóre widoki bedą miały konfigurację : tiles.

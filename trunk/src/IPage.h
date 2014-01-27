@@ -6,21 +6,22 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <GtkForms.h>
-#include <gtk/gtk.h>
+#ifndef IPAGE_H_
+#define IPAGE_H_
 
-int main (int argc, char **argv)
-{
-        gtk_init (&argc, &argv);
-        App app {"../demo/first/config.xml"};
+#include "core/Object.h"
 
-        app.start ("login");
-//        app.join ("main");
-//        app.split ("main");
-//        app.start ("result");
+/**
+ * See documentation of IUnit. Same reasoning apply here.
+ */
+class IPage : public Core::Object {
+public:
+        virtual ~IPage () {}
 
-        gtk_main ();
+        virtual ViewMap replace (IPage *unit) = 0;
+        virtual ViewMap remove (IPage *unit) = 0;
+        virtual IView *getView (std::string const &viewName) = 0;
+        virtual ViewMap &getViews () = 0;
+};
 
-}
-
-
+#endif /* IPAGE_H_ */

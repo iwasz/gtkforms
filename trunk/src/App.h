@@ -11,9 +11,11 @@
 
 #include <string>
 #include <Tiliae.h>
+#include <gtk/gtk.h>
 
-class Unit;
-class Page;
+class IUnit;
+class IPage;
+class Context;
 
 /**
  * Main object (singleton) of a GtkForms application. It can perofrm operations on main aspects
@@ -94,10 +96,8 @@ public:
         void show (std::string const &page) {}
         void hide (std::string const &page) {}
 
-        /**
-         * Method which has to be invoked in your main application loop.
-         */
-        void run ();
+        Context &getContext ();
+        Context const &getContext () const;
 
 private:
 
@@ -105,12 +105,12 @@ private:
          * Gets a unit with given name. Hides implementation details, so units can be stored on some static
          * list or created with new. At this point this is not known.
          */
-        Unit *getUnit (std::string const &name) {}
+        IUnit *getUnit (std::string const &name);
 
         /**
          * Gets a page. Same notes as in case of Units apply.
          */
-        Page *getPage (std::string const &name) {}
+        IPage *getPage (std::string const &name);
 
         /**
          * Deals with SubmitEvents.
@@ -122,8 +122,14 @@ private:
          */
         void createContainer (std::string const &configFile);
 
+        /**
+         * Method which has to be invoked in your main application loop.
+         */
+        void run ();
+
         friend class SubmitEvent;
         friend class QuitEvent;
+        friend gboolean guiThread (gpointer user_data);
 
 private:
 

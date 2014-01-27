@@ -41,7 +41,7 @@ std::string LoginController::start ()
 /*
  * Po konwersji wykonuje się metoda IController::onSubmit:
  */
-std::string LoginController::onSumit ()
+std::string LoginController::onSubmit ()
 {
         std::shared_ptr <LoginForm> form = vcast <std::shared_ptr <LoginForm>> (getFlashScope()["form"]);
         bool loginOk = loginService->checkLogin (form->login, form->password);

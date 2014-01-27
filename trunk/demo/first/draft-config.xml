@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+
+  <!-- Kontroler nagłowka, czyli tam gdzie jest login aktualnie zalogowanego usera. -->
+  <Controller id="headerController" name="headerController"/>
+
+  <!-- Unit do logowania -->
+  <Unit id="login">
+    <Controller add-to="controllers" name="loginController"/>
+    <ref add-to="controllers" bean="headerController" />
+  </Unit>
+
+  <GtkBuilderFactory id="gtkBuilderFactory" fileName="forrest.ui" />
+  <!-- Możliwe, że jakiś dodatkowy obiekt będzie potrzebny też. -->
+  
+  <GtkView id="headerView" name="headerView" factory="@gtkBuilderFactory" widgetName="header"/>
+  <GtkView id="toolbarView" name="toolbarView" factory="@gtkBuilderFactory" widgetName="toolbar"/>
+
+  <Page id="loginPage">
+    <GtkView add-to="views" factory="@gtkBuilderFactory" widgetName="login-01a">
+      <Tile add-to="tiles" widget="toolbaView" targetWidget="sidePane"/>
+      <Tile add-to="tiles" widget="headerView" targetWidget="upperPane"/>        
+      
+<!--       Case 1. Widgets has simple, one word names like "login" and "password". In this -->
+<!--       case : property "text" of widget named "login" is extracted and set to property -->
+<!--       "login" of object "form". Then similar operation is performed on "password" widget  -->      
+      <Mapping add-to="mappings" viewPath="login:text" modelPath="form.login" />
+      <Mapping add-to="mappings" viewPath="password:text" modelPath="form.password" />
+            
+<!--       Case 2. Widgets can have multi segment names. In following case names are respectively :  -->
+<!--       form.login and password.login. Last segment (after ':' character is always -->
+<!--         passed to the accessor. In case of default accessor it should be  -->
+<!--       Gtk property of a GtkWidget. You can check available widget properties in GTK+ -->
+<!--       documentation. There are dozens of it. -->
+      <Mapping add-to="mappings" viewPath="form.login:text" modelPath="form.login" />
+      <Mapping add-to="mappings" viewPath="form.password:text" modelPath="form.password" />
+
+<!--       Case 3. Custom accessors used. VisibilitAccesor could be implemented in such a way, that -->
+<!--       it would check visibility of a widget using GtkWidget::gtk_widget_is_visible (). -->
+      <Mapping add-to="mappings" viewPath="login" modelPath="form.isLoginVisible" accessor="VisibilityAccessor" />
+      <Mapping add-to="mappings" viewPath="password" modelPath="form.password" />
+    
+
+<!--       Case 4. Every GtkWidget that holds some value which GtkForms can use, have -->
+<!--       a defeult propery defined in the DefaultAccessor. If accessor would not -->
+<!--       get the last segment (after ':') it would assume the default property.  -->
+<!--       For example in case of GtkEntry the default paoprery is "text".  -->
+      <Mapping add-to="mappings" viewPath="login" modelPath="form.login" />
+      <Mapping add-to="mappings" viewPath="password" modelPath="form.password" />
+
+                  
+<!--       Case 5. No mapping at all. This is a variation on case 4. This time every widget taht conforms to dataRange -->
+<!--       sent in SeubmitRequest will be checked and its default property will be get. In case the data range is empty  -->
+<!--       or equals "*", all widgets inside GtkContainer where submit button is placed are checked with DefaultAccessot, -->
+<!--       and if there is no mapping for them, thier values is passed to the same path in model as thier name is. This works -->
+<!--       only for simple forms. -->
+             
+    </GtkView>
+    <ref add-to="views" bean="headerView" />
+    <ref add-to="views" bean="toolbarView" />
+  </Page>
+
+</beans>
