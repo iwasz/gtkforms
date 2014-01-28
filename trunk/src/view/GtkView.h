@@ -12,6 +12,7 @@
 #include "IView.h"
 #include "ReflectionMacros.h"
 #include "UiFile.h"
+#include "Tile.h"
 
 namespace GtkForms {
 
@@ -35,10 +36,13 @@ public:
         void model2View (std::string const &dataRange);
         void view2Model (std::string const &dataRange);
 
+        TileVector &getTiles () { return tiles; }
+
 private:
 
         std::string prr_ (name);
         UiFile *prr_ (uiFile);
+        TileVector prp_ (tiles);
 
         class Impl;
         Impl *impl = 0;
