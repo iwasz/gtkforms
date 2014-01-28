@@ -31,7 +31,18 @@ class IUnit : public Core::Object {
 public:
         virtual ~IUnit () {}
 
+        /**
+         * Start a unit.
+         */
         virtual UnitOperationResult start (IUnit *unit) = 0;
+
+        /**
+         * Add another unit to this unit. After this operstion it will have all its
+         * original controllers and the newly added unit's controllers.
+         * \return List of newly added controllers. If unit you are about to add contains
+         * a controller which is already present in this unit, it will not be added, and
+         * won't be returned in this list. Only controllers that are new will be returned;
+         */
         virtual UnitOperationResult join (IUnit *unit) = 0;
         virtual UnitOperationResult split (IUnit *unit) = 0;
         virtual IController *getController (std::string const &controllerName) = 0;

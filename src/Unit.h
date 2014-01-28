@@ -26,17 +26,8 @@ public:
 
         virtual ~Unit () {}
 
-        /**
-         * Add another unit to this unit. After this operstion it will have all its
-         * original controllers and the newly added unit's controllers.
-         * \return List of newly added controllers. If unit you are about to add contains
-         * a controller which is already present in this unit, it will not be added, and
-         * won't be returned in this list. Only controllers that are new will be returned;
-         */
-        UnitOperationResult join (IUnit *unit);
-
         UnitOperationResult start (IUnit *unit);
-
+        UnitOperationResult join (IUnit *unit);
         UnitOperationResult split (IUnit *unit);
 
 //        std::string getName () const {}
