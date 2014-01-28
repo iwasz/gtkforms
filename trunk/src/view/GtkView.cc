@@ -8,6 +8,8 @@
 
 #include "GtkView.h"
 
+namespace GtkForms {
+
 /*--------------------------------------------------------------------------*/
 
 std::string GtkView::getName () const
@@ -42,3 +44,5 @@ void GtkView::view2Model (std::string const &dataRange)
 {
 
 }
+
+} // namespace GtkForms

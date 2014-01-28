@@ -16,6 +16,8 @@
 #include <Tiliae.h>
 #include "ReflectionMacros.h"
 
+namespace GtkForms {
+
 class App;
 
 /*
@@ -97,5 +99,7 @@ typedef std::set <IController *> ControllerSet;
  */
 typedef std::map <std::string, IController *> ControllerMap;
 col_ (ControllerMap)
+
+} // namespace GtkForms
 
 #endif /* ICONTROLLER_H_ */

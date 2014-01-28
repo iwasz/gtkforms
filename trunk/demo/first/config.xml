@@ -31,17 +31,17 @@
     </Page>
 
     <!-- popupy ALBO TAK... -->
-    <Page id="infoPage" join="true">
-        <ViewMap set-as="views">
-            <GtkView set-as="loginView" name="loginView" />
-        </ViewMap>
-    </Page>
+<!--     <Page id="infoPage" join="true"> -->
+<!--         <ViewMap set-as="views"> -->
+<!--             <GtkView set-as="loginView" name="loginView" /> -->
+<!--         </ViewMap> -->
+<!--     </Page> -->
 
     <!-- ...ALBO TAK -->
-    <Page id="infoPage">
-        <ViewMap set-as="views">
-            <GtkView set-as="loginView" name="loginView" join="true" />
-        </ViewMap>
-    </Page>
+<!--     <Page id="infoPage2"> -->
+<!--         <ViewMap set-as="views"> -->
+<!--             <GtkView set-as="loginView" name="loginView" join="true" /> -->
+<!--         </ViewMap> -->
+<!--     </Page> -->
 
 </beans>

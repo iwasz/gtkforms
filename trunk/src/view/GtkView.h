@@ -12,6 +12,8 @@
 #include "IView.h"
 #include "ReflectionMacros.h"
 
+namespace GtkForms {
+
 class GtkView : public IView {
 public:
         ctr__ (void)
@@ -31,5 +33,7 @@ private:
 
         end_ (GtkView)
 };
+
+} // namespace GtkForms
 
 #endif /* GTKVIEW_H_ */

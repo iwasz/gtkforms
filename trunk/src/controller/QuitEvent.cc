@@ -8,9 +8,11 @@
 
 #include "QuitEvent.h"
 
+namespace GtkForms {
+
 void QuitEvent::run (App *app)
 {
 
 }
 
-
+} // namespace GtkForms

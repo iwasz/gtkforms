@@ -13,7 +13,7 @@
 #include "LoginService.h"
 #include <string>
 
-class LoginController : public AbstractController {
+class LoginController : public GtkForms::AbstractController {
 public:
         ctr__ (void)
         bse_ ("AbstractController")

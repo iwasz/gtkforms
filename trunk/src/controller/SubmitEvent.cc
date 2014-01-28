@@ -9,9 +9,14 @@
 #include "SubmitEvent.h"
 #include "App.h"
 
+namespace GtkForms {
+
 void SubmitEvent::run (App *app)
 {
 //        app->doSubmit ();
 }
+
+} // namespace GtkForms
+
 
 
