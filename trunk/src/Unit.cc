@@ -15,7 +15,7 @@ using namespace std;
 
 /*--------------------------------------------------------------------------*/
 
-UnitOperationResult Unit::add (IUnit *unit)
+UnitOperationResult Unit::join (IUnit *unit)
 {
         ControllerMap &ctmap = unit->getControllers ();
         UnitOperationResult result;
@@ -32,7 +32,7 @@ UnitOperationResult Unit::add (IUnit *unit)
 
 /*--------------------------------------------------------------------------*/
 
-UnitOperationResult Unit::replace (IUnit *unit)
+UnitOperationResult Unit::start (IUnit *unit)
 {
         ControllerMap &ctmap = unit->getControllers ();
         UnitOperationResult result;
@@ -59,7 +59,7 @@ UnitOperationResult Unit::replace (IUnit *unit)
 
 /*--------------------------------------------------------------------------*/
 
-UnitOperationResult Unit::remove (IUnit *unit)
+UnitOperationResult Unit::split (IUnit *unit)
 {
         ControllerMap &ctmap = unit->getControllers ();
         UnitOperationResult result;

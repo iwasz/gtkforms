@@ -74,6 +74,12 @@ struct IController : public Core::Object {
         virtual Core::VariantMap &getFlashScope () = 0;
 
         virtual std::string getName () const = 0;
+
+protected:
+
+        friend class App;
+        virtual void setApp (App *app) = 0;
+
 };
 
 /**

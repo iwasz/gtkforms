@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans>
 
-
     <Unit id="login">
         <ControllerMap set-as="controllers">
             <LoginController set-as="loginController" name="loginController"/>            
@@ -23,5 +22,26 @@
             <LoginController set-as="bController" name="toolbarController"/>            
         </ControllerMap>
     </Unit>    
+
+
+    <Page id="loginPage">
+        <ViewMap set-as="views">
+            <GtkView set-as="loginView" name="loginView" />
+        </ViewMap>
+    </Page>
+
+    <!-- popupy ALBO TAK... -->
+    <Page id="infoPage" join="true">
+        <ViewMap set-as="views">
+            <GtkView set-as="loginView" name="loginView" />
+        </ViewMap>
+    </Page>
+
+    <!-- ...ALBO TAK -->
+    <Page id="infoPage">
+        <ViewMap set-as="views">
+            <GtkView set-as="loginView" name="loginView" join="true" />
+        </ViewMap>
+    </Page>
 
 </beans>

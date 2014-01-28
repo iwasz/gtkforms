@@ -61,29 +61,23 @@ App::~App ()
 
 void App::run ()
 {
-//        static int i = 0;
-//        if (++i > 10) {
-//                exit (0);
-//        }
-
         src::logger_mt& lg = logger::get();
-//        BOOST_LOG (lg) << "Greetings from the global logger!";
 
-        UnitOperationResult result;
+        UnitOperationResult uoResult;
 
         if (!impl->unitToStart.empty ()) {
                 IUnit *unit = getUnit (impl->unitToStart);
-                result += impl->unit.replace (unit);
+                uoResult += impl->unit.start (unit);
         }
 
         for (std::string const &unitName : impl->unitsToJoin) {
                 IUnit *unit = getUnit (unitName);
-                result += impl->unit.add (unit);
+                uoResult += impl->unit.join (unit);
         }
 
         for (std::string const &unitName : impl->unitsToSplit) {
                 IUnit *unit = getUnit (unitName);
-                result += impl->unit.remove (unit);
+                uoResult += impl->unit.split (unit);
         }
 
         BOOST_LOG (lg) << impl->unit;
@@ -92,11 +86,12 @@ void App::run ()
         impl->unitsToJoin.clear ();
         impl->unitsToSplit.clear ();
 
-        // Now that our Unit is up to date, w can deal with form submission and data conversion
-        // events:
-        // - submit
-        // - quit
-
+        /*
+         * Now that our Unit is up to date, w can deal with form submission and data conversion
+         * events:
+         * - submit
+         * - quit
+         */
         while (!impl->events.empty ()) {
                 std::unique_ptr <IEvent> event = std::move (impl->events.top ());
                 impl->events.pop ();
@@ -104,8 +99,9 @@ void App::run ()
         }
 
         // Here we are dealing with pages and thier views to hide.
-        for (ControllerMap::value_type const &entry : result.removed) {
+        for (ControllerMap::value_type const &entry : uoResult.removed) {
                 IController *controller = entry.second;
+                controller->setApp (this);
                 std::string pageName = controller->end ();
 
                 if (!pageName.empty ()) {
@@ -116,8 +112,9 @@ void App::run ()
         ViewMap viewsToHide;
         for (std::string const &pageName : impl->pagesToHide) {
                 IPage *page = getPage (pageName);
-                ViewMap tmp = impl->page.remove (page);
-                std::copy (tmp.begin (), tmp.end (), std::inserter (viewsToHide, viewsToHide.end ()));
+//                ViewMap tmp = impl->page.remove (page);
+                viewsToHide = impl->page.split (page);
+//                std::copy (tmp.begin (), tmp.end (), std::inserter (viewsToHide, viewsToHide.end ()));
         }
 
         for (ViewMap::value_type const &entry : viewsToHide) {
@@ -127,9 +124,10 @@ void App::run ()
 
         // All views that was meant to be closed are colsed here. Now show new views user has requested.
 
-        for (ControllerMap::value_type const &entry : result.added) {
+        for (ControllerMap::value_type const &entry : uoResult.added) {
                 IController *controller = entry.second;
-                std::string pageName = controller->end ();
+                controller->setApp (this);
+                std::string pageName = controller->start ();
 
                 if (!pageName.empty ()) {
                         impl->pagesToShow.push_back (pageName);
@@ -139,8 +137,9 @@ void App::run ()
         ViewMap viewsToShow;
         for (std::string const &pageName : impl->pagesToShow) {
                 IPage *page = getPage (pageName);
-                ViewMap tmp = impl->page.replace (page);
-                std::copy (tmp.begin (), tmp.end (), std::inserter (viewsToShow, viewsToShow.end ()));
+//                ViewMap tmp = impl->page.join (page);
+//                std::copy (tmp.begin (), tmp.end (), std::inserter (viewsToShow, viewsToShow.end ()));
+                viewsToShow = impl->page.join (page);
         }
 
         for (ViewMap::value_type const &entry : viewsToShow) {
@@ -149,6 +148,7 @@ void App::run ()
                 view->show ();
         }
 
+        BOOST_LOG (lg) << impl->page;
 
         /*
                 currentController = container->getBean(controllerName);
@@ -268,13 +268,14 @@ Context const &App::getContext () const
 
 IUnit *App::getUnit (std::string const &name)
 {
-        IUnit * unit = ocast <IUnit *> (impl->container->getBean (name));
+        IUnit* unit = ocast <IUnit *> (impl->container->getBean (name));
         return unit;
 }
 
 IPage *App::getPage (std::string const &name)
 {
-
+        IPage* page = ocast <IPage *> (impl->container->getBean (name));
+        return page;
 }
 
 gboolean guiThread (gpointer userData)

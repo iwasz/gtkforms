@@ -12,19 +12,19 @@
 
 Core::VariantMap &AbstractController::getSessionScope ()
 {
-        app->getContext ().getSessionScope ();
+        return app->getContext ().getSessionScope ();
 }
 
 /*--------------------------------------------------------------------------*/
 
 Core::VariantMap &AbstractController::getUnitScope ()
 {
-        app->getContext ().getUnitScope ();
+        return app->getContext ().getUnitScope ();
 }
 
 /*--------------------------------------------------------------------------*/
 
 Core::VariantMap &AbstractController::getFlashScope ()
 {
-        app->getContext ().getFlashScope ();
+        return app->getContext ().getFlashScope ();
 }
