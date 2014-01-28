@@ -20,21 +20,24 @@ class Page : public IPage {
 public:
         ctr__ (void)
 
+        Page () : joinable {false} {}
         virtual ~Page () {}
 
-//        PageOperationResult start (IPage *page);
-        ViewMap join (IPage *page);
+        ViewMap join  (IPage *page);
         ViewMap split (IPage *page);
 
         IView *getView (std::string const &viewName) { return views[viewName]; }
-
         ViewMap &getViews () { return views; }
+
+        bool getJoin () const { return join; }
+        void setJoin (bool b) { join = b; }
 
         friend std::ostream &operator<< (std::ostream &o, Page const &u);
 
 private:
 
         ViewMap prr_ (views);
+        bool prr_ (joinable);
 
         end_ (Page)
 };

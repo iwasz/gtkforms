@@ -136,11 +136,21 @@ void App::run ()
         }
 
         ViewMap viewsToShow;
+        bool started = false; // Protection against multiple starts (second page to be started would replace the first).
         for (std::string const &pageName : impl->pagesToShow) {
                 IPage *page = getPage (pageName);
-//                ViewMap tmp = impl->page.join (page);
-//                std::copy (tmp.begin (), tmp.end (), std::inserter (viewsToShow, viewsToShow.end ()));
-                viewsToShow = impl->page.join (page);
+
+                if (page->getJoin ()) {
+                        viewsToShow = impl->page.join (page);
+                }
+                else {
+                        if (started) {
+                                throw Core::Exception ("You are about to start two pages. Only one page can be started at a time. Other pages must be joined.");
+                        }
+
+                        viewsToShow = impl->page.start (page);
+                        started = true;
+                }
         }
 
         for (ViewMap::value_type const &entry : viewsToShow) {
