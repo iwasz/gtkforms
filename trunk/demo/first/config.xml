@@ -24,15 +24,17 @@
     </Unit>    
 
 
+    <UiFile id="firstUi" file="../demo/first/first.ui" />
+    
     <Page id="loginPage">
         <ViewMap set-as="views">
-            <GtkView set-as="loginView" name="loginView" />
+            <GtkView set-as="loginView" name="loginView" uiFile="@firstUi" />
         </ViewMap>
     </Page>
 
     <Page id="infoPage" joinable="true">
         <ViewMap set-as="views">
-            <GtkView set-as="loginView" name="loginView" />
+            <GtkView set-as="loginView" name="loginView" uiFile="@firstUi" />
         </ViewMap>
     </Page>
 
