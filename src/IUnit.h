@@ -10,8 +10,8 @@
 #define IUNIT_H_
 
 /**
- * Stores information which controllers were added and which were removed durnig Unit operatons
- * (add, remove and morph).
+ * Stores information which controllers were added and which were removed durnig App operatons
+ * (statr, join and split).
  */
 struct UnitOperationResult {
         ControllerMap added;
@@ -29,9 +29,9 @@ class IUnit : public Core::Object {
 public:
         virtual ~IUnit () {}
 
-        virtual UnitOperationResult add (IUnit *unit) = 0;
-        virtual UnitOperationResult replace (IUnit *unit) = 0;
-        virtual UnitOperationResult remove (IUnit *unit) = 0;
+        virtual UnitOperationResult start (IUnit *unit) = 0;
+        virtual UnitOperationResult join (IUnit *unit) = 0;
+        virtual UnitOperationResult split (IUnit *unit) = 0;
         virtual IController *getController (std::string const &controllerName) = 0;
         virtual ControllerMap &getControllers () = 0;
 

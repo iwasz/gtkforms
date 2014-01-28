@@ -31,11 +31,11 @@ public:
          * a controller which is already present in this unit, it will not be added, and
          * won't be returned in this list. Only controllers that are new will be returned;
          */
-        UnitOperationResult add (IUnit *unit);
+        UnitOperationResult join (IUnit *unit);
 
-        UnitOperationResult replace (IUnit *unit);
+        UnitOperationResult start (IUnit *unit);
 
-        UnitOperationResult remove (IUnit *unit);
+        UnitOperationResult split (IUnit *unit);
 
 //        std::string getName () const {}
 

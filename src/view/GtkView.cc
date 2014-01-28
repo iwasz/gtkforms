@@ -8,14 +8,37 @@
 
 #include "GtkView.h"
 
-GtkView::GtkView ()
+/*--------------------------------------------------------------------------*/
+
+std::string GtkView::getName () const
 {
-        // TODO Auto-generated constructor stub
+        return name;
+}
+
+/*--------------------------------------------------------------------------*/
+
+void GtkView::show ()
+{
 
 }
 
-GtkView::~GtkView ()
+/*--------------------------------------------------------------------------*/
+
+void GtkView::hide ()
 {
-        // TODO Auto-generated destructor stub
+
 }
 
+/*--------------------------------------------------------------------------*/
+
+void GtkView::model2View (std::string const &dataRange)
+{
+
+}
+
+/*--------------------------------------------------------------------------*/
+
+void GtkView::view2Model (std::string const &dataRange)
+{
+
+}

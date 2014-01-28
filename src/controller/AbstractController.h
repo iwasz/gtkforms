@@ -19,7 +19,6 @@ public:
         virtual ~AbstractController () {}
 
         App *getApp () { return app; }
-        void setApp (App *app) { this->app = app; }
 
         Core::VariantMap &getSessionScope ();
         Core::VariantMap &getUnitScope ();
@@ -33,6 +32,9 @@ public:
 
 private:
 
+        void setApp (App *app) { this->app = app; }
+
+private:
         App *app = 0;
         std::string name;
 

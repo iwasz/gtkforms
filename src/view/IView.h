@@ -11,8 +11,9 @@
 
 #include <string>
 #include <map>
+#include "ReflectionMacros.h"
 
-class IView {
+class IView : public Core::Object {
 public:
         virtual ~IView () {}
         virtual std::string getName () const = 0;
@@ -25,5 +26,6 @@ public:
 };
 
 typedef std::map <std::string, IView *> ViewMap;
+col_ (ViewMap)
 
 #endif /* IVIEW_H_ */
