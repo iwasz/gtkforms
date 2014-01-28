@@ -133,6 +133,8 @@ private:
         friend class QuitEvent;
         friend gboolean guiThread (gpointer user_data);
 
+        const unsigned int MAIN_LOOP_USLEEP = 10000;
+
 private:
 
         struct Impl;

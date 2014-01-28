@@ -31,17 +31,17 @@ class IPage : public Core::Object {
 public:
         virtual ~IPage () {}
 
-//        virtual PageOperationResult start (IPage *unit) = 0;
-
         /**
          * Returns views to show.
          */
-        virtual ViewMap start (IPage *unit) = 0;
+        virtual PageOperationResult start (IPage *unit) = 0;
+        virtual PageOperationResult join (IPage *unit) = 0;
 
         /**
          * Returns views to hide.
          */
-        virtual ViewMap split (IPage *unit) = 0;
+        virtual PageOperationResult split (IPage *unit) = 0;
+
         virtual IView *getView (std::string const &viewName) = 0;
         virtual ViewMap &getViews () = 0;
 
@@ -49,7 +49,7 @@ public:
          * Tells if this page has to be joined (merged with patge that is beeing currently displayed)
          * instead of "started" i.e. displayed replacing previous page.
          */
-        virtual bool getJoin () const = 0;
+        virtual bool getJoinable () const = 0;
 };
 
 } // namespace GtkForms

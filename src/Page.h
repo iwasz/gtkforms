@@ -23,14 +23,15 @@ public:
         Page () : joinable {false} {}
         virtual ~Page () {}
 
-        ViewMap join  (IPage *page);
-        ViewMap split (IPage *page);
+        PageOperationResult start (IPage *page);
+        PageOperationResult join  (IPage *page);
+        PageOperationResult split (IPage *page);
 
         IView *getView (std::string const &viewName) { return views[viewName]; }
         ViewMap &getViews () { return views; }
 
-        bool getJoin () const { return join; }
-        void setJoin (bool b) { join = b; }
+        bool getJoinable () const { return joinable; }
+        void setJoinable (bool b) { joinable = b; }
 
         friend std::ostream &operator<< (std::ostream &o, Page const &u);
 

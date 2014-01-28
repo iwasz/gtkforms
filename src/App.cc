@@ -31,11 +31,11 @@ struct App::Impl {
         Unit *getUnit (std::string );
 
         std::string unitToStart;
-        Core::StringVector unitsToJoin;
-        Core::StringVector unitsToSplit;
+        Core::StringSet unitsToJoin;
+        Core::StringSet unitsToSplit;
 
-        Core::StringVector pagesToHide;
-        Core::StringVector pagesToShow;
+        Core::StringSet pagesToHide;
+        Core::StringSet pagesToShow;
 
         EventStack events;
 
@@ -81,7 +81,7 @@ void App::run ()
                 uoResult += impl->unit.split (unit);
         }
 
-        BOOST_LOG (lg) << impl->unit;
+//        BOOST_LOG (lg) << impl->unit;
 
         impl->unitToStart = "";
         impl->unitsToJoin.clear ();
@@ -106,21 +106,19 @@ void App::run ()
                 std::string pageName = controller->end ();
 
                 if (!pageName.empty ()) {
-                        impl->pagesToHide.push_back (pageName);
+                        impl->pagesToHide.insert (pageName);
                 }
         }
 
-        ViewMap viewsToHide;
+        PageOperationResult poResult;
         for (std::string const &pageName : impl->pagesToHide) {
                 IPage *page = getPage (pageName);
-//                ViewMap tmp = impl->page.remove (page);
-                viewsToHide = impl->page.split (page);
-//                std::copy (tmp.begin (), tmp.end (), std::inserter (viewsToHide, viewsToHide.end ()));
+                poResult += impl->page.split (page);
         }
 
-        for (ViewMap::value_type const &entry : viewsToHide) {
+        for (ViewMap::value_type const &entry : poResult.removed) {
                 IView *view = entry.second;
-                view->hide ();
+                view->destroy ();
         }
 
         // All views that was meant to be closed are colsed here. Now show new views user has requested.
@@ -131,35 +129,36 @@ void App::run ()
                 std::string pageName = controller->start ();
 
                 if (!pageName.empty ()) {
-                        impl->pagesToShow.push_back (pageName);
+                        impl->pagesToShow.insert (pageName);
                 }
         }
 
-        ViewMap viewsToShow;
         bool started = false; // Protection against multiple starts (second page to be started would replace the first).
+        std::string firstPageToStart; // For more maningful exception message.
         for (std::string const &pageName : impl->pagesToShow) {
                 IPage *page = getPage (pageName);
 
-                if (page->getJoin ()) {
-                        viewsToShow = impl->page.join (page);
+                if (page->getJoinable ()) {
+                        poResult += impl->page.join (page);
                 }
                 else {
                         if (started) {
-                                throw Core::Exception ("You are about to start two pages. Only one page can be started at a time. Other pages must be joined.");
+                                throw Core::Exception ("You are about to start two pages. Only one page can be started at a time. Other pages must be joined. First page started : [" + firstPageToStart + "], second page you tried to start : [" + pageName + "].");
                         }
 
-                        viewsToShow = impl->page.start (page);
+                        poResult += impl->page.start (page);
                         started = true;
+                        firstPageToStart = pageName;
                 }
         }
 
-        for (ViewMap::value_type const &entry : viewsToShow) {
+        for (ViewMap::value_type const &entry : poResult.added) {
                 IView *view = entry.second;
                 // TODO model2View (); TODO pytanie, ale konwertować z modelu na widok wszytsko, czy tylko to co się zmieniło?
                 view->show ();
         }
 
-        BOOST_LOG (lg) << impl->page;
+//        BOOST_LOG (lg) << impl->page;
 
         /*
                 currentController = container->getBean(controllerName);
@@ -171,6 +170,7 @@ void App::run ()
                 currentView->show();
         */
 
+        usleep (MAIN_LOOP_USLEEP);
 }
 
 
@@ -223,7 +223,7 @@ void App::doSubmit (std::string const &viewName, std::string const &dataRange, s
         view->view2Model (dataRange);
 
         std::string nextPage = controller->onSubmit();
-        impl->pagesToShow.push_back (nextPage);
+        impl->pagesToShow.insert (nextPage);
 }
 
 void App::start (std::string const &unitName)
@@ -233,12 +233,12 @@ void App::start (std::string const &unitName)
 
 void App::join (std::string const &unitName)
 {
-        impl->unitsToJoin.push_back (unitName);
+        impl->unitsToJoin.insert (unitName);
 }
 
 void App::split (std::string const &unitName)
 {
-        impl->unitsToSplit.push_back (unitName);
+        impl->unitsToSplit.insert (unitName);
 }
 
 void App::submit (std::string const &controllerName, std::string const &formName)
