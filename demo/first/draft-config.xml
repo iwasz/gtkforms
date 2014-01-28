@@ -18,8 +18,8 @@
 
   <Page id="loginPage">
     <GtkView add-to="views" factory="@gtkBuilderFactory" widgetName="login-01a">
-      <Tile add-to="tiles" widget="toolbaView" targetWidget="sidePane"/>
-      <Tile add-to="tiles" widget="headerView" targetWidget="upperPane"/>        
+      <Tile add-to="tiles" slotWidget="sidePane" plugWidget="toolbaView"/>
+      <Tile add-to="tiles" slotWidget="upperPane" plugWidget="headerView"/>
       
 <!--       Case 1. Widgets has simple, one word names like "login" and "password". In this -->
 <!--       case : property "text" of widget named "login" is extracted and set to property -->
