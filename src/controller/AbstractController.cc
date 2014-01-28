@@ -10,6 +10,8 @@
 #include "App.h"
 #include "Context.h"
 
+namespace GtkForms {
+
 Core::VariantMap &AbstractController::getSessionScope ()
 {
         return app->getContext ().getSessionScope ();
@@ -28,3 +30,5 @@ Core::VariantMap &AbstractController::getFlashScope ()
 {
         return app->getContext ().getFlashScope ();
 }
+
+} // namespace GtkForms

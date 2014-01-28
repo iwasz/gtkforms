@@ -18,6 +18,7 @@
 #include "controller/QuitEvent.h"
 #include "controller/IController.h"
 
+namespace GtkForms {
 using namespace Container;
 
 gboolean guiThread (gpointer user_data);
@@ -284,3 +285,5 @@ gboolean guiThread (gpointer userData)
         app->run ();
         return G_SOURCE_CONTINUE;
 }
+
+} // namespace GtkForms

@@ -11,11 +11,15 @@
 
 #include "IEvent.h"
 
+namespace GtkForms {
+
 class SubmitEvent : public IEvent {
 public:
         SubmitEvent () {}
         virtual ~SubmitEvent (){}
         void run (App *app);
 };
+
+} // namespace GtkForms
 
 #endif /* SUBMITEVENT_H_ */

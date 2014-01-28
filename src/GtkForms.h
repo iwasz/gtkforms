@@ -14,5 +14,4 @@
 #include "controller/Controller.h"
 #include "view/View.h"
 
-
 #endif /* GTKFORMS_H_ */

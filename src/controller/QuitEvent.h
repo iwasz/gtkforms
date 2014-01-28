@@ -11,10 +11,14 @@
 
 #include "IEvent.h"
 
+namespace GtkForms {
+
 class QuitEvent : public IEvent {
 public:
         virtual ~QuitEvent ();
         void run (App *app);
 };
+
+} // namespace GtkForms
 
 #endif /* QUITEVENT_H_ */

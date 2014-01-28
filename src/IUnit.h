@@ -9,6 +9,8 @@
 #ifndef IUNIT_H_
 #define IUNIT_H_
 
+namespace GtkForms {
+
 /**
  * Stores information which controllers were added and which were removed durnig App operatons
  * (statr, join and split).
@@ -36,5 +38,7 @@ public:
         virtual ControllerMap &getControllers () = 0;
 
 };
+
+} // namespace GtkForms
 
 #endif /* IUNIT_H_ */

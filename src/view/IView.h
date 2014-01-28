@@ -13,6 +13,8 @@
 #include <map>
 #include "ReflectionMacros.h"
 
+namespace GtkForms {
+
 class IView : public Core::Object {
 public:
         virtual ~IView () {}
@@ -27,5 +29,7 @@ public:
 
 typedef std::map <std::string, IView *> ViewMap;
 col_ (ViewMap)
+
+} // namespace GtkForms
 
 #endif /* IVIEW_H_ */

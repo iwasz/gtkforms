@@ -6,10 +6,9 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef VIEW_H_
-#define VIEW_H_
+#ifndef GTK_FOMS_VIEW_H_
+#define GTK_FOMS_VIEW_H_
 
-
-
+#include "GtkView.h"
 
 #endif /* VIEW_H_ */

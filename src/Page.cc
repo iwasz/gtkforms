@@ -8,6 +8,7 @@
 
 #include "Page.h"
 
+namespace GtkForms {
 using namespace std;
 
 /*--------------------------------------------------------------------------*/
@@ -97,3 +98,5 @@ ostream &operator<< (ostream &o, Page const &p)
 //        copy (uor.removed.begin (), uor.removed.end (), inserter (removed, removed.end ()));
 //        return *this;
 //}
+
+} // namespace GtkForms

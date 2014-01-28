@@ -13,6 +13,8 @@
 #include <Tiliae.h>
 #include <gtk/gtk.h>
 
+namespace GtkForms {
+
 class IUnit;
 class IPage;
 class Context;
@@ -141,5 +143,7 @@ private:
 //        Session session;
 //        Flash flash;
 };
+
+} // namespace GtkForms
 
 #endif /* APP_H_ */

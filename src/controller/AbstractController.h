@@ -12,6 +12,8 @@
 #include "IController.h"
 #include "ReflectionMacros.h"
 
+namespace GtkForms {
+
 class AbstractController : public IController {
 public:
         abt__
@@ -40,5 +42,7 @@ private:
 
         end_ (AbstractController)
 };
+
+} // namespace GtkForms
 
 #endif /* ABSTRACTCONTROLLER_H_ */

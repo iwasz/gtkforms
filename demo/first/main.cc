@@ -12,7 +12,7 @@
 int main (int argc, char **argv)
 {
         gtk_init (&argc, &argv);
-        App app {"../demo/first/config.xml"};
+        GtkForms::App app {"../demo/first/config.xml"};
 
         app.start ("login");
 //        app.join ("main");

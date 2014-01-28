@@ -8,6 +8,8 @@
 
 #include "Context.h"
 
+namespace GtkForms {
+
 Core::Variant Context::get (const std::string &name)
 {
         Core::VariantMap::iterator i = flash.find (name);
@@ -31,3 +33,4 @@ Core::Variant Context::get (const std::string &name)
         return Core::Variant ();
 }
 
+} // namespace GtkForms

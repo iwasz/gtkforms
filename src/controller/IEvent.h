@@ -12,6 +12,8 @@
 #include <stack>
 #include <memory>
 
+namespace GtkForms {
+
 class App;
 
 class IEvent {
@@ -21,5 +23,7 @@ public:
 };
 
 typedef std::stack <std::unique_ptr <IEvent>> EventStack;
+
+} // namespace GtkForms
 
 #endif /* IEVENT_H_ */

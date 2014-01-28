@@ -11,6 +11,8 @@
 
 #include "core/Object.h"
 
+namespace GtkForms {
+
 ///**
 // * Stores information which views were added and which were removed durnig App operatons
 // * (start, join and split).
@@ -43,5 +45,7 @@ public:
         virtual IView *getView (std::string const &viewName) = 0;
         virtual ViewMap &getViews () = 0;
 };
+
+} // namespace GtkForms
 
 #endif /* IPAGE_H_ */

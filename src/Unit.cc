@@ -10,6 +10,7 @@
 #include <sstream>
 #include "Unit.h"
 
+namespace GtkForms {
 using namespace std;
 //using namespace std::placeholders;
 
@@ -100,3 +101,5 @@ UnitOperationResult &UnitOperationResult::operator += (UnitOperationResult const
         copy (uor.removed.begin (), uor.removed.end (), inserter (removed, removed.end ()));
         return *this;
 }
+
+} // namespace GtkForms

@@ -14,6 +14,8 @@
 #include "view/IView.h"
 #include "IPage.h"
 
+namespace GtkForms {
+
 class Page : public IPage {
 public:
         ctr__ (void)
@@ -38,5 +40,7 @@ private:
 };
 
 std::ostream &operator<< (std::ostream &o, Page const &p);
+
+} // namespace GtkForms
 
 #endif /* PAGE_H_ */

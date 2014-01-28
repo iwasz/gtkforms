@@ -11,6 +11,8 @@
 
 #include <Tiliae.h>
 
+namespace GtkForms {
+
 class Context {
 public:
 
@@ -32,5 +34,7 @@ private:
         Core::VariantMap unit;
         Core::VariantMap flash;
 };
+
+} // namespace GtkForms
 
 #endif /* CONTEXT_H_ */
