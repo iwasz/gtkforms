@@ -29,8 +29,8 @@
     <Page id="loginPage">
         <ViewMap set-as="views">
             <GtkView set-as="loginView" name="loginView" uiFile="@firstUi">
-              <Tile add-to="tiles" slotWidget="sidePane" plugWidget="toolbaView"/>
-              <Tile add-to="tiles" slotWidget="upperPane" plugWidget="headerView"/>
+              <Tile add-to="tiles" slotWidget="toolbarSlot" plugWidget="toolbaView"/>
+              <Tile add-to="tiles" slotWidget="headerSlot" plugWidget="headerView"/>
             </GtkView>
 
             <GtkView set-as="toolbaView" name="toolbaView" uiFile="@firstUi" />

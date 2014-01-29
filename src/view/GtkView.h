@@ -49,7 +49,7 @@ private:
 
         std::string prr_ (name);
         UiFile *prr_ (uiFile);
-        TileVector prp_ (tiles);
+        TileVector prr_ (tiles);
 
         class Impl;
         Impl *impl = 0;

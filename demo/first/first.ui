@@ -62,7 +62,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkFrame" id="toolbarView">
+              <object class="GtkFrame" id="toolbarSlot">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label_xalign">0</property>
@@ -93,7 +93,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFrame" id="headerView">
+              <object class="GtkFrame" id="headerSlot">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label_xalign">0</property>
@@ -149,7 +149,7 @@
   <object class="GtkWindow" id="window2">
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkLabel" id="toolbaView1">
+      <object class="GtkLabel" id="headerView">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">header</property>
