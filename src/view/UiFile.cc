@@ -28,6 +28,10 @@ UiFile::~UiFile ()
 
 GtkBuilder *UiFile::load ()
 {
+        if (impl->loaded) {
+                return impl->builder;
+        }
+
         if (file.empty ()) {
                 throw Core::Exception ("You didn't specify a file name to load in this UiFile factory object.");
         }

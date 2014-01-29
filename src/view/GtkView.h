@@ -9,6 +9,7 @@
 #ifndef GTKVIEW_H_
 #define GTKVIEW_H_
 
+#include <gtk/gtk.h>
 #include "IView.h"
 #include "ReflectionMacros.h"
 #include "UiFile.h"
@@ -29,6 +30,7 @@ public:
 
         std::string getName () const { return name; }
 
+        void load ();
         void show ();
         void hide ();
         void destroy ();
@@ -36,7 +38,12 @@ public:
         void model2View (std::string const &dataRange);
         void view2Model (std::string const &dataRange);
 
-        TileVector &getTiles () { return tiles; }
+        TileVector const &getTiles () const { return tiles; }
+
+        /**
+         * Gets a object (GTK+ GObject) from the ui file.
+         */
+        GObject *getGObject (std::string const &name);
 
 private:
 
