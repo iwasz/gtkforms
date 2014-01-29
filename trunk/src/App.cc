@@ -17,6 +17,7 @@
 #include "controller/SubmitEvent.h"
 #include "controller/QuitEvent.h"
 #include "controller/IController.h"
+#include "view/GtkTileManager.h"
 
 namespace GtkForms {
 using namespace Container;
@@ -46,6 +47,7 @@ struct App::Impl {
 
         Ptr <BeanFactoryContainer> container;
         Context context;
+        GtkTileManager tileManager;
 };
 
 App::App (std::string const &configurationFile)
@@ -152,11 +154,14 @@ void App::run ()
                 }
         }
 
-        for (ViewMap::value_type const &entry : poResult.added) {
-                IView *view = entry.second;
-                // TODO model2View (); TODO pytanie, ale konwertować z modelu na widok wszytsko, czy tylko to co się zmieniło?
-                view->show ();
-        }
+        impl->tileManager.reparent (&poResult.added, true);
+//        impl->tileManager.show (poResult.added);
+
+//        for (ViewMap::value_type const &entry : poResult.added) {
+//                IView *view = entry.second;
+//                // TODO model2View (); TODO pytanie, ale konwertować z modelu na widok wszytsko, czy tylko to co się zmieniło?
+//                view->show ();
+//        }
 
 //        BOOST_LOG (lg) << impl->page;
 
