@@ -37,8 +37,8 @@ PageOperationResult Page::start (IPage *page)
 
         for (auto i = views.begin (); i != views.end (); ) {
                 if (ctmap.find (i->first) == ctmap.end ()) {
-                        i = views.erase (i);
                         result.removed[i->first] = i->second;
+                        i = views.erase (i);
                 }
                 else {
                         ++i;

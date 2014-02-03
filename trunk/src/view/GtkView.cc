@@ -20,14 +20,14 @@ src::logger_mt& lg = logger::get ();
  * Helper class for passing required data between user code and GObject closures.
  */
 struct ClosureDTO {
-        gchar *handlerCopy = 0;
+        std::string handlerCopy;
         Context *context = 0;
 };
 
 struct GtkView::Impl {
         GtkWidget *widget = 0;
         GtkBuilder *builder = 0;
-        static ClosureDTO closureDTO;
+//        static ClosureDTO closureDTO;
 
         static void handler (const std::string &sourceCode, const Core::VariantVector &paramVector, Context *context);
 
@@ -48,9 +48,12 @@ struct GtkView::Impl {
                                      const GValue *param_values,
                                      gpointer invocation_hint,
                                      gpointer marshal_data);
+
+        static void gclosureUserDataDelete (gpointer data, GClosure *closure);
+
 };
 
-ClosureDTO GtkView::Impl::closureDTO;
+//ClosureDTO GtkView::Impl::closureDTO;
 
 /*--------------------------------------------------------------------------*/
 
@@ -180,16 +183,19 @@ void GtkView::Impl::myConnectFunc (GtkBuilder *builder,
                                    GConnectFlags flags,
                                    gpointer user_data)
 {
-        BOOST_LOG (lg) << "Connecting : " << signal_name << ", " << handler_name << ", DTO : [" << (void *)&GtkView::Impl::closureDTO << "]";
+        BOOST_LOG (lg) << "Connecting : " << signal_name << ", " << handler_name /*<< ", DTO : [" << (void *)&GtkView::Impl::closureDTO << "]"*/;
 
         // Skopiować napis z signal_name
-        GtkView::Impl::closureDTO.handlerCopy = g_strdup (handler_name);
-        GtkView::Impl::closureDTO.context = static_cast <Context *> (user_data);
+        ClosureDTO *dto = new ClosureDTO;
+//        GtkView::Impl::closureDTO.handlerCopy = g_strdup (handler_name);
+//        GtkView::Impl::closureDTO.context = static_cast <Context *> (user_data);
+        dto->handlerCopy = /*g_strdup (*/handler_name/*)*/;
+        dto->context = static_cast <Context *> (user_data);
 
         /*
          * https://developer.gnome.org/gobject/stable/gobject-Closures.html#g-cclosure-new
          */
-        GClosure *closure = g_cclosure_new (G_CALLBACK (GtkView::Impl::handler), &GtkView::Impl::closureDTO, NULL);
+        GClosure *closure = g_cclosure_new (G_CALLBACK (GtkView::Impl::handler), dto, gclosureUserDataDelete);
 
         // Usunąć napis z signal_name ?
 //        g_free (handlerCopy);
@@ -219,7 +225,15 @@ void GtkView::Impl::gClosureMarshal (GClosure *closure,
 
         Core::VariantVector params;
         ClosureDTO *dto = static_cast <ClosureDTO *> (closure->data);
-        callback (std::string (dto->handlerCopy), params, dto->context);
+        callback (/*std::string (*/dto->handlerCopy/*)*/, params, dto->context);
+}
+
+/*--------------------------------------------------------------------------*/
+
+void GtkView::Impl::gclosureUserDataDelete (gpointer data, GClosure *closure)
+{
+        ClosureDTO *dto = static_cast <ClosureDTO *> (data);
+        delete dto;
 }
 
 } // namespace GtkForms

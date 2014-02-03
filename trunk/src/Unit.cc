@@ -40,8 +40,8 @@ UnitOperationResult Unit::start (IUnit *unit)
 
         for (auto i = controllers.begin (); i != controllers.end (); ) {
                 if (ctmap.find (i->first) == ctmap.end ()) {
-                        i = controllers.erase (i);
                         result.removed[i->first] = i->second;
+                        i = controllers.erase (i);
                 }
                 else {
                         ++i;

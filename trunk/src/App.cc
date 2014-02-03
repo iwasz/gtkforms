@@ -202,9 +202,6 @@ void App::run ()
 void App::doSubmit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName)
 {
         /*
-         */
-
-        /*
          * Potrzebne dane:
          * - Z jakiego widoku ściągamy dane (bo może byćwięcej niż jeden widok w Page..
          *
