@@ -10,12 +10,20 @@
 #include "GtkTileManager.h"
 #include "Tile.h"
 #include "GtkView.h"
+#include "Context.h"
 
 namespace GtkForms {
 using namespace std;
 
-
-void GtkTileManager::reparent (ViewMap *viewMap, bool show)
+/*
+ * Excerpt from GTK+ documentation : "A GtkBuilder holds a reference to all objects that it has constructed and drops
+ * these references when it is finalized. This finalization can cause the destruction of non-widget objects or widgets
+ * which are not contained in a toplevel window. For toplevel windows constructed by a builder, it is the responsibility
+ * of the user to call gtk_widget_destroy() to get rid of them and all the widgets they contain."
+ *
+ * So GtkWidnows should be destroyed explicitely, the others are reference-counted.
+ */
+void GtkTileManager::reparent (ViewMap *viewMap, Context *context, bool show)
 {
         map <string, GtkBin *> slots;
         map <string, GtkWidget *> plugs;
@@ -30,7 +38,7 @@ void GtkTileManager::reparent (ViewMap *viewMap, bool show)
                 }
 
                 // Load the view.
-                view->load ();
+                view->load (context);
 
                 TileVector const &tiles = view->getTiles ();
                 copy (tiles.begin (), tiles.end (), back_inserter (allTiles));
