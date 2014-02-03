@@ -5,11 +5,31 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
+#ifndef DUMMYCONTROLLER_H_
+#define DUMMYCONTROLLER_H_
 
-#ifndef GTK_FORMS_MAIN_CONTROLLER_FILE_CONTROLLER_H_
-#define GTK_FORMS_MAIN_CONTROLLER_FILE_CONTROLLER_H_
-
+#include <string>
 #include "AbstractController.h"
-#include "DummyController.h"
 
-#endif /* CONTROLLER_H_ */
+namespace GtkForms {
+
+class DummyController : public AbstractController {
+public:
+        ctr__ (void)
+        bse_ ("AbstractController")
+
+        virtual ~DummyController () {}
+
+        std::string start () { return pageToShow; }
+        std::string onSubmit () { return ""; }
+        std::string end () { return ""; }
+
+private:
+
+        std::string prr_ (pageToShow);
+        end_ (DummyController)
+};
+
+} /* namespace GtkForms */
+
+#endif /* DUMMYCONTROLLER_H_ */
