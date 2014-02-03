@@ -12,6 +12,7 @@
 #include <string>
 #include <Tiliae.h>
 #include <gtk/gtk.h>
+#include "ReflectionMacros.h"
 
 namespace GtkForms {
 
@@ -25,6 +26,7 @@ class Context;
  */
 class App {
 public:
+        abt__
 
         App (std::string const &configurationFile);
         ~App ();
@@ -34,7 +36,7 @@ public:
          * show? navigate? Ta funkcja będzie używana w wielu miejscach aby przejść
          * na jakiś widok
          */
-        void start (std::string const &unitName);
+        mth_ (start) void start (std::string const &unitName);
 
         /**
          * Merge another unit with unit that currently is active. It means that currently active unit
@@ -99,7 +101,7 @@ public:
         void hide (std::string const &page) {}
 
         Context &getContext ();
-        Context const &getContext () const;
+        static k202::K202 &getK202 ();
 
 private:
 
@@ -140,10 +142,7 @@ private:
         struct Impl;
         Impl *impl;
 
-//        IController *currentController
-//        IView *currentView;
-//        Session session;
-//        Flash flash;
+        end_ (App)
 };
 
 } // namespace GtkForms

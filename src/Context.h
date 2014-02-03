@@ -10,11 +10,13 @@
 #define GTKFORMS_CONTEXT_H_
 
 #include <Tiliae.h>
+#include "ReflectionMacros.h"
 
 namespace GtkForms {
 
 class Context {
 public:
+        abt__
 
         virtual ~Context () {}
 
@@ -26,13 +28,15 @@ public:
         void clearUnitScope () { session.clear (); }
         void clearFlashScope () { session.clear (); }
 
-        Core::Variant get (const std::string &name);
+        mth_ (get) Core::Variant get (const std::string &name);
 
 private:
 
         Core::VariantMap session;
         Core::VariantMap unit;
         Core::VariantMap flash;
+
+        end_ (Context)
 };
 
 } // namespace GtkForms

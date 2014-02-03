@@ -50,17 +50,24 @@ struct App::Impl {
         GtkTileManager tileManager;
 };
 
+/*--------------------------------------------------------------------------*/
+
 App::App (std::string const &configurationFile)
 {
         impl = new Impl;
         createContainer (configurationFile);
         g_idle_add (guiThread, static_cast <gpointer> (this));
+        impl->context.getSessionScope ()["app"] = Core::Variant (*this);
 }
+
+/*--------------------------------------------------------------------------*/
 
 App::~App ()
 {
         delete impl;
 }
+
+/*--------------------------------------------------------------------------*/
 
 void App::run ()
 {
@@ -154,7 +161,7 @@ void App::run ()
                 }
         }
 
-        impl->tileManager.reparent (&poResult.added, true);
+        impl->tileManager.reparent (&poResult.added, &impl->context, true);
 //        impl->tileManager.show (poResult.added);
 
 //        for (ViewMap::value_type const &entry : poResult.added) {
@@ -177,7 +184,6 @@ void App::run ()
 
         usleep (MAIN_LOOP_USLEEP);
 }
-
 
 /*
  * Metoda start kontrolera zwraca nazwę widoku. ViewResolver otrzymuje tą nazwę i podejmuje decyzję jaki widok pokazać.
@@ -231,25 +237,35 @@ void App::doSubmit (std::string const &viewName, std::string const &dataRange, s
         impl->pagesToShow.insert (nextPage);
 }
 
+/*--------------------------------------------------------------------------*/
+
 void App::start (std::string const &unitName)
 {
         impl->unitToStart = unitName;
 }
+
+/*--------------------------------------------------------------------------*/
 
 void App::join (std::string const &unitName)
 {
         impl->unitsToJoin.insert (unitName);
 }
 
+/*--------------------------------------------------------------------------*/
+
 void App::split (std::string const &unitName)
 {
         impl->unitsToSplit.insert (unitName);
 }
 
+/*--------------------------------------------------------------------------*/
+
 void App::submit (std::string const &controllerName, std::string const &formName)
 {
         impl->events.push (std::unique_ptr <IEvent> (new SubmitEvent {}));
 }
+
+/*--------------------------------------------------------------------------*/
 
 void App::createContainer (std::string const &configFile)
 {
@@ -272,15 +288,31 @@ void App::createContainer (std::string const &configFile)
 //        config (impl->config);
 }
 
+/*--------------------------------------------------------------------------*/
+
 Context &App::getContext ()
 {
         return impl->context;
+//        static Context context;
+//        return context;
 }
 
-Context const &App::getContext () const
+/*--------------------------------------------------------------------------*/
+
+k202::K202 &App::getK202 ()
 {
-        return impl->context;
+        static Ptr <k202::K202> k202 = k202::K202::create ();
+        return *k202;
 }
+
+/*--------------------------------------------------------------------------*/
+
+//Context const &App::getContext () const
+//{
+//        return impl->context;
+//}
+
+/*--------------------------------------------------------------------------*/
 
 IUnit *App::getUnit (std::string const &name)
 {
@@ -288,11 +320,15 @@ IUnit *App::getUnit (std::string const &name)
         return unit;
 }
 
+/*--------------------------------------------------------------------------*/
+
 IPage *App::getPage (std::string const &name)
 {
         IPage* page = ocast <IPage *> (impl->container->getBean (name));
         return page;
 }
+
+/*--------------------------------------------------------------------------*/
 
 gboolean guiThread (gpointer userData)
 {

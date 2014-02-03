@@ -12,11 +12,12 @@
 #include "IView.h"
 
 namespace GtkForms {
+class Context;
 
 class GtkTileManager {
 public:
 
-        void reparent (ViewMap *viewMap, bool show = true);
+        void reparent (ViewMap *viewMap, Context *context, bool show = true);
 
 };
 

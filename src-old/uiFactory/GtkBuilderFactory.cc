@@ -22,6 +22,7 @@ static void handler (const std::string &sourceCode,
 //                const Core::VariantVector &paramVector,
 //                const Core::VariantMap &argsMap)
 }
+
 /****************************************************************************/
 
 void gClosureMarshal (GClosure *closure,

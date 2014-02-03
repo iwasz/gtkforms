@@ -16,6 +16,7 @@
 #include "Tile.h"
 
 namespace GtkForms {
+class Context;
 
 /**
  * View (a top level windows, or some inner GtkWidget) created from GtkBuilder. Thise views are
@@ -30,7 +31,7 @@ public:
 
         std::string getName () const { return name; }
 
-        void load ();
+        void load (Context *context);
         void show ();
         void hide ();
         void destroy ();
@@ -44,6 +45,10 @@ public:
          * Gets a object (GTK+ GObject) from the ui file.
          */
         GObject *getGObject (std::string const &name);
+
+private:
+
+        void connectSignals (Context *context);
 
 private:
 
