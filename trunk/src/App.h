@@ -13,6 +13,7 @@
 #include <Tiliae.h>
 #include <gtk/gtk.h>
 #include "ReflectionMacros.h"
+#include "Logging.h"
 
 namespace GtkForms {
 
@@ -141,6 +142,7 @@ private:
 
         struct Impl;
         Impl *impl;
+        src::logger_mt& lg = logger::get();
 
         end_ (App)
 };

@@ -11,7 +11,6 @@
 #include "App.h"
 #include "Unit.h"
 #include "Page.h"
-#include "Logging.h"
 #include "Context.h"
 #include "controller/IEvent.h"
 #include "controller/SubmitEvent.h"
@@ -71,26 +70,33 @@ App::~App ()
 
 void App::run ()
 {
-        src::logger_mt& lg = logger::get();
-
         UnitOperationResult uoResult;
+        bool mainUnitModified = false;
 
         if (!impl->unitToStart.empty ()) {
                 IUnit *unit = getUnit (impl->unitToStart);
                 uoResult += impl->unit.start (unit);
+                BOOST_LOG (lg) << "Unit to be started : name : [" << impl->unitToStart << "], unit itself : [" << *unit << "]";
+                mainUnitModified = true;
         }
 
         for (std::string const &unitName : impl->unitsToJoin) {
                 IUnit *unit = getUnit (unitName);
                 uoResult += impl->unit.join (unit);
+                BOOST_LOG (lg) << "Unit to be joined : name : [" << unitName << "], unit itself : [" << *unit << "]";
+                mainUnitModified = true;
         }
 
         for (std::string const &unitName : impl->unitsToSplit) {
                 IUnit *unit = getUnit (unitName);
                 uoResult += impl->unit.split (unit);
+                BOOST_LOG (lg) << "Unit to be split : name : [" << unitName << "], unit itself : [" << *unit << "]";
+                mainUnitModified = true;
         }
 
-//        BOOST_LOG (lg) << impl->unit;
+        if (mainUnitModified) {
+                BOOST_LOG (lg) << "Current unit looks like this : [" << impl->unit << "]";
+        }
 
         impl->unitToStart = "";
         impl->unitsToJoin.clear ();
@@ -125,10 +131,12 @@ void App::run ()
                 poResult += impl->page.split (page);
         }
 
-        for (ViewMap::value_type const &entry : poResult.removed) {
-                IView *view = entry.second;
-                view->destroy ();
-        }
+//        for (ViewMap::value_type const &entry : poResult.removed) {
+//                IView *view = entry.second;
+//                view->destroy ();
+//        }
+
+        impl->pagesToHide.clear ();
 
         // All views that was meant to be closed are colsed here. Now show new views user has requested.
 
@@ -161,7 +169,9 @@ void App::run ()
                 }
         }
 
-        impl->tileManager.reparent (&poResult.added, &impl->context, true);
+        impl->pagesToShow.clear ();
+
+        impl->tileManager.reparent (poResult, &impl->context, true);
 //        impl->tileManager.show (poResult.added);
 
 //        for (ViewMap::value_type const &entry : poResult.added) {

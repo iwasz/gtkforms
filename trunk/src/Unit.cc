@@ -77,14 +77,14 @@ UnitOperationResult Unit::split (IUnit *unit)
 
 /*--------------------------------------------------------------------------*/
 
-ostream &operator<< (ostream &o, Unit const &u)
+ostream &operator<< (ostream &o, IUnit const &u)
 {
         o << "Unit [";
 
-        for (auto i = u.controllers.begin (); i != u.controllers.end (); ) {
+        for (auto i = u.getControllers ().begin (); i != u.getControllers ().end (); ) {
                 o << i->second->getName ();
 
-                if (++i != u.controllers.end ()) {
+                if (++i != u.getControllers ().end ()) {
                         o << ", ";
                 }
         }
