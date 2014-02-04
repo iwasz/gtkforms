@@ -31,9 +31,18 @@ public:
 
         std::string getName () const { return name; }
 
+        /**
+         * Loads a UI file into memory (if not loaded allready), and gets pointer to widget with name
+         * name. If widget was obtained from the file earlier, it will be returned immediately, and no
+         * new instance of this widget will be made.
+         */
         void load (Context *context);
         void show ();
         void hide ();
+
+        /**
+         * Destroys
+         */
         void destroy ();
 
         void model2View (std::string const &dataRange);

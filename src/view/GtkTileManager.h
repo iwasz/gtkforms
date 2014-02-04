@@ -10,6 +10,7 @@
 #define GTK_FORMS_TILEMANAGER_H_
 
 #include "IView.h"
+#include "IPage.h"
 
 namespace GtkForms {
 class Context;
@@ -17,7 +18,7 @@ class Context;
 class GtkTileManager {
 public:
 
-        void reparent (ViewMap *viewMap, Context *context, bool show = true);
+        void reparent (PageOperationResult const &poResult, Context *context, bool show = true);
 
 };
 

@@ -24,7 +24,15 @@ public:
         UiFile ();
         ~UiFile ();
 
+        /**
+         * Loads file into memory, and returns it (in form of GtkBuilder). If file is allready loaded,
+         * it is immediately returned.
+         */
         GtkBuilder *load ();
+
+        /**
+         * Clears memory occupied by loaded UI file.
+         */
         void unload ();
 
         std::string getFile () const { return file; }

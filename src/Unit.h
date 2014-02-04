@@ -30,13 +30,10 @@ public:
         UnitOperationResult join (IUnit *unit);
         UnitOperationResult split (IUnit *unit);
 
-//        std::string getName () const {}
-
         IController *getController (std::string const &controllerName) { return controllers[controllerName]; }
 
         ControllerMap &getControllers () { return controllers; }
-
-        friend std::ostream &operator<< (std::ostream &o, Unit const &u);
+        ControllerMap const &getControllers () const { return controllers; }
 
 private:
 
@@ -45,7 +42,7 @@ private:
         end_ (Unit)
 };
 
-std::ostream &operator<< (std::ostream &o, Unit const &u);
+std::ostream &operator<< (std::ostream &o, IUnit const &u);
 
 } // namespace GtkForms
 

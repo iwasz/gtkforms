@@ -115,6 +115,14 @@ Ona będzie mówić który widget ma się wkleić w inny widget. Na przykład: :
  <GtkView name="toolbarView">
  <GtkView name="headerView">
 
+Aktywna (aktualnie wyświetlana) jest tylko jedna strona na raz. Kiedy użytkownik zarząda nowej strony, ona
+zastępuje tą starą, chyba, że ma ustawiony parametr ``joinable="true"`` i w takim przypadku nowa strona
+**połączy się ze starą**. Aktualnie wyświetlaną stronę można też zamknąć zwracając jej nazwę z metody ``end``
+kontrolera.
+
+``loginPage.start ()``
+- 
+
 Model, view and controller communication
 ========================================
 

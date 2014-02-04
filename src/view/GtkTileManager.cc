@@ -23,14 +23,33 @@ using namespace std;
  *
  * So GtkWidnows should be destroyed explicitely, the others are reference-counted.
  */
-void GtkTileManager::reparent (ViewMap *viewMap, Context *context, bool show)
+void GtkTileManager::reparent (PageOperationResult const &poResult, Context *context, bool show)
 {
         map <string, GtkBin *> slots;
         map <string, GtkWidget *> plugs;
         TileVector allTiles;
 
-        // 1. Get all slots and pligs from all views and validate
-        for (ViewMap::value_type const &entry : *viewMap) {
+        /*
+         * Możliwości:
+         * - Otworzyć nowy widok (A) składający się z kafelków.
+         * - Otworzyć jeszcze jeden widok (B) (możliwe że też kafelkowy) nad tym już istniejącym (drugie top-level window).
+         * -
+         *
+         *
+         * - View ma getWidget (bae arg) - zwraca widget o nazwie takiej jak name (w postaci GObject)
+         * - View ma get slots (map <string, GtkBin *>)
+         * - mamy wszystikie widoki i do zamknięcia i do otworzenia i te już widoczne.
+         * - Te do otworzenia ładujemy do pamięci. Stan #1 : Wszystko co jest potrzebne jest w pamięci, każdy widget jest dostępny.
+
+         * - Pobieramy sloty z tych już widocznych i tych załadowanych (do otworzenia).
+         * - jesteśmy w stanie #2, w kŧórym wszystko jest w pamięci, mamy wskaźniki do wszystkich slotów wszystkich widoków i wsakźniki do wszystkich widoków (plugów i nie plugów poprzez GObject *view.getWidget ()).
+         *
+         * - Plugi zawsze mają jakiegos parenta, więc trzeba je reparentować (zawsze).
+         *
+         */
+
+        // 1. Get all slots and plugs from all views and validate
+        for (ViewMap::value_type const &entry : poResult.added) {
                 GtkView *view = dynamic_cast <GtkView *> (entry.second);
 
                 if (!view) {
@@ -117,7 +136,7 @@ void GtkTileManager::reparent (ViewMap *viewMap, Context *context, bool show)
 
 
         if (show) {
-                for (ViewMap::value_type const &entry : *viewMap) {
+                for (ViewMap::value_type const &entry : poResult.added) {
                         GtkView *view = static_cast <GtkView *> (entry.second);
                         view->show ();
                 }

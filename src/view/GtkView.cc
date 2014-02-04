@@ -27,7 +27,6 @@ struct ClosureDTO {
 struct GtkView::Impl {
         GtkWidget *widget = 0;
         GtkBuilder *builder = 0;
-//        static ClosureDTO closureDTO;
 
         static void handler (const std::string &sourceCode, const Core::VariantVector &paramVector, Context *context);
 

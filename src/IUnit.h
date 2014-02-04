@@ -47,6 +47,7 @@ public:
         virtual UnitOperationResult split (IUnit *unit) = 0;
         virtual IController *getController (std::string const &controllerName) = 0;
         virtual ControllerMap &getControllers () = 0;
+        virtual ControllerMap const &getControllers () const = 0;
 
 };
 
