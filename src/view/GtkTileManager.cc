@@ -32,8 +32,19 @@ void GtkTileManager::reparent (PageOperationResult const &poResult, Context *con
         /*
          * Możliwości:
          * - Otworzyć nowy widok (A) składający się z kafelków.
+         *  - Ładujemy główny widok.
+         *  - Ładujemy kafelki.
+         *  - Składamy do kupy.
          * - Otworzyć jeszcze jeden widok (B) (możliwe że też kafelkowy) nad tym już istniejącym (drugie top-level window).
-         * -
+         *  - Ładujemy nowy widok, nie ruszamy tego starego.
+         *  - Ładujemy kafelki.
+         *  - Składamy do kupy.
+         * - Otworzyć nowy kafelek i dokleić go do już istniejącego widoku.
+         *  - Załadować kafelek.
+         *  - Umiescić go na miejscu.
+         *
+         * - Otworzyć widok (C), który ma zamienić widok (A) i (B)
+         *
          *
          *
          * - View ma getWidget (bae arg) - zwraca widget o nazwie takiej jak name (w postaci GObject)
