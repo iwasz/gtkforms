@@ -35,17 +35,67 @@ void GtkTileManager::reparent (PageOperationResult const &poResult, Context *con
          *  - Ładujemy główny widok.
          *  - Ładujemy kafelki.
          *  - Składamy do kupy.
+         *
          * - Otworzyć jeszcze jeden widok (B) (możliwe że też kafelkowy) nad tym już istniejącym (drugie top-level window).
          *  - Ładujemy nowy widok, nie ruszamy tego starego.
          *  - Ładujemy kafelki.
          *  - Składamy do kupy.
+         *
          * - Otworzyć nowy kafelek i dokleić go do już istniejącego widoku.
          *  - Załadować kafelek.
          *  - Umiescić go na miejscu.
          *
          * - Otworzyć widok (C), który ma zamienić widok (A) i (B)
+         *  - Ładujemy główny widok.
+         *  - Ładujemy kafelki (te kóre nie są załadowane).
+         *  - Zamykamy poprzedni główny widok.
+         *  - Składamy do kupy.
+         *
+         * - Page , czyli strona skłąda się tylko:
+         *  - GtkWindow - tylko jedno (standalone).
+         *  - GtkTile - wiele.
+         *  - Z poniższego wynika, że strona musi mieć nazwę, a więc musi być jakaś mapa stron zdefiniowana niestety.
+         * Operacje
+         *  - Page.getName ().  Pobierz nazwę.
+         *  - Page.getView (). Pobierz głowne okno.
+         *  - Page.getTiles (). Pobierz kafelki.
+         *  loadUi (). Wywołuje loadUi na wsyztskich tilesach i na GtkWindow
+         *
+         *  GtkTile operacje. Kafelek.
+         *   - loadUi (). załaduj UI. jezeli już załadowane, to nic się nie dzieje. To jest pomyślane jako singleton, który zajmuje pamięć lub zwalnia, ale jest tylko jeden.
+         *   - getUi ().  pobierz ui.
+         *   - show ().
+         *   - destroy ()
+         *
+         * GtkView/albo GtkWindow. Główne okno
+         *   - loadUi (). załaduj UI.
+         *   - getUi ().  pobierz ui.
+         *   - show ().
+         *   - destroy ()
+         *   - reparent (map <string, GtkTile *>).
          *
          *
+         *
+         *  Wartości zwracane z kontrolerów (nazwy widoków ze specalnymi znacznikami):
+         *  +page (otwórz stronę).
+         *  -page (zamknij stronę, ale po załadowaniu srona nie ma nazwy, więc jak ją zamknąć?).
+         *  pageA->pageB, lub po prostu ->page (move, czyli zmień aktualną stronę na nową stronę przenosząc kafelki jeśli się da)
+         *  +pageA,+pageB otwórz dwie strony.
+         *
+         * Tylko operacja -> wymaga wyjaśnienia. Operacja pageA->pageB.
+         * - pageA ma widok głowny (umownie GtkWindow), i pageB też. Ten z A jest NA PEWNO DO ZAMKNIĘCIA, a ten z B do otworzenia (załadować).
+         * - kafelki z A są już załadowane. Trzeba załadować kafelki od widoku B.
+         * - Pula kafelków to teraz jest pula z A i z B - trzeba je dodac do jednej mapy - jeżeli nazwy się powtarzają, to wygrywają te nowsze,
+         *   alternatywnie kafelki muszą mieć unikalne nazwy. Widok docelowy to jest
+         * - Umieszczamy kafelki w slotach.
+         *
+         * Operacja +page.
+         * - Container.getBean (Page.getname ()) Znajdujemy page w tej super-mapie (singleton, załadowany już).
+         * - Page.loadUi (). ładujemy gowny widok i kafelki.
+         * - tiles = Page.getTiles (). Pula kafelków : mapa, albo jakiś obiekt typu mapa.
+         * - mainWindow = Page.getMainWindow . pobieramy główny widok.
+         * - mainWindow.reparent (tiles);
+         * - Page.show (). Pokazujemy wszystko. (lub mainWindow.show ()).
          *
          * - View ma getWidget (bae arg) - zwraca widget o nazwie takiej jak name (w postaci GObject)
          * - View ma get slots (map <string, GtkBin *>)
