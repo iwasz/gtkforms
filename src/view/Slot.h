@@ -6,8 +6,8 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef GTK_FORMS_TILE_H_
-#define GTK_FORMS_TILE_H_
+#ifndef GTK_FORMS_SLOT_H_
+#define GTK_FORMS_SLOT_H_
 
 #include <string>
 #include "ReflectionMacros.h"
@@ -17,23 +17,23 @@ namespace GtkForms {
 /**
  * Single definition which tells how to nest one view inside another.
  */
-class Tile {
+class Slot {
 public:
         ctr__ (void)
 
-        std::string getSlotWidget () const { return slotWidget; }
-        std::string getPlugWidget () const { return plugWidget; }
+        std::string getName () const { return name; }
+        std::string getTileName () const { return tileName; }
 
 private:
 
-        std::string prr_ (slotWidget);
-        std::string prr_ (plugWidget);
+        std::string prr_ (name);
+        std::string prr_ (tileName);
 
-        end_ (Tile)
+        end_ (Slot)
 };
 
-typedef std::vector <Tile *> TileVector;
-col_ (TileVector)
+typedef std::vector <Slot *> SlotVector;
+col_ (SlotVector)
 
 } /* namespace GtkForms */
 #endif /* TILE_H_ */

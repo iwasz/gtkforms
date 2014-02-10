@@ -10,8 +10,11 @@
 #define IPAGE_H_
 
 #include "core/Object.h"
+#include "view/GtkTile.h"
 
 namespace GtkForms {
+class Context;
+class GtkView;
 
 /**
  * Stores information which views were added and which were removed durnig App operatons
@@ -41,16 +44,23 @@ public:
          * Returns views to hide.
          */
         virtual PageOperationResult split (IPage *unit) = 0;
+        virtual void loadUi (Context *context) = 0;
 
-        virtual IView *getView (std::string const &viewName) = 0;
-        virtual ViewMap &getViews () = 0;
-
-        /**
-         * Tells if this page has to be joined (merged with patge that is beeing currently displayed)
-         * instead of "started" i.e. displayed replacing previous page.
-         */
-        virtual bool getJoinable () const = 0;
+        virtual GtkTileMap getTiles () = 0;
+        virtual GtkView *getView () = 0;
+        virtual std::string getName () const = 0;
+//
+//        virtual IView *getView (std::string const &viewName) = 0;
+//        virtual ViewMap &getViews () = 0;
+//
+//        /**
+//         * Tells if this page has to be joined (merged with patge that is beeing currently displayed)
+//         * instead of "started" i.e. displayed replacing previous page.
+//         */
+//        virtual bool getJoinable () const = 0;
 };
+
+typedef std::map <std::string, IPage *> PageMap;
 
 } // namespace GtkForms
 

@@ -132,6 +132,13 @@ private:
          */
         void run ();
 
+        ///
+        Core::StringSet manageUnits ();
+
+        void addPage (std::string const &page);
+        void removePage (std::string const &page);
+        void movePage (std::string const &pageA, std::string const &pageB);
+
         friend class SubmitEvent;
         friend class QuitEvent;
         friend gboolean guiThread (gpointer user_data);

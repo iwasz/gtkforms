@@ -17,6 +17,7 @@
 #include "controller/QuitEvent.h"
 #include "controller/IController.h"
 #include "view/GtkTileManager.h"
+#include <boost/regex.hpp>
 
 namespace GtkForms {
 using namespace Container;
@@ -42,7 +43,8 @@ struct App::Impl {
         // Current unit.
         Unit unit;
         // Current page;
-        Page page;
+//        Page page;
+        PageMap pages;
 
         Ptr <BeanFactoryContainer> container;
         Context context;
@@ -68,7 +70,7 @@ App::~App ()
 
 /*--------------------------------------------------------------------------*/
 
-void App::run ()
+Core::StringSet App::manageUnits ()
 {
         UnitOperationResult uoResult;
         bool mainUnitModified = false;
@@ -114,17 +116,102 @@ void App::run ()
                 event->run (this);
         }
 
+        Core::StringSet viewCommands;
+
         // Here we are dealing with pages and thier views to hide.
         for (ControllerMap::value_type const &entry : uoResult.removed) {
                 IController *controller = entry.second;
                 controller->setApp (this);
-                std::string pageName = controller->end ();
+                std::string command = controller->end ();
 
-                if (!pageName.empty ()) {
-                        impl->pagesToHide.insert (pageName);
+                if (!command.empty ()) {
+                        viewCommands.insert (command);
                 }
         }
 
+        for (ControllerMap::value_type const &entry : uoResult.added) {
+                IController *controller = entry.second;
+                controller->setApp (this);
+                std::string command = controller->start ();
+
+                if (!command.empty ()) {
+                        viewCommands.insert (command);
+                }
+        }
+
+        return viewCommands;
+}
+
+/*--------------------------------------------------------------------------*/
+
+void App::run ()
+{
+        Core::StringSet viewCommands = manageUnits ();
+
+        boost::regex e1 ("\\+(.*)");
+        boost::regex e2 ("\\-(.*)");
+        boost::regex e3 ("(.*)->(.*)");
+        boost::smatch what;
+
+        for (std::string viewCommand : viewCommands) {
+                if (boost::regex_match (viewCommand, what, e1, boost::match_extra)) {
+                        if (what.size () == 2) {
+                                addPage (what[1]);
+                        }
+                }
+                else if (boost::regex_match (viewCommand, what, e2, boost::match_extra)) {
+                        if (what.size () == 2) {
+                                removePage (what[1]);
+                        }
+                }
+                else {
+                        boost::smatch what;
+
+                        if (boost::regex_match (viewCommand, what, e3, boost::match_extra)) {
+
+                                if (what.size () == 3) {
+                                        movePage (what[1], what[2]);
+                                }
+                                else if (what.size () == 2) {
+                                        movePage ("", what[1]);
+                                }
+                        }
+                }
+        }
+
+        usleep (MAIN_LOOP_USLEEP);
+}
+
+/*--------------------------------------------------------------------------*/
+
+void App::addPage (std::string const &pageName)
+{
+        BOOST_LOG (lg) << "+" << pageName;
+
+        if (impl->pages.find (pageName) != impl->pages.end ()) {
+                // TODO What should happen here? Nothing? Exception? Another unstance of view?
+                throw Core::Exception ("Illegal attempt to open multiple instances of page : [" + pageName + "]");
+        }
+
+        // Load from container, or return if already loaded.
+        IPage *page = getPage (pageName);
+        impl->pages[pageName] = page;
+
+        // Load UI file, or noop if loaded.
+        page->loadUi (&impl->context);
+
+        GtkTileMap tiles = page->getTiles ();
+        GtkView *mainView = page->getView ();
+
+        if (!mainView) {
+                throw Core::Exception ("view property of object Page is NULL.");
+        }
+
+        mainView->reparent (tiles, &impl->context);
+        mainView->show ();
+
+
+#if 0
         PageOperationResult poResult;
         for (std::string const &pageName : impl->pagesToHide) {
                 IPage *page = getPage (pageName);
@@ -140,22 +227,13 @@ void App::run ()
 
         // All views that was meant to be closed are colsed here. Now show new views user has requested.
 
-        for (ControllerMap::value_type const &entry : uoResult.added) {
-                IController *controller = entry.second;
-                controller->setApp (this);
-                std::string pageName = controller->start ();
-
-                if (!pageName.empty ()) {
-                        impl->pagesToShow.insert (pageName);
-                }
-        }
 
         bool started = false; // Protection against multiple starts (second page to be started would replace the first).
         std::string firstPageToStart; // For more maningful exception message.
         for (std::string const &pageName : impl->pagesToShow) {
                 IPage *page = getPage (pageName);
 
-                if (page->getJoinable ()) {
+                if (/*page->getJoinable ()*/true) {
                         poResult += impl->page.join (page);
                 }
                 else {
@@ -191,8 +269,37 @@ void App::run ()
                 currentView->model2View();
                 currentView->show();
         */
+#endif
 
-        usleep (MAIN_LOOP_USLEEP);
+}
+
+/*--------------------------------------------------------------------------*/
+
+void App::removePage (std::string const &page)
+{
+        BOOST_LOG (lg) << "-" << page;
+}
+
+/*--------------------------------------------------------------------------*/
+
+void App::movePage (std::string const &s, std::string const &pageB)
+{
+        std::string pageA = s;
+
+        if (pageA.empty () && impl->pages.size () > 1) {
+                throw Core::Exception ("-> operation failed. If 'from' page is empty, only one active page can be present. Provide 'from' page name.");
+        }
+
+        if (pageA.empty () && impl->pages.size () > 0) {
+                pageA = impl->pages.begin ()->first;
+        }
+
+        if (pageA.empty ()) {
+                addPage (pageB);
+                return;
+        }
+
+        BOOST_LOG (lg) << pageA << "->" << pageB;
 }
 
 /*
@@ -226,7 +333,8 @@ void App::doSubmit (std::string const &viewName, std::string const &dataRange, s
          *
          * - Jakiemu kontrolerowi wuwołąć onSubmit : nazwa kontrolera brana z GtkContainer.
          */
-        IView *view = impl->page.getView (viewName);
+#if 0
+        GtkView *view = impl->page.getView (/*viewName*/);
 
         if (!view) {
                 throw Core::Exception {"No such view : [" + viewName + "]."};
@@ -242,6 +350,7 @@ void App::doSubmit (std::string const &viewName, std::string const &dataRange, s
 
         std::string nextPage = controller->onSubmit();
         impl->pagesToShow.insert (nextPage);
+#endif
 }
 
 /*--------------------------------------------------------------------------*/

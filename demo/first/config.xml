@@ -11,16 +11,16 @@
 
     <UiFile id="firstUi" file="../demo/first/first.ui" />
     
-    <Page id="loginPage">
-        <ViewMap set-as="views">
-            <GtkView set-as="loginView" name="loginView" uiFile="@firstUi">
-              <Tile add-to="tiles" slotWidget="toolbarSlot" plugWidget="toolbaView"/>
-              <Tile add-to="tiles" slotWidget="headerSlot" plugWidget="headerView"/>
-            </GtkView>
-
-            <GtkView set-as="toolbaView" name="toolbaView" uiFile="@firstUi" />
-            <GtkView set-as="headerView" name="headerView" uiFile="@firstUi"/>
-        </ViewMap>
+    <Page id="loginPage" name="loginPage">
+      <GtkView set-as="view" name="loginView" uiFile="@firstUi"/>
+       
+      <Slot add-to="slots" name="toolbarSlot" tileName="toolbaView"/>
+      <Slot add-to="slots" name="headerSlot"  tileName="headerView"/>
+      
+      <GtkTileMap set-as="tiles">
+        <GtkTile set-as="toolbarView" name="toolbaView" uiFile="@firstUi" />
+        <GtkTile set-as="headerView" name="headerView" uiFile="@firstUi"/>
+      </GtkTileMap>
     </Page>
 
     <Unit id="main">
@@ -31,21 +31,21 @@
         </ControllerMap>
     </Unit>    
 
-    <Page id="mainPage">
-        <ViewMap set-as="views">
-            <GtkView set-as="mainView" name="mainView" uiFile="@firstUi">
-              <Tile add-to="tiles" slotWidget="toolbarSlot" plugWidget="toolbaView"/>
-              <Tile add-to="tiles" slotWidget="headerSlot" plugWidget="headerView"/>
-            </GtkView>
+    <Page id="mainPage" name="mainPage">
+<!--         <ViewMap set-as="views"> -->
+<!--             <GtkView set-as="mainView" name="mainView" uiFile="@firstUi"> -->
+<!--               <Tile add-to="tiles" slotWidget="toolbarSlot" plugWidget="toolbaView"/> -->
+<!--               <Tile add-to="tiles" slotWidget="headerSlot" plugWidget="headerView"/> -->
+<!--             </GtkView> -->
 
-            <GtkView set-as="toolbaView" name="toolbaView" uiFile="@firstUi" />
-            <GtkView set-as="headerView" name="headerView" uiFile="@firstUi"/>
-        </ViewMap>
+<!--             <GtkView set-as="toolbaView" name="toolbaView" uiFile="@firstUi" /> -->
+<!--             <GtkView set-as="headerView" name="headerView" uiFile="@firstUi"/> -->
+<!--         </ViewMap> -->
     </Page>
 
-    <Page id="infoPage" joinable="true">
-        <ViewMap set-as="views">
-            <GtkView set-as="loginView" name="loginView" uiFile="@firstUi" />
-        </ViewMap>
-    </Page>
+<!--     <Page id="infoPage"> -->
+<!--         <ViewMap set-as="views"> -->
+<!--             <GtkView set-as="loginView" name="loginView" uiFile="@firstUi" /> -->
+<!--         </ViewMap> -->
+<!--     </Page> -->
 </beans>
