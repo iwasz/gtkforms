@@ -6,40 +6,40 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef GTKVIEW_H_
-#define GTKVIEW_H_
+#ifndef GTK_FORMS_GTKTILE_H_
+#define GTK_FORMS_GTKTILE_H_
 
+#include <gtk/gtk.h>
+#include <string>
+#include <map>
 #include "ReflectionMacros.h"
-#include "UiFile.h"
 #include "GtkAbstractView.h"
-#include "GtkTile.h"
 
 namespace GtkForms {
 class Context;
 
-/**
- * View (a top level windows, or some inner GtkWidget) created from GtkBuilder. Thise views are
- * loaded (i.e. memory is alloceted) in GtkView::show, and unloaded (memory is freed) in GtkView::hide.
- */
-class GtkView : public GtkAbstractView {
+class GtkTile : public GtkAbstractView {
 public:
         ctr__ (void)
         bse_ ("GtkAbstractView")
 
-        virtual ~GtkView () {}
+        virtual ~GtkTile () {}
 
 //        void loadUi (Context *context);
 //        void show ();
 //        void hide ();
 //        void destroy ();
+//
+//        /**
+//         * Gets a object (GTK+ GObject) from the ui file.
+//         */
+//        GObject *getUi ();
 
-        void model2View (std::string const &dataRange);
-        void view2Model (std::string const &dataRange);
-        void reparent (GtkTileMap const &tiles, Context *context);
-
-        end_ (GtkView)
+        end_ (GtkTile)
 };
 
-} // namespace GtkForms
+typedef std::map <std::string, GtkTile *> GtkTileMap;
+col_ (GtkTileMap)
 
-#endif /* GTKVIEW_H_ */
+} /* namespace GtkForms */
+#endif /* GTKTILE_H_ */

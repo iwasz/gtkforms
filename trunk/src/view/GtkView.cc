@@ -7,116 +7,66 @@
  ****************************************************************************/
 
 #include <gtk/gtk.h>
+#include <Tiliae.h>
 #include "GtkView.h"
 #include "Logging.h"
-#include <Tiliae.h>
 #include "App.h"
 #include "Context.h"
+#include "Slot.h"
 
 namespace GtkForms {
-src::logger_mt& lg = logger::get ();
-
-/*
- * Helper class for passing required data between user code and GObject closures.
- */
-struct ClosureDTO {
-        std::string handlerCopy;
-        Context *context = 0;
-};
-
-struct GtkView::Impl {
-        GtkWidget *widget = 0;
-        GtkBuilder *builder = 0;
-
-        static void handler (const std::string &sourceCode, const Core::VariantVector &paramVector, Context *context);
-
-        /*
-         * https://developer.gnome.org/gtk3/stable/GtkBuilder.html#GtkBuilderConnectFunc
-         */
-        static void myConnectFunc (GtkBuilder *builder,
-                                   GObject *object,
-                                   const gchar *signal_name,
-                                   const gchar *handler_name,
-                                   GObject *connect_object,
-                                   GConnectFlags flags,
-                                   gpointer user_data);
-
-        static void gClosureMarshal (GClosure *closure,
-                                     GValue *return_value,
-                                     guint n_param_values,
-                                     const GValue *param_values,
-                                     gpointer invocation_hint,
-                                     gpointer marshal_data);
-
-        static void gclosureUserDataDelete (gpointer data, GClosure *closure);
-
-};
-
-//ClosureDTO GtkView::Impl::closureDTO;
+using namespace std;
+static src::logger_mt& lg = logger::get ();
 
 /*--------------------------------------------------------------------------*/
 
-GtkView::GtkView ()
-{
-        impl = new Impl;
-}
+//void GtkView::loadUi (Context *context)
+//{
+//        if (!uiFile) {
+//                throw Core::Exception ("No UiFile object set inside GtkView.");
+//        }
+//
+//        impl->builder = uiFile->load ();
+//        impl->widget = GTK_WIDGET (gtk_builder_get_object (impl->builder, name.c_str ()));
+//
+//        if (!impl->widget) {
+//                throw Core::Exception ("No widget with name : [" + name + "] was found in file : [" + uiFile->getFile () + "].");
+//        }
+//
+//        connectSignals (context);
+//}
+
+/*--------------------------------------------------------------------------*/
+//
+//void GtkView::show ()
+//{
+////        gtk_builder_connect_signals (builder, NULL);
+////        gtk_builder_connect_signals_full (builder, myConnectFunc, NULL);
+//
+//
+////                TODO Podłączyć do czegoś, co będzie wysylać QuitEvent do wszystkich kontrolerów.
+////                g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
+////                g_signal_connect (window, "destroy", G_CALLBACK (gtk_widget_destroyed), &window);
+//
+//        gtk_widget_show (impl->widget);
+//}
 
 /*--------------------------------------------------------------------------*/
 
-GtkView::~GtkView ()
-{
-        delete impl;
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::load (Context *context)
-{
-        if (!uiFile) {
-                throw Core::Exception ("No UiFile object set inside GtkView.");
-        }
-
-        impl->builder = uiFile->load ();
-        impl->widget = GTK_WIDGET (gtk_builder_get_object (impl->builder, name.c_str ()));
-
-        if (!impl->widget) {
-                throw Core::Exception ("No widget with name : [" + name + "] was found in file : [" + uiFile->getFile () + "].");
-        }
-
-        connectSignals (context);
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::show ()
-{
-//        gtk_builder_connect_signals (builder, NULL);
-//        gtk_builder_connect_signals_full (builder, myConnectFunc, NULL);
-
-
-//                TODO Podłączyć do czegoś, co będzie wysylać QuitEvent do wszystkich kontrolerów.
-//                g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
-//                g_signal_connect (window, "destroy", G_CALLBACK (gtk_widget_destroyed), &window);
-
-        gtk_widget_show (impl->widget);
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::hide ()
-{
-
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::destroy ()
-{
-        // TODO : if (toplevel)
-        gtk_widget_destroy (impl->widget);
-        impl->widget = 0;
-        impl->builder = 0;
-}
+//void GtkView::hide ()
+//{
+//
+//}
+//
+///*--------------------------------------------------------------------------*/
+//
+//void GtkView::destroy ()
+//{
+//        // TODO : if (toplevel)
+//        gtk_widget_destroy (impl->widget);
+//        impl->widget = 0;
+//        impl->builder = 0;
+//}
 
 /*--------------------------------------------------------------------------*/
 
@@ -134,105 +84,208 @@ void GtkView::view2Model (std::string const &dataRange)
 
 /*--------------------------------------------------------------------------*/
 
-GObject *GtkView::getGObject (std::string const &name)
+//GObject *GtkView::getUi (/*std::string const &name*/)
+//{
+//        GObject *obj =  gtk_builder_get_object (impl->builder, name.c_str ());
+//
+//        if (!obj) {
+//                throw Core::Exception ("GtkView::getGObject could not find object in UI. Ui file : [" + uiFile->getFile () + "], object name : [" + std::string (name) + "].");
+//        }
+//
+//        return obj;
+//}
+
+/*
+ * Excerpt from GTK+ documentation : "A GtkBuilder holds a reference to all objects that it has constructed and drops
+ * these references when it is finalized. This finalization can cause the destruction of non-widget objects or widgets
+ * which are not contained in a toplevel window. For toplevel windows constructed by a builder, it is the responsibility
+ * of the user to call gtk_widget_destroy() to get rid of them and all the widgets they contain."
+ *
+ * So GtkWidnows should be destroyed explicitely, the others are reference-counted.
+ */
+void GtkView::reparent (GtkTileMap const &tiles, Context *context)
 {
-        GObject *obj =  gtk_builder_get_object (impl->builder, name.c_str ());
-
-        if (!obj) {
-                throw Core::Exception ("GtkView::getGObject could not find object in UI. Ui file : [" + uiFile->getFile () + "], object name : [" + std::string (name) + "].");
-        }
-
-        return obj;
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::connectSignals (Context *context)
-{
-        // https://developer.gnome.org/gtk3/stable/GtkBuilder.html#gtk-builder-connect-signals-full
-        gtk_builder_connect_signals_full (impl->builder, GtkView::Impl::myConnectFunc, static_cast <gpointer> (context));
-
-//        window = GTK_WIDGET (gtk_builder_get_object (builder, widgetName.c_str ()));
-//        g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::Impl::handler (const std::string &sourceCode, const Core::VariantVector &paramVector, Context *context)
-{
-        Core::Variant domain {context};
-        k202::K202 &k202 = App::getK202 ();
-
-        Core::Variant result = k202.run (sourceCode, domain, paramVector);
-        BOOST_LOG (lg) << "handler here : [" << sourceCode << "]. The result : [" << result.toString () << "]";
-
-//        Core::Variant K202::run (const std::string &sourceCode,
-//                const Core::Variant &domain,
-//                const Core::VariantVector &paramVector,
-//                const Core::VariantMap &argsMap)
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::Impl::myConnectFunc (GtkBuilder *builder,
-                                   GObject *object,
-                                   const gchar *signal_name,
-                                   const gchar *handler_name,
-                                   GObject *connect_object,
-                                   GConnectFlags flags,
-                                   gpointer user_data)
-{
-        BOOST_LOG (lg) << "Connecting : " << signal_name << ", " << handler_name /*<< ", DTO : [" << (void *)&GtkView::Impl::closureDTO << "]"*/;
-
-        // Skopiować napis z signal_name
-        ClosureDTO *dto = new ClosureDTO;
-//        GtkView::Impl::closureDTO.handlerCopy = g_strdup (handler_name);
-//        GtkView::Impl::closureDTO.context = static_cast <Context *> (user_data);
-        dto->handlerCopy = /*g_strdup (*/handler_name/*)*/;
-        dto->context = static_cast <Context *> (user_data);
+        map <string, GtkBin *> slots;
+        map <string, GtkWidget *> plugs;
+        SlotVector allTiles;
 
         /*
-         * https://developer.gnome.org/gobject/stable/gobject-Closures.html#g-cclosure-new
+         * Możliwości:
+         * - Otworzyć nowy widok (A) składający się z kafelków.
+         *  - Ładujemy główny widok.
+         *  - Ładujemy kafelki.
+         *  - Składamy do kupy.
+         *
+         * - Otworzyć jeszcze jeden widok (B) (możliwe że też kafelkowy) nad tym już istniejącym (drugie top-level window).
+         *  - Ładujemy nowy widok, nie ruszamy tego starego.
+         *  - Ładujemy kafelki.
+         *  - Składamy do kupy.
+         *
+         * - Otworzyć nowy kafelek i dokleić go do już istniejącego widoku.
+         *  - Załadować kafelek.
+         *  - Umiescić go na miejscu.
+         *
+         * - Otworzyć widok (C), który ma zamienić widok (A) i (B)
+         *  - Ładujemy główny widok.
+         *  - Ładujemy kafelki (te kóre nie są załadowane).
+         *  - Zamykamy poprzedni główny widok.
+         *  - Składamy do kupy.
+         *
+         * - Page , czyli strona skłąda się tylko:
+         *  - GtkWindow - tylko jedno (standalone).
+         *  - GtkTile - wiele.
+         *  - Z poniższego wynika, że strona musi mieć nazwę, a więc musi być jakaś mapa stron zdefiniowana niestety.
+         * Operacje
+         *  - Page.getName ().  Pobierz nazwę.
+         *  - Page.getView (). Pobierz głowne okno.
+         *  - Page.getTiles (). Pobierz kafelki.
+         *  loadUi (). Wywołuje loadUi na wsyztskich tilesach i na GtkWindow
+         *
+         *  GtkTile operacje. Kafelek.
+         *   - loadUi (). załaduj UI. jezeli już załadowane, to nic się nie dzieje. To jest pomyślane jako singleton, który zajmuje pamięć lub zwalnia, ale jest tylko jeden.
+         *   - getUi ().  pobierz ui.
+         *   - show ().
+         *   - destroy ()
+         *
+         * GtkView/albo GtkWindow. Główne okno
+         *   - loadUi (). załaduj UI.
+         *   - getUi ().  pobierz ui.
+         *   - show ().
+         *   - destroy ()
+         *   - reparent (map <string, GtkTile *>).
+         *
+         *
+         *
+         *  Wartości zwracane z kontrolerów (nazwy widoków ze specalnymi znacznikami):
+         *  +page (otwórz stronę).
+         *  -page (zamknij stronę, ale po załadowaniu srona nie ma nazwy, więc jak ją zamknąć?).
+         *  pageA->pageB, lub po prostu ->page (move, czyli zmień aktualną stronę na nową stronę przenosząc kafelki jeśli się da)
+         *  +pageA,+pageB otwórz dwie strony.
+         *
+         * Tylko operacja -> wymaga wyjaśnienia. Operacja pageA->pageB.
+         * - pageA ma widok głowny (umownie GtkWindow), i pageB też. Ten z A jest NA PEWNO DO ZAMKNIĘCIA, a ten z B do otworzenia (załadować).
+         * - kafelki z A są już załadowane. Trzeba załadować kafelki od widoku B.
+         * - Pula kafelków to teraz jest pula z A i z B - trzeba je dodac do jednej mapy - jeżeli nazwy się powtarzają, to wygrywają te nowsze,
+         *   alternatywnie kafelki muszą mieć unikalne nazwy. Widok docelowy to jest
+         * - Umieszczamy kafelki w slotach.
+         *
+         * Operacja +page.
+         * - Container.getBean (Page.getname ()) Znajdujemy page w tej super-mapie (singleton, załadowany już).
+         * - Page.loadUi (). ładujemy gowny widok i kafelki.
+         * - tiles = Page.getTiles (). Pula kafelków : mapa, albo jakiś obiekt typu mapa.
+         * - mainWindow = Page.getMainWindow . pobieramy główny widok.
+         * - mainWindow.reparent (tiles);
+         * - Page.show (). Pokazujemy wszystko. (lub mainWindow.show ()).
+         *
+         * ----------
+         *
+         * - View ma getWidget (bae arg) - zwraca widget o nazwie takiej jak name (w postaci GObject)
+         * - View ma get slots (map <string, GtkBin *>)
+         * - mamy wszystikie widoki i do zamknięcia i do otworzenia i te już widoczne.
+         * - Te do otworzenia ładujemy do pamięci. Stan #1 : Wszystko co jest potrzebne jest w pamięci, każdy widget jest dostępny.
+
+         * - Pobieramy sloty z tych już widocznych i tych załadowanych (do otworzenia).
+         * - jesteśmy w stanie #2, w kŧórym wszystko jest w pamięci, mamy wskaźniki do wszystkich slotów wszystkich widoków i wsakźniki do wszystkich widoków (plugów i nie plugów poprzez GObject *view.getWidget ()).
+         *
+         * - Plugi zawsze mają jakiegos parenta, więc trzeba je reparentować (zawsze).
+         *
          */
-        GClosure *closure = g_cclosure_new (G_CALLBACK (GtkView::Impl::handler), dto, gclosureUserDataDelete);
 
-        // Usunąć napis z signal_name ?
-//        g_free (handlerCopy);
+#if 0
+        // 1. Get all slots and plugs from all views and validate
+        for (ViewMap::value_type const &entry : poResult.added) {
+                GtkView *view = dynamic_cast <GtkView *> (entry.second);
 
-        g_closure_set_marshal (closure, gClosureMarshal);
-        g_signal_connect_closure  (object, signal_name, closure, FALSE);
-}
+                if (!view) {
+                        throw Core::Exception ("Could not cast one of the views to GtkView. GtkTileManager can operate GtkViews only.");
+                }
 
-/*--------------------------------------------------------------------------*/
+                // Load the view.
+                view->loadUi (context);
 
-void GtkView::Impl::gClosureMarshal (GClosure *closure,
-                                     GValue *return_value,
-                                     guint n_param_values,
-                                     const GValue *param_values,
-                                     gpointer invocation_hint,
-                                     gpointer marshal_data)
-{
-        BOOST_LOG (lg) << "Marshaler here. closure : [" << (void *)closure << "], n_param_values : [" << n_param_values << "], invocation_hint : ["
-                       << (void *)invocation_hint << "], marshal_data [" << (void *)marshal_data << "]";
+                SlotVector const &tiles = view->getTiles ();
+                copy (tiles.begin (), tiles.end (), back_inserter (allTiles));
 
-        typedef void (*HandlerType) (const std::string &,
-                                     const Core::VariantVector &,
-                                     Context *);
+                for (Tile *tile : tiles) {
+                        if (slots.find (tile->getSlotWidget ()) != slots.end ()) {
+                                throw Core::Exception ("There are either two Tiles with the same slot-name : [" + tile->getSlotWidget () + "], or two widgets with this same name.");
+                        }
 
-        GCClosure *cc = (GCClosure*) closure;
-        HandlerType callback = (HandlerType) (marshal_data ? marshal_data : cc->callback);
+                        // Throws if not found.
+                        GObject *obj = view->getUi (/*tile->getSlotWidget ()*/);
 
-        Core::VariantVector params;
-        ClosureDTO *dto = static_cast <ClosureDTO *> (closure->data);
-        callback (/*std::string (*/dto->handlerCopy/*)*/, params, dto->context);
-}
+                        if (obj) {
+                                if (!GTK_IS_BIN (obj)) {
+                                        throw Core::Exception ("Slots have to be of type GtkBin. Your slot [" + tile->getSlotWidget () + "] is not a GtkBin.");
+                                }
 
-/*--------------------------------------------------------------------------*/
+                                slots[tile->getSlotWidget ()] = GTK_BIN (obj);
+                        }
 
-void GtkView::Impl::gclosureUserDataDelete (gpointer data, GClosure *closure)
-{
-        ClosureDTO *dto = static_cast <ClosureDTO *> (data);
-        delete dto;
+                        if (plugs.find (tile->getPlugWidget ()) != plugs.end ()) {
+                                throw Core::Exception ("There are either two Tiles with the same plug-name : [" + tile->getPlugWidget () + "], or two widgets with this same name.");
+                        }
+
+                        obj = view->getUi (/*tile->getPlugWidget ()*/);
+
+                        if (obj) {
+                                if (!GTK_IS_WIDGET (obj)) {
+                                        throw Core::Exception ("Plugs have to be of type GtkWidget. Your plug [" + tile->getPlugWidget () + "] is not a GtkWidget.");
+                                }
+
+                                plugs[tile->getPlugWidget ()] = GTK_WIDGET (obj);
+                        }
+                }
+        }
+
+        // 2. Reparent.
+        for (Tile *tile : allTiles) {
+                GtkBin *slot = 0;
+                GtkWidget *plug = 0;
+
+                auto i = slots.find (tile->getSlotWidget ());
+
+                if (i != slots.end ()) {
+                        slot = i->second;
+                }
+                else {
+                        continue;
+                }
+
+                auto j = plugs.find (tile->getPlugWidget ());
+
+                if (j != plugs.end ()) {
+                        plug = j->second;
+                }
+                else {
+                        continue;
+                }
+
+                // Throw away old child ... ???
+                GtkWidget *oldChild = gtk_bin_get_child (slot);
+
+                if (oldChild) {
+                        gtk_container_remove (GTK_CONTAINER (slot), oldChild);
+                }
+
+                // Add new.
+                GtkWidget *oldParent = 0;
+                if ((oldParent = gtk_widget_get_parent (plug))) {
+                        gtk_widget_reparent (plug, GTK_WIDGET (slot));
+                }
+                else {
+                        gtk_container_add (GTK_CONTAINER (slot), plug);
+                }
+        }
+
+
+        if (show) {
+                for (ViewMap::value_type const &entry : poResult.added) {
+                        GtkView *view = static_cast <GtkView *> (entry.second);
+                        view->show ();
+                }
+        }
+#endif
 }
 
 } // namespace GtkForms

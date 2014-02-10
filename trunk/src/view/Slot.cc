@@ -6,13 +6,8 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <gtk/gtk.h>
-#include "GtkTileManager.h"
-#include "GtkView.h"
-#include "Context.h"
+#include "Slot.h"
 
 namespace GtkForms {
-using namespace std;
-
 
 } /* namespace GtkForms */
