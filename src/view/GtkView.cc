@@ -232,6 +232,8 @@ void GtkView::reparent (GtkTileMap const &tiles, SlotVector const &slots, Contex
                 else {
                         gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
                 }
+
+                BOOST_LOG (lg) << "Reparented : [" << (void *)tileWidget << "]";
         }
 }
 
