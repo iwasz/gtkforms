@@ -11,10 +11,4 @@
 
 namespace GtkForms {
 
-//void GtkTile::loadUi (Context *context) {}
-//void GtkTile::show () {}
-//void GtkTile::hide () {}
-//void GtkTile::destroy () {}
-//GObject *GtkTile::getUi () { return 0; }
-
 } /* namespace GtkForms */

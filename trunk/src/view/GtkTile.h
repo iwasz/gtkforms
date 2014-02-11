@@ -18,22 +18,15 @@
 namespace GtkForms {
 class Context;
 
+/**
+ * GUI element which is embeddable in GtkView.
+ */
 class GtkTile : public GtkAbstractView {
 public:
         ctr__ (void)
         bse_ ("GtkAbstractView")
 
         virtual ~GtkTile () {}
-
-//        void loadUi (Context *context);
-//        void show ();
-//        void hide ();
-//        void destroy ();
-//
-//        /**
-//         * Gets a object (GTK+ GObject) from the ui file.
-//         */
-//        GObject *getUi ();
 
         end_ (GtkTile)
 };

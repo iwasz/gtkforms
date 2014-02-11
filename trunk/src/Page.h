@@ -36,6 +36,7 @@ public:
         GtkTileMap getTiles () { return tiles; }
         GtkView *getView () { return view; }
         std::string getName () const { return name; }
+        SlotVector getSlots () { return slots; }
 
         void loadUi (Context *context);
 

@@ -14,33 +14,33 @@
     <Page id="loginPage" name="loginPage">
       <GtkView set-as="view" name="loginView" uiFile="@firstUi"/>
        
-      <Slot add-to="slots" name="toolbarSlot" tileName="toolbaView"/>
+      <Slot add-to="slots" name="toolbarSlot" tileName="toolbarView"/>
       <Slot add-to="slots" name="headerSlot"  tileName="headerView"/>
       
       <GtkTileMap set-as="tiles">
-        <GtkTile set-as="toolbarView" name="toolbaView" uiFile="@firstUi" />
+        <GtkTile set-as="toolbarView" name="toolbarView" uiFile="@firstUi" />
         <GtkTile set-as="headerView" name="headerView" uiFile="@firstUi"/>
       </GtkTileMap>
     </Page>
 
     <Unit id="main">
         <ControllerMap set-as="controllers">
-            <DummyController pageToShow="mainPage" set-as="mainController" name="mainController"/>            
+            <DummyController viewCommand="->mainPage" set-as="mainController" name="mainController"/>            
             <DummyController set-as="headerController" name="headerController"/>            
             <DummyController set-as="toolbarController" name="toolbarController"/>            
         </ControllerMap>
     </Unit>    
 
     <Page id="mainPage" name="mainPage">
-<!--         <ViewMap set-as="views"> -->
-<!--             <GtkView set-as="mainView" name="mainView" uiFile="@firstUi"> -->
-<!--               <Tile add-to="tiles" slotWidget="toolbarSlot" plugWidget="toolbaView"/> -->
-<!--               <Tile add-to="tiles" slotWidget="headerSlot" plugWidget="headerView"/> -->
-<!--             </GtkView> -->
-
-<!--             <GtkView set-as="toolbaView" name="toolbaView" uiFile="@firstUi" /> -->
-<!--             <GtkView set-as="headerView" name="headerView" uiFile="@firstUi"/> -->
-<!--         </ViewMap> -->
+      <GtkView set-as="view" name="mainView" uiFile="@firstUi"/>
+               
+      <Slot add-to="slots" name="toolbarSlot" tileName="toolbarView"/>
+      <Slot add-to="slots" name="headerSlot"  tileName="headerView"/>
+      
+      <GtkTileMap set-as="tiles">
+        <GtkTile set-as="toolbarView" name="toolbarView" uiFile="@firstUi" />
+        <GtkTile set-as="headerView" name="headerView" uiFile="@firstUi"/>
+      </GtkTileMap>
     </Page>
 
 <!--     <Page id="infoPage"> -->

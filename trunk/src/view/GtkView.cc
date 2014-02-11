@@ -37,19 +37,19 @@ static src::logger_mt& lg = logger::get ();
 //}
 
 /*--------------------------------------------------------------------------*/
-//
-//void GtkView::show ()
-//{
-////        gtk_builder_connect_signals (builder, NULL);
-////        gtk_builder_connect_signals_full (builder, myConnectFunc, NULL);
-//
-//
-////                TODO Podłączyć do czegoś, co będzie wysylać QuitEvent do wszystkich kontrolerów.
-////                g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
-////                g_signal_connect (window, "destroy", G_CALLBACK (gtk_widget_destroyed), &window);
-//
-//        gtk_widget_show (impl->widget);
-//}
+
+void GtkView::show ()
+{
+//        gtk_builder_connect_signals (builder, NULL);
+//        gtk_builder_connect_signals_full (builder, myConnectFunc, NULL);
+
+
+//                TODO Podłączyć do czegoś, co będzie wysylać QuitEvent do wszystkich kontrolerów.
+//                g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
+//                g_signal_connect (window, "destroy", G_CALLBACK (gtk_widget_destroyed), &window);
+
+        gtk_widget_show_all (GTK_WIDGET (getUi ()));
+}
 
 /*--------------------------------------------------------------------------*/
 
@@ -103,11 +103,11 @@ void GtkView::view2Model (std::string const &dataRange)
  *
  * So GtkWidnows should be destroyed explicitely, the others are reference-counted.
  */
-void GtkView::reparent (GtkTileMap const &tiles, Context *context)
+void GtkView::reparent (GtkTileMap const &tiles, SlotVector const &slots, Context *context)
 {
-        map <string, GtkBin *> slots;
-        map <string, GtkWidget *> plugs;
-        SlotVector allTiles;
+//        map <string, GtkBin *> slots;
+//        map <string, GtkWidget *> tiles;
+//        SlotVector allTiles;
 
         /*
          * Możliwości:
@@ -191,101 +191,74 @@ void GtkView::reparent (GtkTileMap const &tiles, Context *context)
          *
          */
 
-#if 0
-        // 1. Get all slots and plugs from all views and validate
-        for (ViewMap::value_type const &entry : poResult.added) {
-                GtkView *view = dynamic_cast <GtkView *> (entry.second);
-
-                if (!view) {
-                        throw Core::Exception ("Could not cast one of the views to GtkView. GtkTileManager can operate GtkViews only.");
-                }
-
-                // Load the view.
-                view->loadUi (context);
-
-                SlotVector const &tiles = view->getTiles ();
-                copy (tiles.begin (), tiles.end (), back_inserter (allTiles));
-
-                for (Tile *tile : tiles) {
-                        if (slots.find (tile->getSlotWidget ()) != slots.end ()) {
-                                throw Core::Exception ("There are either two Tiles with the same slot-name : [" + tile->getSlotWidget () + "], or two widgets with this same name.");
-                        }
-
-                        // Throws if not found.
-                        GObject *obj = view->getUi (/*tile->getSlotWidget ()*/);
-
-                        if (obj) {
-                                if (!GTK_IS_BIN (obj)) {
-                                        throw Core::Exception ("Slots have to be of type GtkBin. Your slot [" + tile->getSlotWidget () + "] is not a GtkBin.");
-                                }
-
-                                slots[tile->getSlotWidget ()] = GTK_BIN (obj);
-                        }
-
-                        if (plugs.find (tile->getPlugWidget ()) != plugs.end ()) {
-                                throw Core::Exception ("There are either two Tiles with the same plug-name : [" + tile->getPlugWidget () + "], or two widgets with this same name.");
-                        }
-
-                        obj = view->getUi (/*tile->getPlugWidget ()*/);
-
-                        if (obj) {
-                                if (!GTK_IS_WIDGET (obj)) {
-                                        throw Core::Exception ("Plugs have to be of type GtkWidget. Your plug [" + tile->getPlugWidget () + "] is not a GtkWidget.");
-                                }
-
-                                plugs[tile->getPlugWidget ()] = GTK_WIDGET (obj);
-                        }
-                }
-        }
+        SlotWidgetMap slotWidgets = getSlotWidgets (slots);
 
         // 2. Reparent.
-        for (Tile *tile : allTiles) {
-                GtkBin *slot = 0;
-                GtkWidget *plug = 0;
+        for (Slot *slot : slots) {
+                GtkBin *slotWidget = 0;
+                GtkWidget *tileWidget = 0;
 
-                auto i = slots.find (tile->getSlotWidget ());
+                auto i = slotWidgets.find (slot->getName ());
 
-                if (i != slots.end ()) {
-                        slot = i->second;
+                if (i != slotWidgets.end ()) {
+                        slotWidget = i->second;
                 }
                 else {
                         continue;
                 }
 
-                auto j = plugs.find (tile->getPlugWidget ());
+                auto j = tiles.find (slot->getTileName ());
 
-                if (j != plugs.end ()) {
-                        plug = j->second;
+                if (j != tiles.end ()) {
+                        GtkTile *gtkTile = j->second;
+                        tileWidget = GTK_WIDGET (gtkTile->getUi ());
                 }
                 else {
                         continue;
                 }
 
                 // Throw away old child ... ???
-                GtkWidget *oldChild = gtk_bin_get_child (slot);
+                GtkWidget *oldChild = gtk_bin_get_child (slotWidget);
 
                 if (oldChild) {
-                        gtk_container_remove (GTK_CONTAINER (slot), oldChild);
+                        gtk_container_remove (GTK_CONTAINER (slotWidget), oldChild);
                 }
 
                 // Add new.
                 GtkWidget *oldParent = 0;
-                if ((oldParent = gtk_widget_get_parent (plug))) {
-                        gtk_widget_reparent (plug, GTK_WIDGET (slot));
+                if ((oldParent = gtk_widget_get_parent (tileWidget))) {
+                        gtk_widget_reparent (tileWidget, GTK_WIDGET (slotWidget));
                 }
                 else {
-                        gtk_container_add (GTK_CONTAINER (slot), plug);
+                        gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
+                }
+        }
+}
+
+/*--------------------------------------------------------------------------*/
+
+GtkView::SlotWidgetMap GtkView::getSlotWidgets (SlotVector const &slots)
+{
+        SlotWidgetMap slotWidgets;
+
+        for (Slot *slot : slots) {
+                if (slotWidgets.find (slot->getName ()) != slotWidgets.end ()) {
+                        throw Core::Exception ("There are either two Tiles with the same slot-name : [" + slot->getName () + "], or two widgets with this same name.");
+                }
+
+                // Throws if not found.
+                GObject *obj = getUi (slot->getName ());
+
+                if (obj) {
+                        if (!GTK_IS_BIN (obj)) {
+                                throw Core::Exception ("Slots have to be of type GtkBin. Your slot [" + slot->getName () + "] is not a GtkBin.");
+                        }
+
+                        slotWidgets[slot->getName ()] = GTK_BIN (obj);
                 }
         }
 
-
-        if (show) {
-                for (ViewMap::value_type const &entry : poResult.added) {
-                        GtkView *view = static_cast <GtkView *> (entry.second);
-                        view->show ();
-                }
-        }
-#endif
+        return slotWidgets;
 }
 
 } // namespace GtkForms
