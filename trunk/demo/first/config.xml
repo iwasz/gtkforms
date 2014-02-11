@@ -10,6 +10,9 @@
     </Unit>    
 
     <UiFile id="firstUi" file="../demo/first/first.ui" />
+
+    <GtkTile id="toolbarView" name="toolbarView" uiFile="@firstUi" />
+    <GtkTile id="headerView" name="headerView" uiFile="@firstUi"/>
     
     <Page id="loginPage" name="loginPage">
       <GtkView set-as="view" name="loginView" uiFile="@firstUi"/>
@@ -18,8 +21,10 @@
       <Slot add-to="slots" name="headerSlot"  tileName="headerView"/>
       
       <GtkTileMap set-as="tiles">
-        <GtkTile set-as="toolbarView" name="toolbarView" uiFile="@firstUi" />
-        <GtkTile set-as="headerView" name="headerView" uiFile="@firstUi"/>
+<!--         <GtkTile set-as="toolbarView" name="toolbarView" uiFile="@firstUi" /> -->
+<!--         <GtkTile set-as="headerView" name="headerView" uiFile="@firstUi"/> -->
+        <ref bean="toolbarView" set-as="toolbarView" />
+        <ref bean="headerView" set-as="headerView" />
       </GtkTileMap>
     </Page>
 
@@ -38,8 +43,8 @@
       <Slot add-to="slots" name="headerSlot"  tileName="headerView"/>
       
       <GtkTileMap set-as="tiles">
-        <GtkTile set-as="toolbarView" name="toolbarView" uiFile="@firstUi" />
-        <GtkTile set-as="headerView" name="headerView" uiFile="@firstUi"/>
+        <ref bean="toolbarView" set-as="toolbarView" />
+        <ref bean="headerView" set-as="headerView" />
       </GtkTileMap>
     </Page>
 
