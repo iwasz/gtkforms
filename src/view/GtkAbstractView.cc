@@ -110,7 +110,7 @@ void GtkAbstractView::hide ()
 
 /*--------------------------------------------------------------------------*/
 
-void GtkAbstractView::destroy ()
+void GtkAbstractView::destroyUi ()
 {
         // TODO : if (toplevel)
         gtk_widget_destroy (impl->widget);
@@ -120,12 +120,19 @@ void GtkAbstractView::destroy ()
 
 /*--------------------------------------------------------------------------*/
 
-GObject *GtkAbstractView::getUi (/*std::string const &name*/)
+GObject *GtkAbstractView::getUi ()
+{
+        return G_OBJECT (impl->widget);
+}
+
+/*--------------------------------------------------------------------------*/
+
+GObject *GtkAbstractView::getUi (std::string const &name)
 {
         GObject *obj =  gtk_builder_get_object (impl->builder, name.c_str ());
 
         if (!obj) {
-                throw Core::Exception ("GtkAbstractView::getGObject could not find object in UI. Ui file : [" + uiFile->getFile () + "], object name : [" + std::string (name) + "].");
+                throw Core::Exception ("GtkAbstractView::getGObject could not find ARBITRARY object in UI. Ui file : [" + uiFile->getFile () + "], object name : [" + std::string (name) + "].");
         }
 
         return obj;

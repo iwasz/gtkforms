@@ -20,13 +20,13 @@ public:
 
         virtual ~DummyController () {}
 
-        std::string start () { return pageToShow; }
+        std::string start () { return viewCommand; }
         std::string onSubmit () { return ""; }
         std::string end () { return ""; }
 
 private:
 
-        std::string prr_ (pageToShow);
+        std::string prr_ (viewCommand);
         end_ (DummyController)
 };
 

@@ -18,6 +18,7 @@
 #include "controller/IController.h"
 #include "view/GtkTileManager.h"
 #include <boost/regex.hpp>
+#include "view/Slot.h"
 
 namespace GtkForms {
 using namespace Container;
@@ -149,7 +150,7 @@ void App::run ()
         Core::StringSet viewCommands = manageUnits ();
 
         boost::regex e1 ("\\+(.*)");
-        boost::regex e2 ("\\-(.*)");
+        boost::regex e2 ("\\-(^[>]*)");
         boost::regex e3 ("(.*)->(.*)");
         boost::smatch what;
 
@@ -176,6 +177,10 @@ void App::run ()
                                         movePage ("", what[1]);
                                 }
                         }
+                        else {
+                                throw Core::Exception ("Invalid view command. Use +, - or -> operations.");
+                        }
+
                 }
         }
 
@@ -207,7 +212,8 @@ void App::addPage (std::string const &pageName)
                 throw Core::Exception ("view property of object Page is NULL.");
         }
 
-        mainView->reparent (tiles, &impl->context);
+        SlotVector slots = page->getSlots ();
+        mainView->reparent (tiles, slots, &impl->context);
         mainView->show ();
 
 
@@ -282,24 +288,80 @@ void App::removePage (std::string const &page)
 
 /*--------------------------------------------------------------------------*/
 
-void App::movePage (std::string const &s, std::string const &pageB)
+void App::movePage (std::string const &s, std::string const &pageBName)
 {
-        std::string pageA = s;
+        std::string pageAName = s;
 
-        if (pageA.empty () && impl->pages.size () > 1) {
+        if (pageAName.empty () && impl->pages.size () > 1) {
                 throw Core::Exception ("-> operation failed. If 'from' page is empty, only one active page can be present. Provide 'from' page name.");
         }
 
-        if (pageA.empty () && impl->pages.size () > 0) {
-                pageA = impl->pages.begin ()->first;
+        if (pageAName.empty () && impl->pages.size () > 0) {
+                pageAName = impl->pages.begin ()->first;
         }
 
-        if (pageA.empty ()) {
-                addPage (pageB);
+        if (pageAName.empty ()) {
+                addPage (pageBName);
                 return;
         }
 
-        BOOST_LOG (lg) << pageA << "->" << pageB;
+        BOOST_LOG (lg) << pageAName << "->" << pageBName;
+
+        // Load from container, or return if already loaded.
+        IPage *pageA = getPage (pageAName);
+        IPage *pageB = getPage (pageBName);
+
+        if (impl->pages.find (pageBName) != impl->pages.end ()) {
+                // TODO What should happen here? Nothing? Exception? Another unstance of view?
+                throw Core::Exception ("Illegal attempt to open multiple instances of page : [" + pageBName + "]");
+        }
+
+        impl->pages[pageBName] = pageB;
+
+        if (impl->pages.find (pageAName) == impl->pages.end ()) {
+                throw Core::Exception ("Page [" + pageAName + "] is not loaded curently, so it cannot be moved to page [" + pageBName + "].");
+        }
+
+        impl->pages.erase (pageAName);
+
+        // Load UI file, or noop if loaded.
+        pageB->loadUi (&impl->context);
+
+        // Get tiles and add them.
+        GtkTileMap tilesA = pageA->getTiles ();
+        GtkTileMap tilesB = pageB->getTiles ();
+
+        for (auto elem : tilesA) {
+                std::string tileAName = elem.first;
+                GtkTile *tileA = elem.second;
+
+                // Add only those tiles, that are not present in tilesB map.
+                GtkTileMap::iterator i;
+                if ((i = tilesB.find (tileAName)) != tilesB.end ()) {
+//                        GtkTile *tileB = i->second;
+//
+//                        if (pageA != pageB) {
+//                                tilesB[tileAName] =
+//                        }
+                }
+                else {
+                        tilesB[tileAName] = tileA;
+                }
+        }
+
+
+        GtkView *mainViewA = pageA->getView ();
+        GtkView *mainViewB = pageB->getView ();
+
+        if (!mainViewB) {
+                throw Core::Exception ("view property of object Page is NULL.");
+        }
+
+        SlotVector slots = pageB->getSlots ();
+        mainViewB->reparent (tilesB, slots, &impl->context);
+        mainViewA->hide ();
+        mainViewB->show ();
+        mainViewA->destroyUi ();
 }
 
 /*

@@ -36,7 +36,7 @@ public:
         /**
          * Hides and unloads this widget from memory.
          */
-        virtual void destroy () = 0;
+        virtual void destroyUi () = 0;
 
 //        virtual void model2View (std::string const &dataRange) = 0;
 //        virtual void view2Model (std::string const &dataRange) = 0;

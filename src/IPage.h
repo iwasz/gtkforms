@@ -11,6 +11,7 @@
 
 #include "core/Object.h"
 #include "view/GtkTile.h"
+#include "view/Slot.h"
 
 namespace GtkForms {
 class Context;
@@ -47,6 +48,7 @@ public:
         virtual void loadUi (Context *context) = 0;
 
         virtual GtkTileMap getTiles () = 0;
+        virtual SlotVector getSlots () = 0;
         virtual GtkView *getView () = 0;
         virtual std::string getName () const = 0;
 //

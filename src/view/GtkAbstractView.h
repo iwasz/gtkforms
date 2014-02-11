@@ -42,12 +42,17 @@ public:
         /**
          * Destroys
          */
-        virtual void destroy ();
+        virtual void destroyUi ();
 
         /**
-         * Gets a object (GTK+ GObject) from the ui file.
+         * Gets the main object (GTK+ GObject) from the ui file.
          */
-        virtual GObject *getUi (/*std::string const &name*/);
+        virtual GObject *getUi ();
+
+        /**
+         * Get arbitrary object from UI.
+         */
+        virtual GObject *getUi (std::string const &name);
 
 private:
 

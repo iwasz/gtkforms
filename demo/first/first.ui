@@ -404,7 +404,7 @@
   <object class="GtkWindow" id="window1">
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkLabel" id="toolbaView">
+      <object class="GtkLabel" id="toolbarView">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">toolbar</property>
