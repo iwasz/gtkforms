@@ -1,56 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans>
 
-    <Unit id="login">
-        <ControllerMap set-as="controllers">
-            <LoginController set-as="loginController" name="loginController"/>            
-            <DummyController set-as="toolbarController" name="toolbarController"/>            
-            <DummyController set-as="headerController" name="headerController"/>            
-        </ControllerMap>
-    </Unit>    
+  <!-- +===================================================+ -->
+  <!-- | Definicje widoków i kafelków. Globalne singletony | -->
+  <!-- +===================================================+ -->
+  
+  <UiFile id="firstUi" file="../demo/first/first.ui" />
 
-    <UiFile id="firstUi" file="../demo/first/first.ui" />
+  <GtkView id="loginView" name="loginView" uiFile="@firstUi" />
+  <GtkTile id="toolbarView" name="toolbarView" uiFile="@firstUi" />
+  <GtkTile id="headerView" name="headerView" uiFile="@firstUi" />
+  <GtkTile id="xView" name="xView" uiFile="@firstUi" />
+  <GtkTile id="yView" name="yView" uiFile="@firstUi" />
 
-    <GtkTile id="toolbarView" name="toolbarView" uiFile="@firstUi" />
-    <GtkTile id="headerView" name="headerView" uiFile="@firstUi"/>
-    
-    <Page id="loginPage" name="loginPage">
-      <GtkView set-as="view" name="loginView" uiFile="@firstUi"/>
-       
-      <Slot add-to="slots" name="toolbarSlot" tileName="toolbarView"/>
-      <Slot add-to="slots" name="headerSlot"  tileName="headerView"/>
-      
-      <GtkTileMap set-as="tiles">
-<!--         <GtkTile set-as="toolbarView" name="toolbarView" uiFile="@firstUi" /> -->
-<!--         <GtkTile set-as="headerView" name="headerView" uiFile="@firstUi"/> -->
-        <ref bean="toolbarView" set-as="toolbarView" />
-        <ref bean="headerView" set-as="headerView" />
-      </GtkTileMap>
-    </Page>
+  <!-- +===================================================+ -->
+  <!-- | UNITY                                             | -->
+  <!-- +===================================================+ -->
+  
+  <Unit id="login">
+    <ControllerMap set-as="controllers">
+      <LoginController set-as="loginController" name="loginController" />
+      <DummyController set-as="toolbarController" name="toolbarController" />
+      <DummyController set-as="headerController" name="headerController" />
+    </ControllerMap>
+  </Unit>
+  
+  <Unit id="main">
+    <ControllerMap set-as="controllers">
+      <DummyController viewCommand="->mainPage" set-as="mainController" name="mainController" />
+      <DummyController set-as="headerController" name="headerController" />
+      <DummyController set-as="toolbarController" name="toolbarController" />
+    </ControllerMap>
+  </Unit>
 
-    <Unit id="main">
-        <ControllerMap set-as="controllers">
-            <DummyController viewCommand="->mainPage" set-as="mainController" name="mainController"/>            
-            <DummyController set-as="headerController" name="headerController"/>            
-            <DummyController set-as="toolbarController" name="toolbarController"/>            
-        </ControllerMap>
-    </Unit>    
+  <Unit id="info">
+    <ControllerMap set-as="controllers">
+      <DummyController viewCommand="->infoPage" set-as="mainController" name="mainController" />
+    </ControllerMap>
+  </Unit>
+  
+  <!-- +===================================================+ -->
+  <!-- | STRONY                                            | -->
+  <!-- +===================================================+ -->
+  
+  <Page id="loginPage" name="loginPage">
+    <ref bean="loginView" set-as="view" />
 
-    <Page id="mainPage" name="mainPage">
-      <GtkView set-as="view" name="mainView" uiFile="@firstUi"/>
-               
-      <Slot add-to="slots" name="toolbarSlot" tileName="toolbarView"/>
-      <Slot add-to="slots" name="headerSlot"  tileName="headerView"/>
-      
-      <GtkTileMap set-as="tiles">
-        <ref bean="toolbarView" set-as="toolbarView" />
-        <ref bean="headerView" set-as="headerView" />
-      </GtkTileMap>
-    </Page>
+    <Slot add-to="slots" name="toolbarSlot" tileName="toolbarView" />
+    <Slot add-to="slots" name="headerSlot" tileName="headerView" />
 
-<!--     <Page id="infoPage"> -->
-<!--         <ViewMap set-as="views"> -->
-<!--             <GtkView set-as="loginView" name="loginView" uiFile="@firstUi" /> -->
-<!--         </ViewMap> -->
-<!--     </Page> -->
+    <GtkTileMap set-as="tiles">
+      <ref bean="toolbarView" set-as="toolbarView" />
+      <ref bean="headerView" set-as="headerView" />
+    </GtkTileMap>
+  </Page>
+
+  <Page id="mainPage" name="mainPage">
+    <GtkView set-as="view" name="mainView" uiFile="@firstUi" />
+
+    <Slot add-to="slots" name="toolbarSlot1" tileName="toolbarView" />
+    <Slot add-to="slots" name="headerSlot1" tileName="headerView" />
+
+    <GtkTileMap set-as="tiles">
+      <ref bean="toolbarView" set-as="toolbarView" />
+      <ref bean="headerView" set-as="headerView" />
+    </GtkTileMap>
+  </Page>
+
+  <Page id="infoPage" name="infoPage">
+    <ref bean="loginView" set-as="view" />
+
+    <Slot add-to="slots" name="toolbarSlot" tileName="xView" />
+    <Slot add-to="slots" name="headerSlot" tileName="yView" />
+
+    <GtkTileMap set-as="tiles">
+      <ref bean="xView" set-as="xView" />
+      <ref bean="yView" set-as="yView" />
+    </GtkTileMap>
+  </Page>
 </beans>

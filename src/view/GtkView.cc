@@ -204,7 +204,7 @@ void GtkView::reparent (GtkTileMap const &tiles, SlotVector const &slots, Contex
                         slotWidget = i->second;
                 }
                 else {
-                        continue;
+                        throw Core::Exception ("No such slot [" + slot->getName () + "]");
                 }
 
                 auto j = tiles.find (slot->getTileName ());
@@ -233,7 +233,7 @@ void GtkView::reparent (GtkTileMap const &tiles, SlotVector const &slots, Contex
                         gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
                 }
 
-                BOOST_LOG (lg) << "Reparented : [" << (void *)tileWidget << "]";
+                BOOST_LOG (lg) << "Reparented : tile [" << (void *)tileWidget << "], to slot [" << (void*)slotWidget << "]";
         }
 }
 
@@ -253,7 +253,7 @@ GtkView::SlotWidgetMap GtkView::getSlotWidgets (SlotVector const &slots)
 
                 if (obj) {
                         if (!GTK_IS_BIN (obj)) {
-                                throw Core::Exception ("Slots have to be of type GtkBin. Your slot [" + slot->getName () + "] is not a GtkBin.");
+                                throw Core::Exception ("Slot widgets have to be of type GtkBin. Your slot [" + slot->getName () + "] is not a GtkBin.");
                         }
 
                         slotWidgets[slot->getName ()] = GTK_BIN (obj);

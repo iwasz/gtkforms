@@ -359,9 +359,8 @@ void App::movePage (std::string const &s, std::string const &pageBName)
 
         SlotVector slots = pageB->getSlots ();
         mainViewB->reparent (tilesB, slots, &impl->context);
-        mainViewA->hide ();
-        mainViewB->show ();
         mainViewA->destroyUi ();
+        mainViewB->show ();
 }
 
 /*

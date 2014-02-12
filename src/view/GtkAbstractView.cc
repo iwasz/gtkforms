@@ -76,6 +76,10 @@ void GtkAbstractView::loadUi (Context *context)
                 throw Core::Exception ("No UiFile object set inside GtkAbstractView.");
         }
 
+        if (impl->widget) {
+                return;
+        }
+
         impl->builder = uiFile->load ();
         impl->widget = GTK_WIDGET (gtk_builder_get_object (impl->builder, name.c_str ()));
 
@@ -105,13 +109,14 @@ void GtkAbstractView::show ()
 
 void GtkAbstractView::hide ()
 {
-
+        gtk_widget_hide (impl->widget);
 }
 
 /*--------------------------------------------------------------------------*/
 
 void GtkAbstractView::destroyUi ()
 {
+        hide ();
         // TODO : if (toplevel)
         gtk_widget_destroy (impl->widget);
         impl->widget = 0;
@@ -136,6 +141,29 @@ GObject *GtkAbstractView::getUi (std::string const &name)
         }
 
         return obj;
+
+#if 0
+        GList *children, *iter;
+
+        children = gtk_container_get_children(GTK_CONTAINER(container));
+        for(iter = children; iter != NULL; iter = g_list_next(iter))
+        gtk_widget_destroy(GTK_WIDGET(iter->data));
+        g_list_free(children);
+
+        // -----
+
+        if(GTK_IS_CONTAINER(widget)) {
+                GList *children = gtk_container_get_children(GTK_CONTAINER(widget));
+                ...
+        }
+        If the widget is a GtkBin it has only one child. In that case, the following is simpler than dealing with a GList:
+
+        if(GTK_IS_BIN(widget)) {
+                GtkWidget *child = gtk_bin_get_child(GTK_BIN(widget));
+                ...
+        }
+
+#endif
 }
 
 /*--------------------------------------------------------------------------*/
