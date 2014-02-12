@@ -292,6 +292,7 @@ void App::movePage (std::string const &s, std::string const &pageBName)
 {
         std::string pageAName = s;
 
+        // Define which page we are moving from and to.
         if (pageAName.empty () && impl->pages.size () > 1) {
                 throw Core::Exception ("-> operation failed. If 'from' page is empty, only one active page can be present. Provide 'from' page name.");
         }
@@ -331,6 +332,7 @@ void App::movePage (std::string const &s, std::string const &pageBName)
         GtkTileMap tilesA = pageA->getTiles ();
         GtkTileMap tilesB = pageB->getTiles ();
 
+        // Find out common tiles.
         for (auto elem : tilesA) {
                 std::string tileAName = elem.first;
                 GtkTile *tileA = elem.second;
@@ -349,13 +351,15 @@ void App::movePage (std::string const &s, std::string const &pageBName)
                 }
         }
 
-
+        // Find out common views.
         GtkView *mainViewA = pageA->getView ();
         GtkView *mainViewB = pageB->getView ();
 
         if (!mainViewB) {
                 throw Core::Exception ("view property of object Page is NULL.");
         }
+
+        id (mainViewA == mainViewB)
 
         SlotVector slots = pageB->getSlots ();
         mainViewB->reparent (tilesB, slots, &impl->context);
