@@ -70,6 +70,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="$app.start ('info')" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -421,6 +422,37 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">header</property>
+        <attributes>
+          <attribute name="scale" value="4"/>
+        </attributes>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="window3">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkLabel" id="xView">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">xxxx</property>
+        <property name="ellipsize">start</property>
+        <property name="max_width_chars">0</property>
+        <attributes>
+          <attribute name="scale" value="4"/>
+        </attributes>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="window4">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkLabel" id="yView">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="xalign">0.49000000953674316</property>
+        <property name="label" translatable="yes">yyyy</property>
+        <property name="ellipsize">start</property>
+        <property name="max_width_chars">0</property>
         <attributes>
           <attribute name="scale" value="4"/>
         </attributes>
