@@ -117,7 +117,6 @@ void GtkAbstractView::hide ()
 void GtkAbstractView::destroyUi ()
 {
         hide ();
-        // TODO : if (toplevel)
         gtk_widget_destroy (impl->widget);
         impl->widget = 0;
         impl->builder = 0;

@@ -194,7 +194,7 @@ void App::addPage (std::string const &pageName)
         BOOST_LOG (lg) << "+" << pageName;
 
         if (impl->pages.find (pageName) != impl->pages.end ()) {
-                // TODO What should happen here? Nothing? Exception? Another unstance of view?
+                // TODO What should happen here? Nothing? Exception? Another instance of view?
                 throw Core::Exception ("Illegal attempt to open multiple instances of page : [" + pageName + "]");
         }
 
@@ -215,75 +215,22 @@ void App::addPage (std::string const &pageName)
         SlotVector slots = page->getSlots ();
         mainView->reparent (tiles, slots, &impl->context);
         mainView->show ();
-
-
-#if 0
-        PageOperationResult poResult;
-        for (std::string const &pageName : impl->pagesToHide) {
-                IPage *page = getPage (pageName);
-                poResult += impl->page.split (page);
-        }
-
-//        for (ViewMap::value_type const &entry : poResult.removed) {
-//                IView *view = entry.second;
-//                view->destroy ();
-//        }
-
-        impl->pagesToHide.clear ();
-
-        // All views that was meant to be closed are colsed here. Now show new views user has requested.
-
-
-        bool started = false; // Protection against multiple starts (second page to be started would replace the first).
-        std::string firstPageToStart; // For more maningful exception message.
-        for (std::string const &pageName : impl->pagesToShow) {
-                IPage *page = getPage (pageName);
-
-                if (/*page->getJoinable ()*/true) {
-                        poResult += impl->page.join (page);
-                }
-                else {
-                        if (started) {
-                                throw Core::Exception ("You are about to start two pages. Only one page can be started at a time. Other pages must be joined. First page started : [" + firstPageToStart + "], second page you tried to start : [" + pageName + "].");
-                        }
-
-                        poResult += impl->page.start (page);
-                        started = true;
-                        firstPageToStart = pageName;
-                }
-        }
-
-        impl->pagesToShow.clear ();
-
-        impl->tileManager.reparent (poResult, &impl->context, true);
-//        impl->tileManager.show (poResult.added);
-
-//        for (ViewMap::value_type const &entry : poResult.added) {
-//                IView *view = entry.second;
-//                // TODO model2View (); TODO pytanie, ale konwertować z modelu na widok wszytsko, czy tylko to co się zmieniło?
-//                view->show ();
-//        }
-
-//        BOOST_LOG (lg) << impl->page;
-
-        /*
-                currentController = container->getBean(controllerName);
-
-                // To by robił Flow.
-                std::string viewName = currentController->start();
-                currentView = ViewResolver.getView(viewName);
-                currentView->model2View();
-                currentView->show();
-        */
-#endif
-
 }
 
 /*--------------------------------------------------------------------------*/
 
-void App::removePage (std::string const &page)
+void App::removePage (std::string const &pageName)
 {
-        BOOST_LOG (lg) << "-" << page;
+        BOOST_LOG (lg) << "-" << pageName;
+
+        if (impl->pages.find (pageName) != impl->pages.end ()) {
+                throw Core::Exception ("Illegal attempt to close page : [" + pageName + "] which is not active.");
+        }
+
+        // Load from container, or return if already loaded.
+        IPage *page = getPage (pageName);
+        impl->pages.erase (pageName);
+        page->destroyUi ();
 }
 
 /*--------------------------------------------------------------------------*/
@@ -313,7 +260,7 @@ void App::movePage (std::string const &s, std::string const &pageBName)
         IPage *pageB = getPage (pageBName);
 
         if (impl->pages.find (pageBName) != impl->pages.end ()) {
-                // TODO What should happen here? Nothing? Exception? Another unstance of view?
+                // TODO What should happen here? Nothing? Exception? Another instance of view?
                 throw Core::Exception ("Illegal attempt to open multiple instances of page : [" + pageBName + "]");
         }
 
@@ -339,14 +286,7 @@ void App::movePage (std::string const &s, std::string const &pageBName)
 
                 // Add only those tiles, that are not present in tilesB map.
                 GtkTileMap::iterator i;
-                if ((i = tilesB.find (tileAName)) != tilesB.end ()) {
-//                        GtkTile *tileB = i->second;
-//
-//                        if (pageA != pageB) {
-//                                tilesB[tileAName] =
-//                        }
-                }
-                else {
+                if ((i = tilesB.find (tileAName)) == tilesB.end ()) {
                         tilesB[tileAName] = tileA;
                 }
         }
@@ -359,12 +299,14 @@ void App::movePage (std::string const &s, std::string const &pageBName)
                 throw Core::Exception ("view property of object Page is NULL.");
         }
 
-        id (mainViewA == mainViewB)
-
         SlotVector slots = pageB->getSlots ();
+
         mainViewB->reparent (tilesB, slots, &impl->context);
-        mainViewA->destroyUi ();
-        mainViewB->show ();
+
+        if (mainViewA != mainViewB) {
+                mainViewA->destroyUi();
+                mainViewB->show();
+        }
 }
 
 /*

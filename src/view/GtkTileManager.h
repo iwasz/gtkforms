@@ -18,7 +18,7 @@ class Context;
 class GtkTileManager {
 public:
 
-        void reparent (PageOperationResult const &poResult, Context *context, bool show = true);
+//        void reparent (PageOperationResult const &poResult, Context *context, bool show = true);
 
 };
 
