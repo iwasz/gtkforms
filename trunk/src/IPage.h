@@ -17,16 +17,16 @@ namespace GtkForms {
 class Context;
 class GtkView;
 
-/**
- * Stores information which views were added and which were removed durnig App operatons
- * (start, join and split).
- */
-struct PageOperationResult {
-        ViewMap added;
-        ViewMap removed;
-
-        PageOperationResult &operator += (PageOperationResult const &);
-};
+///**
+// * Stores information which views were added and which were removed durnig App operatons
+// * (start, join and split).
+// */
+//struct PageOperationResult {
+//        ViewMap added;
+//        ViewMap removed;
+//
+//        PageOperationResult &operator += (PageOperationResult const &);
+//};
 
 /**
  * See documentation of IUnit. Same reasoning apply here.
@@ -35,17 +35,18 @@ class IPage : public Core::Object {
 public:
         virtual ~IPage () {}
 
-        /**
-         * Returns views to show.
-         */
-        virtual PageOperationResult start (IPage *unit) = 0;
-        virtual PageOperationResult join (IPage *unit) = 0;
-
-        /**
-         * Returns views to hide.
-         */
-        virtual PageOperationResult split (IPage *unit) = 0;
+//        /**
+//         * Returns views to show.
+//         */
+//        virtual PageOperationResult start (IPage *unit) = 0;
+//        virtual PageOperationResult join (IPage *unit) = 0;
+//
+//        /**
+//         * Returns views to hide.
+//         */
+//        virtual PageOperationResult split (IPage *unit) = 0;
         virtual void loadUi (Context *context) = 0;
+        virtual void destroyUi () = 0;
 
         virtual GtkTileMap getTiles () = 0;
         virtual SlotVector getSlots () = 0;

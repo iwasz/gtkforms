@@ -35,7 +35,7 @@ std::string LoginController::start ()
         buttons["home"] = Core::Variant (false);
         getUnitScope ()["buttons"] = Core::Variant (buttons);
 
-        return "+loginPage";
+        return "->loginPage";
 }
 
 /*

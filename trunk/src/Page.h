@@ -26,9 +26,9 @@ public:
 //        Page () : joinable {false} {}
         virtual ~Page () {}
 
-        PageOperationResult start (IPage *page);
-        PageOperationResult join  (IPage *page);
-        PageOperationResult split (IPage *page);
+//        PageOperationResult start (IPage *page);
+//        PageOperationResult join  (IPage *page);
+//        PageOperationResult split (IPage *page);
 
 //        IView *getView (std::string const &viewName) { return views[viewName]; }
 //        ViewMap &getViews () { return views; }
@@ -39,6 +39,7 @@ public:
         SlotVector getSlots () { return slots; }
 
         void loadUi (Context *context);
+        void destroyUi ();
 
 //        bool getJoinable () const { return joinable; }
 //        void setJoinable (bool b) { joinable = b; }
@@ -58,7 +59,7 @@ private:
         end_ (Page)
 };
 
-std::ostream &operator<< (std::ostream &o, Page const &p);
+//std::ostream &operator<< (std::ostream &o, Page const &p);
 
 } // namespace GtkForms
 
