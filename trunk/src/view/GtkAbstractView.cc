@@ -87,21 +87,13 @@ void GtkAbstractView::loadUi (Context *context)
                 throw Core::Exception ("No widget with name : [" + name + "] was found in file : [" + uiFile->getFile () + "].");
         }
 
-        connectSignals (context);
+        uiFile->connectSignals (context);
 }
 
 /*--------------------------------------------------------------------------*/
 
 void GtkAbstractView::show ()
 {
-//        gtk_builder_connect_signals (builder, NULL);
-//        gtk_builder_connect_signals_full (builder, myConnectFunc, NULL);
-
-
-//                TODO Podłączyć do czegoś, co będzie wysylać QuitEvent do wszystkich kontrolerów.
-//                g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
-//                g_signal_connect (window, "destroy", G_CALLBACK (gtk_widget_destroyed), &window);
-
         gtk_widget_show (impl->widget);
 }
 
@@ -185,11 +177,6 @@ void GtkAbstractView::Impl::handler (const std::string &sourceCode, const Core::
 
         Core::Variant result = k202.run (sourceCode, domain, paramVector);
         BOOST_LOG (lg) << "handler here : [" << sourceCode << "]. The result : [" << result.toString () << "]";
-
-//        Core::Variant K202::run (const std::string &sourceCode,
-//                const Core::Variant &domain,
-//                const Core::VariantVector &paramVector,
-//                const Core::VariantMap &argsMap)
 }
 
 /*--------------------------------------------------------------------------*/

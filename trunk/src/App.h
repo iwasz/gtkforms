@@ -13,7 +13,6 @@
 #include <Tiliae.h>
 #include <gtk/gtk.h>
 #include "ReflectionMacros.h"
-#include "Logging.h"
 
 namespace GtkForms {
 
@@ -93,7 +92,7 @@ public:
          * sends an SubmitEvent to be processed in the next main loop iteration. doSubmit
          * performs all the work.
          */
-        void submit (std::string const &controllerName, std::string const &formName);
+        mth_ (submit) void submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName);
 
         /**
          *
@@ -149,7 +148,6 @@ private:
 
         struct Impl;
         Impl *impl;
-        src::logger_mt& lg = logger::get();
 
         end_ (App)
 };
