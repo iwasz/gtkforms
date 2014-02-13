@@ -19,9 +19,11 @@
 #include "view/GtkTileManager.h"
 #include <boost/regex.hpp>
 #include "view/Slot.h"
+#include "Logging.h"
 
 namespace GtkForms {
 using namespace Container;
+static src::logger_mt& lg = logger::get();
 
 gboolean guiThread (gpointer user_data);
 
@@ -383,9 +385,9 @@ void App::split (std::string const &unitName)
 
 /*--------------------------------------------------------------------------*/
 
-void App::submit (std::string const &controllerName, std::string const &formName)
+void App::submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName)
 {
-        impl->events.push (std::unique_ptr <IEvent> (new SubmitEvent {}));
+        impl->events.push (std::unique_ptr <IEvent> (new SubmitEvent {viewName, dataRange, controllerName}));
 }
 
 /*--------------------------------------------------------------------------*/

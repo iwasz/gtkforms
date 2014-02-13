@@ -128,7 +128,7 @@ Model, view and controller communication
 
 There are only two options here: 
 
-1. *Data binding* is performed during form submission just like any other MVC framework does. Data put
+1. *Data binding* is performed during form submission just like in any other MVC framework. Data put
    by the user into inputs (the term *input* is derived from web environment, where you place <input .../> elements
    inside <form>. In GTK+ application, and in GtkForms in particular inputs are simple GTK+ widgets with
    special name) is converted and passed further to your *model* (the term *model* refers to all so called business 
@@ -152,7 +152,7 @@ field of complex model object, only this one value should be converted and the o
 
 
 Form is a virtual beeing in GtkForms, because elements of a form (called inputs) may be laid out everywhere
-on the window, making virtually entire vindow a form. GtkForms distingusig inputs and other GtkWindgets by
+on the window, making virtually entire vindow a form. GtkForms distingushig inputs and other GtkWindgets by
 name. **Every widget whise name starts with an exclamation mark is an input**.  
 
 To submit a form you must invoke special function : ``$app->submit (...)```. You may do it specifying 
@@ -163,7 +163,7 @@ concrete class derived from ``IView``. Example of a callback may look like this:
 
 Arguments of this call have the following meaning:
 
-1. ``'loginView'`` is a name ov a view from data will be get. It may be view which contains the button shich was used
+1. ``'loginView'`` is a name of a view from which data will be get. It may be view which contains the button shich was used
    to submit a form, or some other view available in current ``Page``. If current page does not contain view with given 
    name, an exception will be thrown.
 #. ``''`` second argument in above example, which is an empty string is called a *dataRange*. It tells the library which
@@ -171,7 +171,7 @@ Arguments of this call have the following meaning:
    want to get all input fields from the form (i.e. all ``GtkWidgets`` whise name starts with an ``!``). 
 #. ``'loginController'`` is a name of controller to submit converted data to.
 
-Dla widoku o nazwie viewName:
+Dla widoku o nazwie viewName (ten punkt nieaktualny):
 Następnie pobrać kontener GtkContainer w którym jest ten guzik. Potem przeiterować
 po widgetach w tym GtkContenerze i znaleźć wszystikie inne widgety. Z nich będzzie konwertował dane. Czyli 
 taki automatyczy formularz to jest GtkContainer, pola z danymi i guzik. Bierze każdy widget , p;obiera

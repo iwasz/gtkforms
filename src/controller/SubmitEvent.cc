@@ -8,12 +8,14 @@
 
 #include "SubmitEvent.h"
 #include "App.h"
+#include "Logging.h"
 
 namespace GtkForms {
+static src::logger_mt& lg = logger::get();
 
 void SubmitEvent::run (App *app)
 {
-//        app->doSubmit ();
+        BOOST_LOG (lg) << "SubmitEvent::run. viewName : [" << viewName << "], dataRange : [" << dataRange << "], controllerName : [" << controllerName << "].";
 }
 
 } // namespace GtkForms

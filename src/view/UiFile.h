@@ -13,6 +13,7 @@
 #include "ReflectionMacros.h"
 
 namespace GtkForms {
+class Context;
 
 /**
  * Single GTK+ *.ui file. GtkBuilder is embedded in this class.
@@ -33,9 +34,11 @@ public:
         /**
          * Clears memory occupied by loaded UI file.
          */
-        void unload ();
+        void destroy ();
 
         std::string getFile () const { return file; }
+
+        void connectSignals (Context *context);
 
 private:
 
