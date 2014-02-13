@@ -29,7 +29,8 @@ public:
         ctr__ (void)
         bse_ ("GtkAbstractView")
 
-        virtual ~GtkView () {}
+        GtkView ();
+        virtual ~GtkView ();
 
 //        void loadUi (Context *context);
         void show ();
@@ -40,10 +41,16 @@ public:
         void view2Model (std::string const &dataRange);
         void reparent (GtkTileMap const &tiles, SlotVector const &slots, Context *context);
 
+        void getInputs (std::string const &dataRange);
+        void printStructure ();
+
 private:
 
         typedef std::map <std::string, GtkBin *> SlotWidgetMap;
         SlotWidgetMap getSlotWidgets (SlotVector const &slots);
+
+        class Impl;
+        Impl *impl;
 
         end_ (GtkView)
 };

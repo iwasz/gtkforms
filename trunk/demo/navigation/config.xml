@@ -5,7 +5,7 @@
   <!-- | Definicje widoków i kafelków. Globalne singletony | -->
   <!-- +===================================================+ -->
   
-  <UiFile id="firstUi" file="../demo/first/first.ui" />
+  <UiFile id="firstUi" file="../demo/navigation/first.ui" />
 
   <GtkView id="loginView" name="loginView" uiFile="@firstUi" />
   <GtkTile id="toolbarView" name="toolbarView" uiFile="@firstUi" />

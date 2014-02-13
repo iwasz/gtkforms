@@ -13,22 +13,17 @@
 #include <string>
 
 namespace GtkForms {
+class IView;
 
-class SubmitEvent : public IEvent {
-public:
-        SubmitEvent (std::string const &v,
-                     std::string const &d,
-                     std::string const &c) :
-                     viewName {v}, dataRange {d}, controllerName {c}  {}
+struct SubmitEvent : public IEvent {
 
         virtual ~SubmitEvent (){}
         void run (App *app);
 
-private:
-
         std::string viewName;
         std::string dataRange;
         std::string controllerName;
+        IView *view = 0;
 };
 
 } // namespace GtkForms

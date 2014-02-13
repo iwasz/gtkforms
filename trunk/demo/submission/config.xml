@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+
+  <!-- +===================================================+ -->
+  <!-- | Definicje widoków i kafelków. Globalne singletony | -->
+  <!-- +===================================================+ -->
+  
+  <UiFile id="uiFile" file="../demo/submission/submission.ui" />
+
+  <GtkView id="loginView" name="loginView" uiFile="@uiFile" />
+
+  <!-- +===================================================+ -->
+  <!-- | UNITY                                             | -->
+  <!-- +===================================================+ -->
+  
+  <Unit id="login">
+    <ControllerMap set-as="controllers">
+      <LoginController set-as="loginController" name="loginController" />
+      <DummyController set-as="toolbarController" name="toolbarController" />
+      <DummyController set-as="headerController" name="headerController" />
+    </ControllerMap>
+  </Unit>
+
+  <!-- +===================================================+ -->
+  <!-- | STRONY                                            | -->
+  <!-- +===================================================+ -->
+  
+  <Page id="loginPage" name="loginPage">
+    <ref bean="loginView" set-as="view" />
+  </Page>
+
+</beans>

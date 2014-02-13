@@ -16,6 +16,7 @@ static src::logger_mt& lg = logger::get ();
 
 /*
  * Helper class for passing required data between user code and GObject closures.
+ * TODO Zostawić łączenie w jednym pliku : albo tu, albo w AbstractGtkView.
  */
 struct ClosureDTO {
         std::string handlerCopy;

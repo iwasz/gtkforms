@@ -6,23 +6,19 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include "SubmitEvent.h"
-#include "App.h"
-#include "Logging.h"
-#include "view/GtkView.h"
+#ifndef LOGINFORM_H_
+#define LOGINFORM_H_
 
-namespace GtkForms {
-static src::logger_mt& lg = logger::get();
+#include <Tiliae.h>
+#include <ReflectionMacros.h>
 
-void SubmitEvent::run (App *app)
-{
-        BOOST_LOG (lg) << "SubmitEvent::run. viewName : [" << viewName << "], dataRange : [" << dataRange << "], controllerName : [" << controllerName << "].";
-        GtkView *v = dynamic_cast <GtkView *> (view);
-        v->printStructure ();
-//        v->getInputs ("");
-}
+struct LoginForm {
+        ctr__ (void)
+        std::string prp_ (login);
+        std::string prp_ (password);
+        bool prp_ (encrypt);
+        int prp_ (number);
+        end_ (LoginForm)
+};
 
-} // namespace GtkForms
-
-
-
+#endif /* LOGINFORM_H_ */
