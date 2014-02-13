@@ -6,23 +6,16 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include "SubmitEvent.h"
-#include "App.h"
-#include "Logging.h"
-#include "view/GtkView.h"
+#include <GtkForms.h>
+#include <gtk/gtk.h>
 
-namespace GtkForms {
-static src::logger_mt& lg = logger::get();
-
-void SubmitEvent::run (App *app)
+int main (int argc, char **argv)
 {
-        BOOST_LOG (lg) << "SubmitEvent::run. viewName : [" << viewName << "], dataRange : [" << dataRange << "], controllerName : [" << controllerName << "].";
-        GtkView *v = dynamic_cast <GtkView *> (view);
-        v->printStructure ();
-//        v->getInputs ("");
+        gtk_init (&argc, &argv);
+        GtkForms::App app {"../demo/submission/config.xml"};
+        app.start ("login");
+        gtk_main ();
+
 }
-
-} // namespace GtkForms
-
 
 

@@ -387,7 +387,34 @@ void App::split (std::string const &unitName)
 
 void App::submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName)
 {
-        impl->events.push (std::unique_ptr <IEvent> (new SubmitEvent {viewName, dataRange, controllerName}));
+        IView *submitView = 0;
+
+        for (auto elem : impl->pages) {
+                IPage *page = elem.second;
+                submitView = page->getView ();
+
+                if (submitView->getName () == viewName) {
+                        break;
+                }
+        }
+
+        // Throw an error if no such view was found
+        if (!submitView) {
+                std::ostringstream o;
+                o << "You requested submit from view which is not currently loaded. Available pages and their views are :\n";
+
+                for (auto elem : impl->pages) {
+                        o << elem.second << "\n";
+                }
+
+                throw Core::Exception (o.str ());
+        }
+        std::unique_ptr <SubmitEvent> event {new SubmitEvent};
+        event->viewName = viewName;
+        event->dataRange = dataRange;
+        event->controllerName = controllerName;
+        event->view = submitView;
+        impl->events.push (std::move (event));
 }
 
 /*--------------------------------------------------------------------------*/

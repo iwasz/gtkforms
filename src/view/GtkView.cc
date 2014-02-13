@@ -18,6 +18,27 @@ namespace GtkForms {
 using namespace std;
 static src::logger_mt& lg = logger::get ();
 
+struct GtkView::Impl {
+
+        static void onIterateWidget (GtkWidget *widget, gpointer data);
+        static void onPrintWidget (GtkWidget *widget, gpointer data);
+
+};
+
+/****************************************************************************/
+
+GtkView::GtkView ()
+{
+        impl = new Impl;
+}
+
+/*--------------------------------------------------------------------------*/
+
+GtkView::~GtkView ()
+{
+        delete impl;
+}
+
 /*--------------------------------------------------------------------------*/
 
 //void GtkView::loadUi (Context *context)
@@ -261,6 +282,94 @@ GtkView::SlotWidgetMap GtkView::getSlotWidgets (SlotVector const &slots)
         }
 
         return slotWidgets;
+}
+
+/*--------------------------------------------------------------------------*/
+
+void GtkView::Impl::onIterateWidget (GtkWidget *widget, gpointer data)
+{
+        std::cerr << gtk_buildable_get_name (GTK_BUILDABLE (widget)) << std::endl;
+
+        if (GTK_IS_CONTAINER (widget)) {
+                gtk_container_foreach (GTK_CONTAINER (widget), &GtkView::Impl::onIterateWidget, 0);
+        }
+}
+
+/*--------------------------------------------------------------------------*/
+
+void GtkView::getInputs (std::string const &dataRange)
+{
+        GtkBuildable *mainWidget = GTK_BUILDABLE (getUi ());
+
+        std::cerr << gtk_buildable_get_name (mainWidget) << std::endl;
+
+        if (!GTK_IS_CONTAINER (getUi ())) {
+                return;
+        }
+
+        gtk_container_foreach (GTK_CONTAINER (mainWidget), &GtkView::Impl::onIterateWidget, (gpointer)this);
+
+#if 0
+        GList *children, *iter;
+
+        children = gtk_container_get_children(GTK_CONTAINER(container));
+        for(iter = children; iter != NULL; iter = g_list_next(iter))
+        gtk_widget_destroy(GTK_WIDGET(iter->data));
+        g_list_free(children);
+
+        // -----
+
+        if(GTK_IS_CONTAINER(widget)) {
+                GList *children = gtk_container_get_children(GTK_CONTAINER(widget));
+                ...
+        }
+        If the widget is a GtkBin it has only one child. In that case, the following is simpler than dealing with a GList:
+
+        if(GTK_IS_BIN(widget)) {
+                GtkWidget *child = gtk_bin_get_child(GTK_BIN(widget));
+                ...
+        }
+
+#endif
+}
+
+/*--------------------------------------------------------------------------*/
+
+void GtkView::Impl::onPrintWidget (GtkWidget *widget, gpointer data)
+{
+        int *indent = static_cast <int *> (data);
+        std::string id;
+
+        for (int i = 0; i < *indent; ++i) {
+                id += " ";
+        }
+
+        BOOST_LOG (lg) << id << gtk_buildable_get_name (GTK_BUILDABLE (widget));
+
+        if (GTK_IS_CONTAINER (widget)) {
+                int newIndent = *indent + 1;
+                gtk_container_foreach (GTK_CONTAINER (widget), &GtkView::Impl::onPrintWidget, &newIndent);
+        }
+}
+
+/*--------------------------------------------------------------------------*/
+
+void GtkView::printStructure ()
+{
+        if (!GTK_IS_BUILDABLE (getUi ())) {
+                BOOST_LOG (lg) << "UI is not of type GtkBuildable. Can not get ID then.";
+        }
+
+        GtkBuildable *mainWidget = GTK_BUILDABLE (getUi ());
+
+        BOOST_LOG (lg) << gtk_buildable_get_name (mainWidget);
+
+        if (!GTK_IS_CONTAINER (getUi ())) {
+                return;
+        }
+
+        int indent = 1;
+        gtk_container_foreach (GTK_CONTAINER (mainWidget), &GtkView::Impl::onPrintWidget, &indent);
 }
 
 } // namespace GtkForms

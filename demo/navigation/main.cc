@@ -12,13 +12,8 @@
 int main (int argc, char **argv)
 {
         gtk_init (&argc, &argv);
-        GtkForms::App app {"../demo/first/config.xml"};
-
+        GtkForms::App app {"../demo/navigation/config.xml"};
         app.start ("login");
-//        app.join ("main");
-//        app.split ("main");
-//        app.start ("result");
-
         gtk_main ();
 
 }
