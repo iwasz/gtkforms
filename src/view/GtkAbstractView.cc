@@ -174,9 +174,9 @@ void GtkAbstractView::connectSignals (Context *context)
 void GtkAbstractView::Impl::handler (const std::string &sourceCode, const Core::VariantVector &paramVector, Context *context)
 {
         Core::Variant domain {context};
-        k202::K202 &k202 = App::getK202 ();
+        k202::K202 *k202 = App::getK202 ();
 
-        Core::Variant result = k202.run (sourceCode, domain, paramVector);
+        Core::Variant result = k202->run (sourceCode, domain, paramVector);
         BOOST_LOG (lg) << "handler here : [" << sourceCode << "]. The result : [" << result.toString () << "]";
 }
 

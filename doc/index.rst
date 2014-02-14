@@ -225,6 +225,10 @@ User actions may emit signals which in turn invoke callbacks. Those are meant to
 which performs some custom operations (or more standard operations like data conversion). Callbacks may have
 parameters which can be converted or raw.
 
+Onscreen keyboard R&D
+----------------------
+
+https://wiki.gnome.org/action/show/Projects/Caribou?action=show&redirect=Caribou
 
 Indices and tables
 ==================
