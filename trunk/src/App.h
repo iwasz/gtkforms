@@ -101,7 +101,8 @@ public:
         void hide (std::string const &page) {}
 
         Context &getContext ();
-        static k202::K202 &getK202 ();
+        static k202::K202 *getK202 ();
+        static Wrapper::BeanWrapper *getBeanWrapper ();
 
 private:
 

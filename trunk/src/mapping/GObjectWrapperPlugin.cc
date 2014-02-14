@@ -1,0 +1,206 @@
+/****************************************************************************
+ *                                                                          *
+ *  Author : lukasz.iwaszkiewicz@gmail.com                                  *
+ *  ~~~~~~~~                                                                *
+ *  License : see COPYING file for details.                                 *
+ *  ~~~~~~~~~                                                               *
+ ****************************************************************************/
+
+#include <cassert>
+#include "GObjectWrapperPlugin.h"
+
+/****************************************************************************/
+
+namespace GtkForms {
+using Core::StringList;
+using Core::Variant;
+using Core::DebugContext;
+using Core::VariantVector;
+using Reflection::ReflectionTools;
+using namespace Common;
+
+/****************************************************************************/
+
+Variant GObjectWrapperPlugin::get (const Variant &bean,
+                                        IPath *path,
+                                        bool *error,
+                                        DebugContext *ctx,
+                                        Editor::IEditor *) const
+{
+        assert (path);
+
+#       if 0
+        std::cerr << "--> " << __FILE__ << "," << __FUNCTION__ << " @ " << __LINE__ << " : " << "GObjectWrapperPlugin::get "
+                << path << ", path.countSegments = " << path->countSegments () << std::endl;
+#endif
+
+        Reflection::Class *cls = getClass (bean, path);
+
+#       if 0
+        std::cerr << "--> " << __FILE__ << "," << __FUNCTION__ << " @ " << __LINE__ << " : " << (unsigned long int)cls << std::endl;
+#endif
+
+        if (!cls) {
+                dcError (ctx, "GObjectWrapperPlugin (Path : '" + path->toString () + "'. Nie udalo sie pobrac obiektu klasy (Class) dla nastepujacego type_info : " + std::string (bean.getTypeInfo ().name ()) + ")");
+                setError (error);
+                return Variant ();
+        }
+
+        // Znajdz getter:
+        std::string property = path->getFirstSegment ();
+
+        Reflection::Field *field = cls->getField (property);
+
+        if (field) {
+                clearError (error);
+                path->cutFirstSegment ();
+                return field->get (bean);
+        }
+
+        Reflection::Method *getter = ReflectionTools::findGetter (cls, property);
+
+        if (!getter) {
+                dcError (ctx, "GObjectWrapperPlugin (Path : '" + path->toString () + "'. Class '" + cls->getName () + "' does not have getter for property with name '" + property + "').");
+                setError (error);
+                return Variant ();
+        }
+
+        try {
+                clearError (error);
+                path->cutFirstSegment ();
+                return getter->invoke (bean);
+        }
+        catch (Core::Exception const &e) {
+                ctx->addContext (e.getContext ());
+                dcError (ctx, "GObjectWrapperPlugin (Path : '" +
+                                path->toString () + "'). Exception from 'get' method has been thrown.");
+                setError (error);
+                return Variant ();
+        }
+        catch (std::exception const &e) {
+                dcError (ctx, "GObjectWrapperPlugin (Path : '" +
+                                path->toString () + "'). Exception from 'get' method has been thrown : " + e.what ());
+                setError (error);
+                return Variant ();
+        }
+}
+
+/****************************************************************************/
+
+bool GObjectWrapperPlugin::set (Core::Variant *bean,
+                                       IPath *path,
+                                       const Core::Variant &objectToSet,
+                                       DebugContext *ctx,
+                                       Editor::IEditor *editor)
+{
+#if 0
+        std::cerr << "--> " << __FILE__ << "," << __FUNCTION__ << " @ " << __LINE__ << " : " << "GObjectWrapperPlugin::get "
+                << path << ", path.countSegments = " << path->countSegments () << std::endl;
+#endif
+
+        try {
+
+                assert (path);
+
+                Variant output;
+                Reflection::Class *cls = getClass (*bean, path);
+
+                if (!cls) {
+                        dcError (ctx, "GObjectWrapperPlugin (Path : '" + path->toString () + "'. Nie udalo sie pobrac obiektu klasy (Class) dla nastepujacego type_info : " + std::string (bean->getTypeInfo ().name ()) + ")");
+                        return false;
+                }
+
+                std::string property = path->getFirstSegment ();
+                Reflection::Field *field = cls->getField (property);
+
+                if (field) {
+                        path->cutFirstSegment ();
+
+                        if (editor) {
+                                output.setTypeInfo (field->getType ());
+
+                                dcBegin (ctx);
+
+                                if (!editor->convert (objectToSet, &output, ctx)) {
+                                        dcError (ctx, "GObjectWrapperPlugin (Path : '" + path->toString () + "'). Editor failed.");
+                                        return false;
+                                }
+
+                                field->set (*bean, (!output.isNone () ? output : objectToSet));
+
+                                /*
+                                 * Rolbakujemy dopiero tu, bo tu wiemy, ze invoke nie zrzuciło wyjatku. Edytor mógł przecierz
+                                 * skonwertować input na coś bezsensownego i wtedy chcemy wiedziec co to było.
+                                 */
+                                dcRollback (ctx);
+                        }
+                        else {
+                                field->set (*bean, objectToSet);
+                        }
+
+                        return true;
+                }
+
+                Reflection::Method *setter = ReflectionTools::findSetter (cls, property);
+
+                if (!setter) {
+                        dcError (ctx, "GObjectWrapperPlugin (Path : '" + path->toString () + "'. Class '" + cls->getName () + "' does not have setter for property with name '" + property + "').");
+                        return false;
+                }
+
+                path->cutFirstSegment ();
+
+                if (editor) {
+                        output.setTypeInfo (setter->getType ());
+
+                        dcBegin (ctx);
+
+                        if (!editor->convert (objectToSet, &output, ctx)) {
+                                dcError (ctx, "GObjectWrapperPlugin (Path : '" + path->toString () + "'). Editor failed.");
+                                return false;
+                        }
+
+                        setter->invoke (*bean, (!output.isNone () ? output : objectToSet));
+
+                        /*
+                         * Rolbakujemy dopiero tu, bo tu wiemy, ze invoke nie zrzuciło wyjatku. Edytor mógł przecierz
+                         * skonwertować input na coś bezsensownego i wtedy chcemy wiedziec co to było.
+                         */
+                        dcRollback (ctx);
+                }
+                else {
+                        setter->invoke (*bean, objectToSet);
+                }
+        }
+        catch (Core::Exception const &e) {
+                if (ctx) {
+                        ctx->addContext (e.getContext ());
+                }
+
+                dcError (ctx, "GObjectWrapperPlugin (Path : '" +
+                                path->toString () + "'). Exception from 'set' method has been thrown.");
+                return false;
+        }
+        catch (std::exception const &e) {
+                dcError (ctx, "GObjectWrapperPlugin (Path : '" +
+                                path->toString () + "'). Exception from 'set' method has been thrown : " + e.what () + ".");
+                return false;
+        }
+
+        return true;
+}
+
+/****************************************************************************/
+
+Reflection::Class *GObjectWrapperPlugin::getClass (const Variant &bean, const IPath *path) const
+{
+        // Sprawdz, czy bean w ogole cos zawiera. Moze nic nie zawierac, czyli ze w mapie map nie bylo obiektu glownego.
+        if (!path->countSegments () || bean.isNone ())
+                return NULL;
+
+        // Kazdy nastepny element wymaga juz uzycia reflexji:
+        return Reflection::Manager::classForType (bean.getTypeInfo ());
+}
+
+} // namespace
+

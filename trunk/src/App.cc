@@ -451,18 +451,35 @@ Context &App::getContext ()
 
 /*--------------------------------------------------------------------------*/
 
-k202::K202 &App::getK202 ()
+k202::K202 *App::getK202 ()
 {
         static Ptr <k202::K202> k202 = k202::K202::create ();
-        return *k202;
+        return k202.get ();
 }
 
 /*--------------------------------------------------------------------------*/
 
-//Context const &App::getContext () const
-//{
-//        return impl->context;
-//}
+struct BWInitializer {
+
+        BWInitializer ()
+        {
+                beanWrapper = new Wrapper::BeanWrapper (true);
+                beanWrapper->addPlugin (new Wrapper::PropertyRWBeanWrapperPlugin ());
+                beanWrapper->addPlugin (new Wrapper::GetPutMethodRWBeanWrapperPlugin ());
+                beanWrapper->addPlugin (new Wrapper::MethodPlugin (Wrapper::MethodPlugin::METHOD));
+        }
+
+        Wrapper::BeanWrapper *beanWrapper = 0;
+
+};
+
+/*--------------------------------------------------------------------------*/
+
+Wrapper::BeanWrapper *App::getBeanWrapper ()
+{
+        static BWInitializer bwInitializer;
+        return bwInitializer.beanWrapper;
+}
 
 /*--------------------------------------------------------------------------*/
 
