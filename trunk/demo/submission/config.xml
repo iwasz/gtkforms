@@ -32,6 +32,12 @@
     <Mapping add-to="mappings" input="form.password" property="text" /> 
     <Mapping add-to="mappings" input="form.number" property="value" /> 
     <Mapping add-to="mappings" input="form.encrypt" property="active" /> 
+
+    <TableMapping add-to="mappings" input="employees">
+        <Column add-to="columns" name="firstname" model="firstname" />
+        <Column add-to="columns" name="lastname" model="lastname" />
+        <Column add-to="columns" name="city" model="city" />
+    </TableMapping> 
   </Page>
 
 </beans>
