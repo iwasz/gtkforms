@@ -389,24 +389,10 @@ std::pair <IView *, Page *> App::Impl::getActiveViewOrThrow (std::string const &
 
 void App::submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName)
 {
-//        std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (viewName);
-//        IView *submitView = ret.first;
-//        Page *page = ret.second;
-//
-//        IController *controller = impl->unit.getController (controllerName);
-//
-//        if (!controller) {
-//                throw Core::Exception ("You requested submit to a controller which is not currently loaded. Controller name : [" + controllerName + "].");
-//        }
-
         std::unique_ptr <SubmitEvent> event {new SubmitEvent};
         event->viewName = viewName;
         event->dataRange = dataRange;
         event->controllerName = controllerName;
-//        event->controller = controller;
-//        event->view = submitView;
-//        event->mappings = &page->getMappingsByInput ();
-
         impl->events.push (std::move (event));
 }
 
@@ -539,10 +525,10 @@ void App::doRefresh (RefreshEvent *event)
                 Page *page = elem.second;
                 // ? why dynamic_cast!
                 GtkView *v = dynamic_cast <GtkView *> (page->getView ());
-                GtkView::InputMap map = v->getInputs (event->dataRange);
+                GtkView::InputMap inputMap = v->getInputs (event->dataRange);
                 MappingMap const &mappings = page->getMappingsByInput ();
 
-                for (auto elem : map) {
+                for (auto elem : inputMap) {
                         std::string inputName = elem.first;
                         std::string property;
                         std::string modelName = inputName;

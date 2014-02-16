@@ -24,13 +24,8 @@ struct SubmitEvent : public IEvent {
         void run (App *app);
 
         std::string viewName;
-//        IView *view = 0;
-
         std::string controllerName;
-//        IController *controller = 0;
-
         std::string dataRange;
-//        MappingMap const *mappings = 0;
 };
 
 } // namespace GtkForms
