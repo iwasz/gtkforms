@@ -11,6 +11,12 @@
 namespace GtkForms {
 using namespace std;
 
+Page::~Page ()
+{
+        delete mappingsByInputCache;
+        delete mappingsByModelCache;
+}
+
 /*--------------------------------------------------------------------------*/
 
 void Page::loadUi (Context *context)
@@ -40,67 +46,6 @@ void Page::destroyUi ()
 
 /*--------------------------------------------------------------------------*/
 
-//PageOperationResult Page::join (IPage *page)
-//{
-////        ViewMap &ctmap = page->getViews ();
-////        PageOperationResult result;
-////
-////        for (ViewMap::value_type &entry : ctmap) {
-////                if (views.find (entry.first) == views.end ()) {
-////                        views[entry.first] = entry.second;
-////                        result.added[entry.first] = entry.second;
-////                }
-////        }
-////
-////        return result;
-//}
-//
-///*--------------------------------------------------------------------------*/
-//
-//PageOperationResult Page::start (IPage *page)
-//{
-////        ViewMap &ctmap = page->getViews ();
-////        PageOperationResult result;
-////
-////        for (auto i = views.begin (); i != views.end (); ) {
-////                if (ctmap.find (i->first) == ctmap.end ()) {
-////                        result.removed[i->first] = i->second;
-////                        i = views.erase (i);
-////                }
-////                else {
-////                        ++i;
-////                }
-////        }
-////
-////        for (ViewMap::value_type &entry : ctmap) {
-////                if (views.find (entry.first) == views.end ()) {
-////                        views[entry.first] = entry.second;
-////                        result.added[entry.first] = entry.second;
-////                }
-////        }
-////
-////        return result;
-//}
-//
-///*--------------------------------------------------------------------------*/
-//
-//PageOperationResult Page::split (IPage *page)
-//{
-////        ViewMap &ctmap = page->getViews ();
-////        PageOperationResult result;
-////
-////        for (ViewMap::value_type &entry : ctmap) {
-////                if (views.find (entry.first) != views.end ()) {
-////                        views.erase (entry.first);
-////                        result.removed[entry.first] = entry.second;
-////                }
-////        }
-////
-////        return result;
-//}
-
-/*--------------------------------------------------------------------------*/
-
 ostream &operator<< (ostream &o, Page const &p)
 {
         o << "Page [view : [" << p.view->getName () << "], tiles : [";
@@ -119,11 +64,36 @@ ostream &operator<< (ostream &o, Page const &p)
 
 /*--------------------------------------------------------------------------*/
 
-//PageOperationResult &PageOperationResult::operator += (PageOperationResult const &uor)
-//{
-//        copy (uor.added.begin (), uor.added.end (), inserter (added, added.end ()));
-//        copy (uor.removed.begin (), uor.removed.end (), inserter (removed, removed.end ()));
-//        return *this;
-//}
+MappingMap const &Page::getMappingsByInput () const
+{
+        if (mappingsByInputCache) {
+                return *mappingsByInputCache;
+        }
+
+        mappingsByInputCache = new MappingMap;
+
+        for (IMapping *mapping : mappings) {
+                mappingsByInputCache->operator[] (mapping->getInput()) = mapping;
+        }
+
+        return *mappingsByInputCache;
+}
+
+/*--------------------------------------------------------------------------*/
+
+MappingMap const &Page::getMappingsByModel () const
+{
+        if (mappingsByModelCache) {
+                return *mappingsByModelCache;
+        }
+
+        mappingsByModelCache = new MappingMap;
+
+        for (IMapping *mapping : mappings) {
+                mappingsByModelCache->operator[] (mapping->getModel ()) = mapping;
+        }
+
+        return *mappingsByModelCache;
+}
 
 } // namespace GtkForms

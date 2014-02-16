@@ -30,7 +30,7 @@ public:
         UnitOperationResult join (IUnit *unit);
         UnitOperationResult split (IUnit *unit);
 
-        IController *getController (std::string const &controllerName) { return controllers[controllerName]; }
+        IController *getController (std::string const &controllerName);
 
         ControllerMap &getControllers () { return controllers; }
         ControllerMap const &getControllers () const { return controllers; }

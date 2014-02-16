@@ -17,7 +17,7 @@ struct LoginForm {
         std::string prp_ (login);
         std::string prp_ (password);
         bool prp_ (encrypt);
-        int prp_ (number);
+        double prp_ (number);
         end_ (LoginForm)
 };
 

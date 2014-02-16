@@ -5,34 +5,23 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
+#ifndef IMAPPING_H_
+#define IMAPPING_H_
 
-#ifndef SUBMITEVENT_H_
-#define SUBMITEVENT_H_
-
-#include "IEvent.h"
 #include <string>
-#include "mapping/Mapping.h"
+#include <core/Object.h>
 
 namespace GtkForms {
-class IView;
-class Context;
-class IController;
 
-struct SubmitEvent : public IEvent {
+class IMapping : public Core::Object {
+public:
+        virtual ~IMapping () {}
 
-        virtual ~SubmitEvent (){}
-        void run (App *app);
-
-        std::string viewName;
-//        IView *view = 0;
-
-        std::string controllerName;
-//        IController *controller = 0;
-
-        std::string dataRange;
-//        MappingMap const *mappings = 0;
+        virtual std::string getInput () const = 0;
+        virtual std::string getProperty () const = 0;
+        virtual std::string getModel () const = 0;
 };
 
-} // namespace GtkForms
+} /* namespace GtkForms */
 
-#endif /* SUBMITEVENT_H_ */
+#endif /* IMAPPING_H_ */

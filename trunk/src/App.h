@@ -12,13 +12,17 @@
 #include <string>
 #include <Tiliae.h>
 #include <gtk/gtk.h>
+
+#include "controller/RefreshEvent.h"
 #include "ReflectionMacros.h"
 
 namespace GtkForms {
 
 class IUnit;
-class IPage;
+class Page;
 class Context;
+class SubmitEvent;
+class RefreshEvent;
 
 /**
  * Main object (singleton) of a GtkForms application. It can perofrm operations on main aspects
@@ -95,6 +99,17 @@ public:
         mth_ (submit) void submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName);
 
         /**
+         * Do the opposite of submit i.e. converts data from model suitable to be presented on the
+         * view, and shows it there.
+         * \param viewName Name of the view to populate with fresh data. If empty, all active views
+         * will be populated.
+         * \param dataRange Specifies which range of data to convert and display. Imagine you have
+         * beefy table with tons of data. It would be pointless to convert all the contents if only
+         * one tiny cell was changed. dataRange allows you to narrow the conversion process.
+         */
+        void refresh (std::string const &viewName, std::string const &dataRange);
+
+        /**
          *
          */
         void show (std::string const &page) {}
@@ -115,12 +130,14 @@ private:
         /**
          * Gets a page. Same notes as in case of Units apply.
          */
-        IPage *getPage (std::string const &name);
+        Page *getPage (std::string const &name);
 
         /**
          * Deals with SubmitEvents.
          */
-        void doSubmit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName);
+        void doSubmit (SubmitEvent *event);
+        void doRefresh (RefreshEvent *event);
+        std::string getDefaultProperty () const;
 
         /**
          * Creates a tiliae container instance (pointer is in Impl).
@@ -134,12 +151,14 @@ private:
 
         ///
         Core::StringSet manageUnits ();
+        void managePages (Core::StringSet const &viewCommands);
 
         void addPage (std::string const &page);
         void removePage (std::string const &page);
         void movePage (std::string const &pageA, std::string const &pageB);
 
         friend class SubmitEvent;
+        friend class RefreshEvent;
         friend class QuitEvent;
         friend gboolean guiThread (gpointer user_data);
 

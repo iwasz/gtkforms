@@ -16,7 +16,7 @@
 #include "mapping/MapperDTO.h"
 #include <core/Pointer.h>
 
-namespace GtkForms {
+namespace aGtkForms {
 
 struct TILIAE_API IMapping : public Core::Object {
 

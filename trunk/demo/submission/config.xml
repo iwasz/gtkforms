@@ -27,6 +27,11 @@
   
   <Page id="loginPage" name="loginPage">
     <ref bean="loginView" set-as="view" />
+
+    <Mapping add-to="mappings" input="form.login" model="form.login" property="text" /> 
+    <Mapping add-to="mappings" input="form.password" property="text" /> 
+    <Mapping add-to="mappings" input="form.number" property="value" /> 
+    <Mapping add-to="mappings" input="form.encrypt" property="active" /> 
   </Page>
 
 </beans>

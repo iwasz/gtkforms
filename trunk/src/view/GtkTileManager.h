@@ -10,7 +10,7 @@
 #define GTK_FORMS_TILEMANAGER_H_
 
 #include "IView.h"
-#include "IPage.h"
+#include "Page.h"
 
 namespace GtkForms {
 class Context;

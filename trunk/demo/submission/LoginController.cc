@@ -9,11 +9,20 @@
 #include <memory>
 #include "LoginController.h"
 #include "LoginForm.h"
+#include "Logging.h"
+
+using namespace Core;
+static src::logger_mt& lg = logger::get();
 
 std::string LoginController::start ()
 {
         // Ona tworzy obiekt mdoelu.
-        std::shared_ptr <LoginForm> loginForm = std::make_shared<LoginForm>();
+        std::shared_ptr <LoginForm> form = std::make_shared<LoginForm>();
+
+        form->login = "login";
+        form->password = "password";;
+        form->encrypt = true;
+        form->number = 12.3;
 
         /*
          * Ustawia go w kontekście. kiedy kontekst flash przestanie istnieć, automatyczny wskaźnik
@@ -22,7 +31,8 @@ std::string LoginController::start ()
          * Tworzy nowy flash, ustawia tam jakieś rzeczy i przekazuje do do kontrolera, Kontroler pobiera
          * dane i znów go kasuje.
          */
-        getFlashScope ()["form"] = Core::Variant (loginForm);
+        getUnitScope ()["form"] = Variant (form);
+        app->refresh ("", "");
 
         return "->loginPage";
 }
@@ -32,15 +42,23 @@ std::string LoginController::start ()
  */
 std::string LoginController::onSubmit ()
 {
-        std::shared_ptr <LoginForm> form = vcast <std::shared_ptr <LoginForm>> (getFlashScope()["form"]);
+        std::shared_ptr <LoginForm> form = vcast <std::shared_ptr <LoginForm>> (getUnitScope()["form"]);
+//        LoginForm *form = vcast <LoginForm *> (getUnitScope()["form"]);
+//        BOOST_LOG(lg) << form.get ();
+
+        BOOST_LOG (lg) << "Submited data. login : [" << form->login <<
+                          "], password : [" << form->password <<
+                          "], encrypt : [" << form->encrypt <<
+                          "], number : [" << form->number<< "]";
+
 //        bool loginOk = loginService->checkLogin (form->login, form->password);
 //
 //        if (!loginOk) {
-//                getFlashScope ()["errors"] = Core::Variant ("Błędny login lub hasło");
+//                getFlashScope ()["errors"] = Variant ("Błędny login lub hasło");
 //                // Wymuś akcję view->model2View ("tylko dla errors"), co poinno zaskutkowac natychmiastowym wyświetleniem się komunikatu.
 //                return "loginPage";
 //        } else {
-//                getFlashScope ()["feedback"] = Core::Variant ("Zalogowano prawidłowo");
+//                getFlashScope ()["feedback"] = Variant ("Zalogowano prawidłowo");
 //
 //                // Wymuś przejście na kontroler MainWindowController. Tej samej metody uzyją widoki żeby przejść
 //                // na jakis inny unit : onClicked : $app->start ();

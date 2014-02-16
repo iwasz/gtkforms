@@ -16,7 +16,7 @@
 #include "mapping/IMapping.h"
 #include "mapping/MapperDTO.h"
 
-namespace GtkForms {
+namespace a {
 
 /**
  *

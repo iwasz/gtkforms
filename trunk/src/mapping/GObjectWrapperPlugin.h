@@ -14,9 +14,7 @@
 namespace GtkForms {
 
 /**
- *  Plugin, ktory potrafi odczytywac i ustawiac za pomoca refleksji
- *  pola obiektow. Najpierw zprawdza, czy jest w klasie Field o danej
- *  nazwie, a jesli nie ma, szuka setterów i getterów.
+ * This is a BeanWrapper plugin which is able to set and get properites from GObjects.
  */
 class GObjectWrapperPlugin : public Wrapper::IBeanWrapperPlugin {
 public:
@@ -45,10 +43,6 @@ public:
                                         Common::IPath *path,
                                         bool *error,
                                         Core::DebugContext *ctx) const { throw Core::Exception ("GObjectWrapperPlugin::iterator is not supported."); }
-
-private:
-
-        Reflection::Class *getClass (const Core::Variant &bean, const Common::IPath *path) const;
 
 };
 
