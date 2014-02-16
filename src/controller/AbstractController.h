@@ -32,12 +32,16 @@ public:
         virtual std::string getName () const { return name; }
         mth_ (setName) void setName (std::string const &name) { this->name = name; }
 
+protected:
+
+        App *app = 0;
+
 private:
 
         void setApp (App *app) { this->app = app; }
 
 private:
-        App *app = 0;
+
         std::string name;
 
         end_ (AbstractController)

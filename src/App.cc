@@ -12,17 +12,23 @@
 #include "Unit.h"
 #include "Page.h"
 #include "Context.h"
-#include "controller/IEvent.h"
 #include "controller/SubmitEvent.h"
+#include "controller/RefreshEvent.h"
 #include "controller/QuitEvent.h"
 #include "controller/IController.h"
 #include "view/GtkTileManager.h"
 #include <boost/regex.hpp>
+
+#include "controller/RefreshEvent.h"
 #include "view/Slot.h"
 #include "Logging.h"
+#include "mapping/GObjectWrapperPlugin.h"
 
 namespace GtkForms {
 using namespace Container;
+using namespace Wrapper;
+using namespace Core;
+
 static src::logger_mt& lg = logger::get();
 
 gboolean guiThread (gpointer user_data);
@@ -33,6 +39,7 @@ gboolean guiThread (gpointer user_data);
 struct App::Impl {
 
         Unit *getUnit (std::string );
+        std::pair <IView *, Page *> getActiveViewOrThrow (std::string const &viewName);
 
         std::string unitToStart;
         Core::StringSet unitsToJoin;
@@ -45,13 +52,13 @@ struct App::Impl {
 
         // Current unit.
         Unit unit;
-        // Current page;
-//        Page page;
+        // Current pages.
         PageMap pages;
 
         Ptr <BeanFactoryContainer> container;
         Context context;
         GtkTileManager tileManager;
+        bool model2ViewRequest = false;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -136,6 +143,7 @@ Core::StringSet App::manageUnits ()
                 IController *controller = entry.second;
                 controller->setApp (this);
                 std::string command = controller->start ();
+                impl->model2ViewRequest = true;
 
                 if (!command.empty ()) {
                         viewCommands.insert (command);
@@ -147,10 +155,8 @@ Core::StringSet App::manageUnits ()
 
 /*--------------------------------------------------------------------------*/
 
-void App::run ()
+void App::managePages (Core::StringSet const &viewCommands)
 {
-        Core::StringSet viewCommands = manageUnits ();
-
         boost::regex e1 ("\\+(.*)");
         boost::regex e2 ("\\-(^[>]*)");
         boost::regex e3 ("(.*)->(.*)");
@@ -160,6 +166,7 @@ void App::run ()
                 if (boost::regex_match (viewCommand, what, e1, boost::match_extra)) {
                         if (what.size () == 2) {
                                 addPage (what[1]);
+                                impl->model2ViewRequest = true;
                         }
                 }
                 else if (boost::regex_match (viewCommand, what, e2, boost::match_extra)) {
@@ -178,6 +185,8 @@ void App::run ()
                                 else if (what.size () == 2) {
                                         movePage ("", what[1]);
                                 }
+
+                                impl->model2ViewRequest = true;
                         }
                         else {
                                 throw Core::Exception ("Invalid view command. Use +, - or -> operations.");
@@ -185,7 +194,20 @@ void App::run ()
 
                 }
         }
+}
 
+/*--------------------------------------------------------------------------*/
+
+void App::run ()
+{
+        Core::StringSet viewCommands = manageUnits ();
+        managePages (viewCommands);
+
+        if (impl->model2ViewRequest) {
+                // Model -> view conversion
+        }
+
+        impl->model2ViewRequest = false;
         usleep (MAIN_LOOP_USLEEP);
 }
 
@@ -201,7 +223,7 @@ void App::addPage (std::string const &pageName)
         }
 
         // Load from container, or return if already loaded.
-        IPage *page = getPage (pageName);
+        Page *page = getPage (pageName);
         impl->pages[pageName] = page;
 
         // Load UI file, or noop if loaded.
@@ -230,7 +252,7 @@ void App::removePage (std::string const &pageName)
         }
 
         // Load from container, or return if already loaded.
-        IPage *page = getPage (pageName);
+        Page *page = getPage (pageName);
         impl->pages.erase (pageName);
         page->destroyUi ();
 }
@@ -258,8 +280,8 @@ void App::movePage (std::string const &s, std::string const &pageBName)
         BOOST_LOG (lg) << pageAName << "->" << pageBName;
 
         // Load from container, or return if already loaded.
-        IPage *pageA = getPage (pageAName);
-        IPage *pageB = getPage (pageBName);
+        Page *pageA = getPage (pageAName);
+        Page *pageB = getPage (pageBName);
 
         if (impl->pages.find (pageBName) != impl->pages.end ()) {
                 // TODO What should happen here? Nothing? Exception? Another instance of view?
@@ -311,57 +333,6 @@ void App::movePage (std::string const &s, std::string const &pageBName)
         }
 }
 
-/*
- * Metoda start kontrolera zwraca nazwę widoku. ViewResolver otrzymuje tą nazwę i podejmuje decyzję jaki widok pokazać.
- * Możliwe, że ładuje go z pojedyczego pliku. Możliwe, że nie ładuje, bo on juz jest widoczny, mozliwe, że ładuje i skleja
- * kilka widoków w jeden na podstawie jakiejś konfiguracji. Możliwe wreszcie, ze ładuje z pliku ui i embeduje w już istniejącym.
- * Jednocześnie będzie musiał umieć skasować poprzedni. I tak dalej i tak dalej.
- *
- * view->model2View ();
- * view->show ();
- *
- * I teraz widok się pokazuje z wypełnionym formularzem (pustym, bo login był pusty).
- *
- * User wypełnia dwa pola formularza o nazwach : form.login i form.password. Klika guzik OK, który ma w clicked akcję
- * $submit(). Ta akcja jakimś cudem trafia znów do App, albo do Flow:
- */
-void App::doSubmit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName)
-{
-        /*
-         * Potrzebne dane:
-         * - Z jakiego widoku ściągamy dane (bo może byćwięcej niż jeden widok w Page..
-         *
-         * - jakie dane. Konwertuje dane z formularza do modelu. Konweruje całość, lub tylko część. Decyzja jest podejmowana
-         * na podstawie jakichś dodatiowych parametrów. Np jezeli guzik OK ma calback $submit() (bez parametrów),
-         * to konwerujemy całość. Jeżeli ma tak : $submit ('form'), to konwertowane jest kazde pole które zaczyna
-         * się od "form." bo mogą być węcej niż 1 obiektów formularza). Jeżeli damyh $submit ('form.login'), to
-         * tylko login. Moznaby się pokusić jeszcze o listę typu : $submit (['form.a', 'form.b']).
-         *
-         * Na przykłąad domyślnie jeśli mamy GtkContainer o nazwie loginFormm, a w nim pola o nazwach form.login i form.password,
-         * a na końcu (w tym samym kontenerze) guzik z podpiętą akcją $app->submit () (czy podobnie), to
-         *
-         * - Jakiemu kontrolerowi wuwołąć onSubmit : nazwa kontrolera brana z GtkContainer.
-         */
-#if 0
-        GtkView *view = impl->page.getView (/*viewName*/);
-
-        if (!view) {
-                throw Core::Exception {"No such view : [" + viewName + "]."};
-        }
-
-        IController *controller = impl->unit.getController (controllerName);
-
-        if (!controller) {
-                throw Core::Exception {"No such controller : [" + controllerName + "]."};
-        }
-
-        view->view2Model (dataRange);
-
-        std::string nextPage = controller->onSubmit();
-        impl->pagesToShow.insert (nextPage);
-#endif
-}
-
 /*--------------------------------------------------------------------------*/
 
 void App::start (std::string const &unitName)
@@ -385,36 +356,223 @@ void App::split (std::string const &unitName)
 
 /*--------------------------------------------------------------------------*/
 
-void App::submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName)
+std::pair <IView *, Page *> App::Impl::getActiveViewOrThrow (std::string const &viewName)
 {
-        IView *submitView = 0;
+        IView *view = 0;
+        Page *page = 0;
 
-        for (auto elem : impl->pages) {
-                IPage *page = elem.second;
-                submitView = page->getView ();
+        for (auto elem : pages) {
+                page = elem.second;
+                view = page->getView ();
 
-                if (submitView->getName () == viewName) {
+                if (view->getName () == viewName) {
                         break;
                 }
         }
 
         // Throw an error if no such view was found
-        if (!submitView) {
+        if (!view) {
                 std::ostringstream o;
                 o << "You requested submit from view which is not currently loaded. Available pages and their views are :\n";
 
-                for (auto elem : impl->pages) {
+                for (auto elem : pages) {
                         o << elem.second << "\n";
                 }
 
                 throw Core::Exception (o.str ());
         }
+
+        return std::make_pair (view, page);
+}
+
+/*--------------------------------------------------------------------------*/
+
+void App::submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName)
+{
+//        std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (viewName);
+//        IView *submitView = ret.first;
+//        Page *page = ret.second;
+//
+//        IController *controller = impl->unit.getController (controllerName);
+//
+//        if (!controller) {
+//                throw Core::Exception ("You requested submit to a controller which is not currently loaded. Controller name : [" + controllerName + "].");
+//        }
+
         std::unique_ptr <SubmitEvent> event {new SubmitEvent};
         event->viewName = viewName;
         event->dataRange = dataRange;
         event->controllerName = controllerName;
-        event->view = submitView;
+//        event->controller = controller;
+//        event->view = submitView;
+//        event->mappings = &page->getMappingsByInput ();
+
         impl->events.push (std::move (event));
+}
+
+/*--------------------------------------------------------------------------*/
+
+void App::refresh (std::string const &viewName, std::string const &dataRange)
+{
+        std::unique_ptr <RefreshEvent> event {new RefreshEvent};
+        event->viewName = viewName;
+        event->dataRange = dataRange;
+        impl->events.push (std::move (event));
+}
+
+/*--------------------------------------------------------------------------*/
+
+/*
+ * Metoda start kontrolera zwraca nazwę widoku. ViewResolver otrzymuje tą nazwę i podejmuje decyzję jaki widok pokazać.
+ * Możliwe, że ładuje go z pojedyczego pliku. Możliwe, że nie ładuje, bo on juz jest widoczny, mozliwe, że ładuje i skleja
+ * kilka widoków w jeden na podstawie jakiejś konfiguracji. Możliwe wreszcie, ze ładuje z pliku ui i embeduje w już istniejącym.
+ * Jednocześnie będzie musiał umieć skasować poprzedni. I tak dalej i tak dalej.
+ *
+ * view->model2View ();
+ * view->show ();
+ *
+ * I teraz widok się pokazuje z wypełnionym formularzem (pustym, bo login był pusty).
+ *
+ * User wypełnia dwa pola formularza o nazwach : form.login i form.password. Klika guzik OK, który ma w clicked akcję
+ * $submit(). Ta akcja jakimś cudem trafia znów do App, albo do Flow:
+ */
+void App::doSubmit (SubmitEvent *event)
+{
+        BOOST_LOG (lg) << "SubmitEvent::run. viewName : [" << event->viewName << "], dataRange : [" << event->dataRange << "], controllerName : [" << event->controllerName << "].";
+
+        std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (event->viewName);
+        GtkView *v = dynamic_cast <GtkView *> (ret.first);
+        Page *page = ret.second;
+        MappingMap const &mappings = page->getMappingsByInput ();
+
+#if 0
+        v->printStructure ();
+#endif
+
+        GtkView::InputMap map = v->getInputs (event->dataRange);
+        BeanWrapper *wrapper = getBeanWrapper ();
+
+        for (auto elem : map) {
+                std::string inputName = elem.first;
+                std::string property;
+                std::string modelName = inputName;
+
+                wrapper->setWrappedObject (Variant (G_OBJECT (elem.second)));
+                IMapping *mapping = 0;
+                MappingMap::const_iterator i;
+
+                if ((i = mappings.find (inputName)) != mappings.end ()) {
+                        mapping = i->second;
+                }
+
+                if (mapping && !mapping->getProperty ().empty ()) {
+                        property = mapping->getProperty ();
+                }
+                else {
+                        property = getDefaultProperty ();
+                }
+
+                if (mapping && !mapping->getModel ().empty ()) {
+                        modelName = mapping->getModel ();
+                }
+
+                Variant v = wrapper->get (property);
+                BOOST_LOG (lg) << elem.first << " : " << v;
+
+                Core::VariantMap &unitScope = impl->context.getUnitScope ();
+                wrapper->setWrappedObject (Variant (&unitScope));
+                wrapper->set (modelName, v);
+        }
+
+        /*
+         * Potrzebne dane:
+         * - Z jakiego widoku ściągamy dane (bo może byćwięcej niż jeden widok w Page..
+         *
+         * - jakie dane. Konwertuje dane z formularza do modelu. Konweruje całość, lub tylko część. Decyzja jest podejmowana
+         * na podstawie jakichś dodatiowych parametrów. Np jezeli guzik OK ma calback $submit() (bez parametrów),
+         * to konwerujemy całość. Jeżeli ma tak : $submit ('form'), to konwertowane jest kazde pole które zaczyna
+         * się od "form." bo mogą być węcej niż 1 obiektów formularza). Jeżeli damyh $submit ('form.login'), to
+         * tylko login. Moznaby się pokusić jeszcze o listę typu : $submit (['form.a', 'form.b']).
+         *
+         * Na przykłąad domyślnie jeśli mamy GtkContainer o nazwie loginFormm, a w nim pola o nazwach form.login i form.password,
+         * a na końcu (w tym samym kontenerze) guzik z podpiętą akcją $app->submit () (czy podobnie), to
+         *
+         * - Jakiemu kontrolerowi wuwołąć onSubmit : nazwa kontrolera brana z GtkContainer.
+         */
+        IController *controller = impl->unit.getController (event->controllerName);
+
+        if (!controller) {
+                throw Core::Exception ("You requested submit to a controller which is not currently loaded. Controller name : [" + event->controllerName + "].");
+        }
+
+        std::string nextPage = controller->onSubmit ();
+        impl->pagesToShow.insert (nextPage);
+}
+
+/*--------------------------------------------------------------------------*/
+
+std::string App::getDefaultProperty () const
+{
+        // TODO get this from some configuration / map.
+        return "text";
+}
+
+/*--------------------------------------------------------------------------*/
+
+void App::doRefresh (RefreshEvent *event)
+{
+        BOOST_LOG (lg) << "RefreshEvent::doRefresh. viewName : [" << event->viewName << "], dataRange : [" << event->dataRange << "].";
+
+        PageMap refreshPages;
+        if (!event->viewName.empty ()) {
+                std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (event->viewName);
+                Page *page = ret.second;
+                refreshPages[page->getName ()] = page;
+        }
+        else {
+               refreshPages = impl->pages;
+        }
+
+        BeanWrapper *wrapper = getBeanWrapper ();
+
+        for (auto elem : refreshPages) {
+                Page *page = elem.second;
+                // ? why dynamic_cast!
+                GtkView *v = dynamic_cast <GtkView *> (page->getView ());
+                GtkView::InputMap map = v->getInputs (event->dataRange);
+                MappingMap const &mappings = page->getMappingsByInput ();
+
+                for (auto elem : map) {
+                        std::string inputName = elem.first;
+                        std::string property;
+                        std::string modelName = inputName;
+
+                        IMapping *mapping = 0;
+                        MappingMap::const_iterator i;
+
+                        if ((i = mappings.find (inputName)) != mappings.end ()) {
+                                mapping = i->second;
+                        }
+
+                        if (mapping && !mapping->getProperty ().empty ()) {
+                                property = mapping->getProperty ();
+                        }
+                        else {
+                                property = getDefaultProperty ();
+                        }
+
+                        if (mapping && !mapping->getModel ().empty ()) {
+                                modelName = mapping->getModel ();
+                        }
+
+                        Core::VariantMap &unitScope = impl->context.getUnitScope ();
+                        wrapper->setWrappedObject (Variant (&unitScope));
+                        Variant v = wrapper->get (modelName);
+
+                        wrapper->setWrappedObject (Variant (G_OBJECT (elem.second)));
+                        wrapper->set (property, v);
+                }
+        }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -464,6 +622,7 @@ struct BWInitializer {
         BWInitializer ()
         {
                 beanWrapper = new Wrapper::BeanWrapper (true);
+                beanWrapper->addPlugin (new GObjectWrapperPlugin);
                 beanWrapper->addPlugin (new Wrapper::PropertyRWBeanWrapperPlugin ());
                 beanWrapper->addPlugin (new Wrapper::GetPutMethodRWBeanWrapperPlugin ());
                 beanWrapper->addPlugin (new Wrapper::MethodPlugin (Wrapper::MethodPlugin::METHOD));
@@ -491,9 +650,9 @@ IUnit *App::getUnit (std::string const &name)
 
 /*--------------------------------------------------------------------------*/
 
-IPage *App::getPage (std::string const &name)
+Page *App::getPage (std::string const &name)
 {
-        IPage* page = ocast <IPage *> (impl->container->getBean (name));
+        Page* page = ocast <Page *> (impl->container->getBean (name));
         return page;
 }
 

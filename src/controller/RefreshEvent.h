@@ -5,34 +5,27 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
-
-#ifndef SUBMITEVENT_H_
-#define SUBMITEVENT_H_
+#ifndef GTK_FORMS_REFRESHEVENT_H_
+#define GTK_FORMS_REFRESHEVENT_H_
 
 #include "IEvent.h"
+#include "view/IView.h"
 #include <string>
 #include "mapping/Mapping.h"
 
 namespace GtkForms {
-class IView;
 class Context;
 class IController;
 
-struct SubmitEvent : public IEvent {
-
-        virtual ~SubmitEvent (){}
+class RefreshEvent : public IEvent {
+public:
+        virtual ~RefreshEvent () {}
         void run (App *app);
 
         std::string viewName;
-//        IView *view = 0;
-
-        std::string controllerName;
-//        IController *controller = 0;
-
         std::string dataRange;
-//        MappingMap const *mappings = 0;
 };
 
-} // namespace GtkForms
+} /* namespace GtkForms */
 
-#endif /* SUBMITEVENT_H_ */
+#endif /* REFRESHEVENT_H_ */

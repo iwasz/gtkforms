@@ -46,6 +46,8 @@ public:
 typedef std::map <std::string, IView *> ViewMap;
 col_ (ViewMap)
 
+typedef std::set <IView *> ViewSet;
+
 } // namespace GtkForms
 
 #endif /* IVIEW_H_ */

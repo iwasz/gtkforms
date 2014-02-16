@@ -102,4 +102,16 @@ UnitOperationResult &UnitOperationResult::operator += (UnitOperationResult const
         return *this;
 }
 
+/*--------------------------------------------------------------------------*/
+
+IController *Unit::getController (std::string const &controllerName)
+{
+        ControllerMap::iterator i;
+        if ((i = controllers.find (controllerName)) == controllers.end ()) {
+                return 0;
+        }
+
+        return i->second;
+}
+
 } // namespace GtkForms
