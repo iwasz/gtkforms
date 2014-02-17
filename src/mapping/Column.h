@@ -6,29 +6,21 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef LOGINCONTROLLER_H_
-#define LOGINCONTROLLER_H_
+#ifndef GTK_FORMS_TABLE_MAPPING_COLUMN_H_
+#define GTK_FORMS_TABLE_MAPPING_COLUMN_H_
 
-#include <GtkForms.h>
-#include <string>
-#include "Employee.h"
+#include "ReflectionMacros.h"
 
-class LoginController : public GtkForms::AbstractController {
-public:
+namespace GtkForms {
+
+struct Column {
         ctr__ (void)
-        bse_ ("AbstractController")
-
-        virtual ~LoginController () {}
-
-        std::string start ();
-        std::string onSubmit ();
-        std::string end ();
-
-private:
-
-        EmployeeVector employees;
-
-        end_ (LoginController)
+        std::string prp_ (model);
+        end_ (Column)
 };
 
-#endif /* LOGINCONTROLLER_H_ */
+typedef std::vector <Column *> ColumnVector;
+col_ (ColumnVector)
+
+} /* namespace GtkForms */
+#endif /* COLUMN_H_ */

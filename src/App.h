@@ -119,6 +119,8 @@ public:
         static k202::K202 *getK202 ();
         static Wrapper::BeanWrapper *getBeanWrapper ();
 
+        std::string getDefaultProperty (std::string const &widgetType) const;
+
 private:
 
         /**
@@ -137,7 +139,6 @@ private:
          */
         void doSubmit (SubmitEvent *event);
         void doRefresh (RefreshEvent *event);
-        std::string getDefaultProperty () const;
 
         /**
          * Creates a tiliae container instance (pointer is in Impl).

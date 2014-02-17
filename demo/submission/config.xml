@@ -33,10 +33,10 @@
     <Mapping add-to="mappings" input="form.number" property="value" /> 
     <Mapping add-to="mappings" input="form.encrypt" property="active" /> 
 
-    <TableMapping add-to="mappings" input="employees">
-        <Column add-to="columns" name="firstname" model="firstname" />
-        <Column add-to="columns" name="lastname" model="lastname" />
-        <Column add-to="columns" name="city" model="city" />
+    <TableMapping add-to="mappings" listStore="employees" modelCollection="employees">
+        <Column add-to="columns" model="firstname" />
+        <Column add-to="columns" model="lastname" />
+        <Column add-to="columns" model="city" />
     </TableMapping> 
   </Page>
 

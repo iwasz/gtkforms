@@ -6,29 +6,9 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef LOGINCONTROLLER_H_
-#define LOGINCONTROLLER_H_
+#include "Column.h"
 
-#include <GtkForms.h>
-#include <string>
-#include "Employee.h"
+namespace GtkForms {
 
-class LoginController : public GtkForms::AbstractController {
-public:
-        ctr__ (void)
-        bse_ ("AbstractController")
 
-        virtual ~LoginController () {}
-
-        std::string start ();
-        std::string onSubmit ();
-        std::string end ();
-
-private:
-
-        EmployeeVector employees;
-
-        end_ (LoginController)
-};
-
-#endif /* LOGINCONTROLLER_H_ */
+} /* namespace GtkForms */

@@ -14,7 +14,7 @@
 #include "mapping/IMapping.h"
 #include "mapping/MapperDTO.h"
 
-namespace GtkForms {
+namespace GtkForms1 {
 
 /**
  * Cell mapping.

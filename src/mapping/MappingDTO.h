@@ -6,29 +6,25 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef LOGINCONTROLLER_H_
-#define LOGINCONTROLLER_H_
+#ifndef MAPPINGDTO_H_
+#define MAPPINGDTO_H_
 
-#include <GtkForms.h>
 #include <string>
-#include "Employee.h"
+#include <gtk/gtk.h>
 
-class LoginController : public GtkForms::AbstractController {
-public:
-        ctr__ (void)
-        bse_ ("AbstractController")
+namespace GtkForms {
+class  App;
+class Context;
 
-        virtual ~LoginController () {}
-
-        std::string start ();
-        std::string onSubmit ();
-        std::string end ();
-
-private:
-
-        EmployeeVector employees;
-
-        end_ (LoginController)
+/**
+ * Helper class to pass data between App and mappers.
+ */
+struct MappingDTO {
+        App *app = 0;
+        GObject *inputWidget = 0;
+        Context *context = 0;
+        std::string dataRange;
 };
 
-#endif /* LOGINCONTROLLER_H_ */
+} /* namespace GtkForms */
+#endif /* MAPPINGDTO_H_ */
