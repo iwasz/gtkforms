@@ -14,6 +14,7 @@
 #include "ReflectionMacros.h"
 
 namespace GtkForms {
+class App;
 
 class Mapping : public IMapping {
 public:
@@ -22,8 +23,12 @@ public:
         virtual ~Mapping () {}
 
         std::string getInput () const { return input; }
-        std::string getProperty () const { return property; }
-        std::string getModel () const { return model; }
+
+        void view2Model (MappingDTO *dto);
+        void model2View (MappingDTO *dto);
+
+        static void view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model);
+        static void model2View (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model);
 
 private:
 

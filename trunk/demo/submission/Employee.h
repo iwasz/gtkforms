@@ -6,29 +6,22 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef LOGINCONTROLLER_H_
-#define LOGINCONTROLLER_H_
+#ifndef EMPLOYEE_H_
+#define EMPLOYEE_H_
 
-#include <GtkForms.h>
+#include "ReflectionMacros.h"
 #include <string>
-#include "Employee.h"
+#include <vector>
 
-class LoginController : public GtkForms::AbstractController {
-public:
+struct Employee {
         ctr__ (void)
-        bse_ ("AbstractController")
-
-        virtual ~LoginController () {}
-
-        std::string start ();
-        std::string onSubmit ();
-        std::string end ();
-
-private:
-
-        EmployeeVector employees;
-
-        end_ (LoginController)
+        std::string prp_ (firstname)
+        std::string prp_ (lastname)
+        std::string prp_ (city)
+        end_ (Employee)
 };
 
-#endif /* LOGINCONTROLLER_H_ */
+typedef std::vector <Employee *> EmployeeVector;
+col_ (EmployeeVector)
+
+#endif /* EMPLOYEE_H_ */

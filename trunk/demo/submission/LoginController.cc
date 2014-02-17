@@ -10,6 +10,7 @@
 #include "LoginController.h"
 #include "LoginForm.h"
 #include "Logging.h"
+#include "Employee.h"
 
 using namespace Core;
 static src::logger_mt& lg = logger::get();
@@ -32,6 +33,12 @@ std::string LoginController::start ()
          * dane i znów go kasuje.
          */
         getUnitScope ()["form"] = Variant (form);
+
+        employees.push_back (new Employee {"Łukasz", "Iwaszkiewicz", "Mokotów"});
+        employees.push_back (new Employee {"Joanna", "Szenajch", "Praga"});
+        employees.push_back (new Employee {"Franek", "Iwaszkiewicz", "Śródmiescie"});
+        getUnitScope ()["employees"] = Variant (&employees);
+
         app->refresh ("", "");
 
         return "->loginPage";

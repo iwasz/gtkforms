@@ -12,7 +12,7 @@
 #include "tools/GValueVariant.h"
 #include "Mapper.h"
 
-namespace GtkForms {
+namespace GtkForms1 {
 using namespace Core;
 
 void TableMapping::m2v (MapperDTO *dto)

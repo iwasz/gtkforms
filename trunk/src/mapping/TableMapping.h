@@ -6,29 +6,33 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef LOGINCONTROLLER_H_
-#define LOGINCONTROLLER_H_
+#ifndef TABLEMAPPING_H_
+#define TABLEMAPPING_H_
 
-#include <GtkForms.h>
-#include <string>
-#include "Employee.h"
+#include "IMapping.h"
+#include "ReflectionMacros.h"
+#include "Column.h"
 
-class LoginController : public GtkForms::AbstractController {
+namespace GtkForms {
+
+class TableMapping : public IMapping {
 public:
         ctr__ (void)
-        bse_ ("AbstractController")
+        virtual ~TableMapping () {}
 
-        virtual ~LoginController () {}
+        std::string getInput () const { return listStore; }
 
-        std::string start ();
-        std::string onSubmit ();
-        std::string end ();
+        void view2Model (MappingDTO *dto);
+        void model2View (MappingDTO *dto);
 
 private:
 
-        EmployeeVector employees;
+        std::string prp_ (listStore);
+        std::string prp_ (modelCollection);
+        ColumnVector prr_ (columns);
 
-        end_ (LoginController)
+        end_ (TableMapping)
 };
 
-#endif /* LOGINCONTROLLER_H_ */
+} /* namespace GtkForms */
+#endif /* TABLEMAPPING_H_ */

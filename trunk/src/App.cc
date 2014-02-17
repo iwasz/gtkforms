@@ -435,39 +435,28 @@ void App::doSubmit (SubmitEvent *event)
         v->printStructure ();
 #endif
 
-        GtkView::InputMap map = v->getInputs (event->dataRange);
-        BeanWrapper *wrapper = getBeanWrapper ();
+        GtkView::InputMap inputMap = v->getInputs (event->dataRange);
 
-        for (auto elem : map) {
+        for (auto elem : inputMap) {
                 std::string inputName = elem.first;
-                std::string property;
+                std::string property = getDefaultProperty ("");
                 std::string modelName = inputName;
 
-                wrapper->setWrappedObject (Variant (G_OBJECT (elem.second)));
-                IMapping *mapping = 0;
+                MappingDTO dto;
+                dto.app = this;
+                dto.inputWidget = G_OBJECT (elem.second);
+                dto.context = &impl->context;
+                dto.dataRange = event->dataRange;
+
                 MappingMap::const_iterator i;
-
                 if ((i = mappings.find (inputName)) != mappings.end ()) {
-                        mapping = i->second;
+                        IMapping *mapping = i->second;
+                        mapping->view2Model (&dto);
+                        continue;
                 }
 
-                if (mapping && !mapping->getProperty ().empty ()) {
-                        property = mapping->getProperty ();
-                }
-                else {
-                        property = getDefaultProperty ();
-                }
-
-                if (mapping && !mapping->getModel ().empty ()) {
-                        modelName = mapping->getModel ();
-                }
-
-                Variant v = wrapper->get (property);
-                BOOST_LOG (lg) << elem.first << " : " << v;
-
-                Core::VariantMap &unitScope = impl->context.getUnitScope ();
-                wrapper->setWrappedObject (Variant (&unitScope));
-                wrapper->set (modelName, v);
+                // Default.
+                Mapping::view2Model (&dto, inputName, "", "");
         }
 
         /*
@@ -497,7 +486,7 @@ void App::doSubmit (SubmitEvent *event)
 
 /*--------------------------------------------------------------------------*/
 
-std::string App::getDefaultProperty () const
+std::string App::getDefaultProperty (std::string const &widgetType) const
 {
         // TODO get this from some configuration / map.
         return "text";
@@ -519,8 +508,6 @@ void App::doRefresh (RefreshEvent *event)
                refreshPages = impl->pages;
         }
 
-        BeanWrapper *wrapper = getBeanWrapper ();
-
         for (auto elem : refreshPages) {
                 Page *page = elem.second;
                 // ? why dynamic_cast!
@@ -533,30 +520,22 @@ void App::doRefresh (RefreshEvent *event)
                         std::string property;
                         std::string modelName = inputName;
 
-                        IMapping *mapping = 0;
+                        MappingDTO dto;
+                        dto.app = this;
+                        dto.inputWidget = G_OBJECT (elem.second);
+                        dto.context = &impl->context;
+                        dto.dataRange = event->dataRange;
+
                         MappingMap::const_iterator i;
 
                         if ((i = mappings.find (inputName)) != mappings.end ()) {
-                                mapping = i->second;
+                                IMapping *mapping = i->second;
+                                mapping->model2View (&dto);
+                                continue;
                         }
 
-                        if (mapping && !mapping->getProperty ().empty ()) {
-                                property = mapping->getProperty ();
-                        }
-                        else {
-                                property = getDefaultProperty ();
-                        }
-
-                        if (mapping && !mapping->getModel ().empty ()) {
-                                modelName = mapping->getModel ();
-                        }
-
-                        Core::VariantMap &unitScope = impl->context.getUnitScope ();
-                        wrapper->setWrappedObject (Variant (&unitScope));
-                        Variant v = wrapper->get (modelName);
-
-                        wrapper->setWrappedObject (Variant (G_OBJECT (elem.second)));
-                        wrapper->set (property, v);
+                        // Default.
+                        Mapping::model2View (&dto, inputName, "", "");
                 }
         }
 }
