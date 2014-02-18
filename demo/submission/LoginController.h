@@ -24,6 +24,8 @@ public:
         std::string onSubmit ();
         std::string end ();
 
+        mth_ (buttonClicked) void buttonClicked ();
+
 private:
 
         EmployeeVector employees;

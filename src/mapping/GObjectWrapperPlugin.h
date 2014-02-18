@@ -37,12 +37,12 @@ public:
                           Common::IPath *path,
                           const Core::Variant &,
                           Core::DebugContext *,
-                          Editor::IEditor * = NULL) { throw Core::Exception ("GObjectWrapperPlugin::add is not supported."); }
+                          Editor::IEditor * = NULL) { return false; }
 
         virtual Core::Variant iterator (const Core::Variant &bean,
                                         Common::IPath *path,
                                         bool *error,
-                                        Core::DebugContext *ctx) const { throw Core::Exception ("GObjectWrapperPlugin::iterator is not supported."); }
+                                        Core::DebugContext *ctx) const { return Core::Variant (); }
 
 };
 

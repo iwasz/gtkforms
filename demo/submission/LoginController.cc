@@ -80,3 +80,8 @@ std::string LoginController::end ()
         // Don't need to return page to be closed, because next page will replace current page.
         return "";
 }
+
+void LoginController::buttonClicked ()
+{
+        BOOST_LOG (lg) << "LoginController::buttonClicked";
+}
