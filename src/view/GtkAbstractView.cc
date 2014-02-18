@@ -12,6 +12,7 @@
 #include "App.h"
 #include "Context.h"
 #include "Logging.h"
+#include "mapping/GValueVariant.h"
 
 namespace GtkForms {
 static src::logger_mt& lg = logger::get ();
@@ -222,6 +223,10 @@ void GtkAbstractView::Impl::gClosureMarshal (GClosure *closure,
 {
         BOOST_LOG (lg) << "Marshaler here. closure : [" << (void *)closure << "], n_param_values : [" << n_param_values << "], invocation_hint : ["
                        << (void *)invocation_hint << "], marshal_data [" << (void *)marshal_data << "]";
+
+        for (unsigned int i = 0; i < n_param_values; ++i) {
+                BOOST_LOG (lg) << gValueToVariant (param_values + i);
+        }
 
         typedef void (*HandlerType) (const std::string &,
                                      const Core::VariantVector &,
