@@ -133,6 +133,7 @@ Core::StringSet App::manageUnits ()
                 IController *controller = entry.second;
                 controller->setApp (this);
                 std::string command = controller->end ();
+                impl->context.getSessionScope ().erase (controller->getName ());
 
                 if (!command.empty ()) {
                         viewCommands.insert (command);
@@ -144,6 +145,7 @@ Core::StringSet App::manageUnits ()
                 controller->setApp (this);
                 std::string command = controller->start ();
                 impl->model2ViewRequest = true;
+                impl->context.getSessionScope ()[controller->getName ()] = Core::Variant (controller);
 
                 if (!command.empty ()) {
                         viewCommands.insert (command);
@@ -568,8 +570,6 @@ void App::createContainer (std::string const &configFile)
 Context &App::getContext ()
 {
         return impl->context;
-//        static Context context;
-//        return context;
 }
 
 /*--------------------------------------------------------------------------*/

@@ -20,11 +20,24 @@ using namespace Core;
 
 void TableMapping::view2Model (MappingDTO *dto)
 {
-        if (!GTK_IS_LIST_STORE (dto->inputWidget)) {
-                throw Core::Exception ("TableMapping::view2Model : Could not converto to GtkListStore.");
+}
+
+/*--------------------------------------------------------------------------*/
+
+void TableMapping::model2View (MappingDTO *dto)
+{
+        if (!GTK_IS_TREE_VIEW (dto->inputWidget)) {
+                throw Core::Exception ("TableMapping::view2Model : Could not conver inputWidget to to GtkTreeView.");
         }
 
-        GtkListStore *list = GTK_LIST_STORE (dto->inputWidget);
+        GtkTreeView *treeView = GTK_TREE_VIEW (dto->inputWidget);
+        GtkTreeModel *model = gtk_tree_view_get_model (treeView);
+
+        if (!GTK_IS_LIST_STORE (model)) {
+                throw Core::Exception ("TableMapping::view2Model : Could not conver treeViewModel to to GtkListStore.");
+        }
+
+        GtkListStore *list = GTK_LIST_STORE (model);
 
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
         Core::VariantMap &unitScope = dto->context->getUnitScope ();
@@ -56,13 +69,6 @@ void TableMapping::view2Model (MappingDTO *dto)
                         gtk_list_store_set_value (list, &iter, colNo++, &gVal);
                 }
         }
-}
-
-/*--------------------------------------------------------------------------*/
-
-void TableMapping::model2View (MappingDTO *dto)
-{
-
 }
 
 } /* namespace GtkForms */
