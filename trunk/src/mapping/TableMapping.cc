@@ -63,7 +63,7 @@ void TableMapping::model2View (MappingDTO *dto)
                  */
                 unsigned int colNo = 0;
                 for (Column *column : columns) {
-                        GValue gVal = {0};
+                        GValue gVal = G_VALUE_INIT;
                         Variant vVal = wrapper->get (&element, column->model);
                         GtkForms::variantToGValue (&gVal, vVal);
                         gtk_list_store_set_value (list, &iter, colNo++, &gVal);

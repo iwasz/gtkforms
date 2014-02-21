@@ -103,7 +103,7 @@ bool GObjectWrapperPlugin::set (Core::Variant *bean,
         }
 
         GObject *object = vcast <GObject *> (*bean);
-        GValue gVal = {0};
+        GValue gVal = G_VALUE_INIT;
         Variant output = objectToSet;
 
         if (editor) {
