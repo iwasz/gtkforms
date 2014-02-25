@@ -218,7 +218,7 @@ void myConnectFunc (GtkBuilder *builder,
         GClosure *closure = g_cclosure_new (G_CALLBACK (handler), dto, gclosureUserDataDelete);
 
         g_closure_set_marshal (closure, gClosureMarshal);
-        g_signal_connect_closure  (object, signal_name, closure, FALSE);
+        g_signal_connect_closure (object, signal_name, closure, FALSE);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -246,26 +246,51 @@ void gClosureMarshal (GClosure *closure,
                 }
 
                 if (G_VALUE_TYPE (param_values + 2) == GTK_TYPE_TREE_VIEW_COLUMN) {
-                        BOOST_LOG (lg) << "GTK_TYPE_TREE_VIEW_COLUMN, " << g_type_name (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE (param_values + 1)));;
+                        BOOST_LOG (lg) << "GTK_TYPE_TREE_VIEW_COLUMN, " << g_type_name (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE (param_values + 2)));
                 }
 
                 for (unsigned int i = 0; i < n_param_values; ++i) {
                         BOOST_LOG (lg) << "Parameter : " << G_VALUE_TYPE_NAME (param_values + i);
                 }
 
+                GValue const *gValue = param_values;
+                if (!G_VALUE_HOLDS_OBJECT (gValue)) {
+                        throw Core::Exception ("GValue not object.");
+                }
+
+                GObject *object = G_OBJECT (g_value_get_object (gValue));
+                GtkTreeView *treeView = GTK_TREE_VIEW (object);
+
                 // Actual work:
-                GValue const *pathVal = param_values + 1;
-                if (!G_VALUE_HOLDS_BOXED (pathVal)) {
+                gValue = param_values + 1;
+                if (!G_VALUE_HOLDS_BOXED (gValue)) {
                         throw Core::Exception ("GValue not boxed.");
                 }
 
-                gpointer pathPtr = g_value_get_boxed (pathVal);
+                gpointer boxedPtr = g_value_get_boxed (gValue);
+                GtkTreePath *path = static_cast <GtkTreePath *> (boxedPtr);
 
-//                if (!GTK_IS_TREE_PATH (pathPtr)) {
-//                        throw Core::Exception ("");
-//                }
+                gValue = param_values + 2;
+                if (!G_VALUE_HOLDS_OBJECT (gValue)) {
+                        throw Core::Exception ("GValue not object.");
+                }
 
-                GtkTreePath *path = GTK_TREE_PATH (pathPtr);
+                object = G_OBJECT (g_value_get_object (gValue));
+                GtkTreeViewColumn *column = GTK_TREE_VIEW_COLUMN (object);
+
+                // Find out which column number it is.
+                guint numOfColumns = gtk_tree_view_get_n_columns (treeView);
+
+                unsigned int activatedColumnNumber = 0;
+                for (; activatedColumnNumber < numOfColumns; ++activatedColumnNumber) {
+                        GtkTreeViewColumn *c = gtk_tree_view_get_column (treeView, activatedColumnNumber);
+
+                        if (c == column) {
+                                break;
+                        }
+                }
+
+                BOOST_LOG (lg) << "The path to row : " << gtk_tree_path_to_string (path) << ", activatedColumnNumber = " << activatedColumnNumber;
 
         }
 
