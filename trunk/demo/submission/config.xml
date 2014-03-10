@@ -6,8 +6,10 @@
   <!-- +===================================================+ -->
   
   <UiFile id="uiFile" file="../demo/submission/submission.ui" />
-
-  <GtkView id="loginView" name="loginView" uiFile="@uiFile" />
+  
+  <GtkView id="loginView" name="loginView" uiFile="@uiFile">
+      <RowActivatedAdapter add-to="signalAdapters" />
+  </GtkView>
 
   <!-- +===================================================+ -->
   <!-- | UNITY                                             | -->
@@ -37,6 +39,7 @@
         <Column add-to="columns" model="firstname" />
         <Column add-to="columns" model="lastname" />
         <Column add-to="columns" model="city" />
+        <Column add-to="columns" model="imagePath" />
     </TableMapping> 
   </Page>
 

@@ -13,6 +13,7 @@
 #include "IView.h"
 #include "ReflectionMacros.h"
 #include "UiFile.h"
+#include "signalAdapter/AbstractSignalAdapter.h"
 
 namespace GtkForms {
 class Context;
@@ -61,7 +62,8 @@ private:
 private:
 
         std::string prr_ (name);
-        UiFile *prr_ (uiFile);
+        UiFile *prp_ (uiFile);
+        SignalAdapterVector prr_ (signalAdapters);
 
         class Impl;
         Impl *impl = 0;

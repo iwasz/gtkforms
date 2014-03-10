@@ -24,7 +24,7 @@ public:
         std::string onSubmit ();
         std::string end ();
 
-        mth_ (buttonClicked) void buttonClicked ();
+        mth_ (buttonClicked) void buttonClicked (unsigned int column);
 
 private:
 
