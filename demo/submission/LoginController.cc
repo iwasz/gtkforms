@@ -34,9 +34,9 @@ std::string LoginController::start ()
          */
         getUnitScope ()["form"] = Variant (form);
 
-        employees.push_back (new Employee {"Łukasz", "Iwaszkiewicz", "Mokotów"});
-        employees.push_back (new Employee {"Joanna", "Szenajch", "Praga"});
-        employees.push_back (new Employee {"Franek", "Iwaszkiewicz", "Śródmiescie"});
+        employees.push_back (new Employee {"Łukasz", "Iwaszkiewicz", "Mokotów", "/home/iwasz/icon.png"});
+        employees.push_back (new Employee {"Joanna", "Szenajch", "Praga", "/home/iwasz/icon.png"});
+        employees.push_back (new Employee {"Franek", "Iwaszkiewicz", "Śródmiescie", "/home/iwasz/icon.png"});
         getUnitScope ()["employees"] = Variant (&employees);
 
         app->refresh ("", "");
@@ -81,7 +81,7 @@ std::string LoginController::end ()
         return "";
 }
 
-void LoginController::buttonClicked ()
+void LoginController::buttonClicked (unsigned int column)
 {
-        BOOST_LOG (lg) << "LoginController::buttonClicked";
+        BOOST_LOG (lg) << "LoginController::buttonClicked. Column : [" << column << "]";
 }

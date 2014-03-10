@@ -17,21 +17,23 @@
 namespace GtkForms {
 static src::logger_mt& lg = logger::get ();
 
-struct GtkAbstractView::Impl {
-        GtkWidget *widget = 0;
-        GtkBuilder *builder = 0;
-};
-
 extern "C" {
 
 /*
  * Helper class for passing required data between user code and GObject closures.
  */
 struct ClosureDTO {
-        char *signalName;
+        char *signal;
         char *gObjectName;
+        char const *widgetId;
         char *handler;
         Context *context;
+        SignalAdapterVector *signalAdapters;
+};
+
+struct ConnectDTO {
+        Context *context;
+        SignalAdapterVector *signalAdapters;
 };
 
 /*
@@ -56,6 +58,12 @@ void gclosureUserDataDelete (gpointer data, GClosure *closure);
 
 void handler (const std::string &sourceCode, const Core::VariantVector &paramVector, Context *context);
 }
+
+struct GtkAbstractView::Impl {
+        GtkWidget *widget = 0;
+        GtkBuilder *builder = 0;
+        ConnectDTO connectDTO;
+};
 
 /*--------------------------------------------------------------------------*/
 
@@ -165,8 +173,10 @@ GObject *GtkAbstractView::getUi (std::string const &name)
 
 void GtkAbstractView::connectSignals (Context *context)
 {
+        impl->connectDTO.context = context;
+        impl->connectDTO.signalAdapters = &signalAdapters;
         // https://developer.gnome.org/gtk3/stable/GtkBuilder.html#gtk-builder-connect-signals-full
-        gtk_builder_connect_signals_full (impl->builder, myConnectFunc, static_cast <gpointer> (context));
+        gtk_builder_connect_signals_full (impl->builder, myConnectFunc, static_cast <gpointer> (&impl->connectDTO));
 
 //        window = GTK_WIDGET (gtk_builder_get_object (builder, widgetName.c_str ()));
 //        g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
@@ -196,26 +206,36 @@ void myConnectFunc (GtkBuilder *builder,
         BOOST_LOG (lg) << "Connecting : " << signal_name << ", " << handler_name /*<< ", DTO : [" << (void *)&GtkAbstractView::Impl::closureDTO << "]"*/;
 
         // Skopiować napis z signal_name
-        ClosureDTO *dto = static_cast <ClosureDTO *> (malloc (sizeof (ClosureDTO)));
+        ClosureDTO *closureDTO = static_cast <ClosureDTO *> (malloc (sizeof (ClosureDTO)));
 
+//        dto->
         char const *tmpString = handler_name;
         tmpString = ((tmpString) ? (tmpString) : (""));
-        dto->handler = g_strdup (tmpString);
+        closureDTO->handler = g_strdup (tmpString);
 
-        dto->context = static_cast <Context *> (user_data);
+        ConnectDTO *connectDTO = static_cast <ConnectDTO *> (user_data);
+        closureDTO->context = connectDTO->context;
+        closureDTO->signalAdapters = connectDTO->signalAdapters;
 
         tmpString = G_OBJECT_TYPE_NAME (object);
         tmpString = ((tmpString) ? (tmpString) : (""));
-        dto->gObjectName = g_strdup (tmpString);
+        closureDTO->gObjectName = g_strdup (tmpString);
 
         tmpString = signal_name;
         tmpString = ((tmpString) ? (tmpString) : (""));
-        dto->signalName = g_strdup (tmpString);
+        closureDTO->signal = g_strdup (tmpString);
+
+        if (GTK_IS_BUILDABLE (object)) {
+                closureDTO->widgetId = gtk_buildable_get_name (GTK_BUILDABLE (object));
+        }
+        else {
+                closureDTO->widgetId = 0;
+        }
 
         /*
          * https://developer.gnome.org/gobject/stable/gobject-Closures.html#g-cclosure-new
          */
-        GClosure *closure = g_cclosure_new (G_CALLBACK (handler), dto, gclosureUserDataDelete);
+        GClosure *closure = g_cclosure_new (G_CALLBACK (handler), closureDTO, gclosureUserDataDelete);
 
         g_closure_set_marshal (closure, gClosureMarshal);
         g_signal_connect_closure (object, signal_name, closure, FALSE);
@@ -224,74 +244,46 @@ void myConnectFunc (GtkBuilder *builder,
 /*--------------------------------------------------------------------------*/
 
 void gClosureMarshal (GClosure *closure,
-                                     GValue *return_value,
-                                     guint n_param_values,
-                                     const GValue *param_values,
-                                     gpointer invocation_hint,
-                                     gpointer marshal_data)
+                      GValue *return_value,
+                      guint n_param_values,
+                      const GValue *param_values,
+                      gpointer invocation_hint,
+                      gpointer marshal_data)
 {
         BOOST_LOG (lg) << "Marshaler here. closure : [" << (void *)closure << "], n_param_values : [" << n_param_values << "], invocation_hint : ["
                        << (void *)invocation_hint << "], marshal_data [" << (void *)marshal_data << "]";
 
         ClosureDTO *dto = static_cast <ClosureDTO *> (closure->data);
 
-        std::string signalNameCopy = dto->signalName;
+        std::string signalNameCopy = dto->signal;
         std::string handlerCopy = dto->handler;
         std::string gObjectNameCopy = dto->gObjectName;
+        std::string widgetIdCopy = (dto->widgetId) ? (dto->widgetId) : ("");
 
-        if (signalNameCopy == "row-activated" && gObjectNameCopy == "GtkTreeView") {
-                // Debug
-                if (G_VALUE_TYPE (param_values + 1) == GTK_TYPE_TREE_PATH) {
-                        BOOST_LOG (lg) << "GTK_TREE_PATH, " << g_type_name (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE (param_values + 1)));
-                }
+        ISignalAdapter *signalParametersAdapter = 0;
+        for (ISignalAdapter *a : *dto->signalAdapters) {
+                if (a->getSignal () == signalNameCopy) {
+                        signalParametersAdapter = a;
 
-                if (G_VALUE_TYPE (param_values + 2) == GTK_TYPE_TREE_VIEW_COLUMN) {
-                        BOOST_LOG (lg) << "GTK_TYPE_TREE_VIEW_COLUMN, " << g_type_name (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE (param_values + 2)));
-                }
+                        if (a->getGObjectName () == gObjectNameCopy) {
+                                signalParametersAdapter = a;
 
-                for (unsigned int i = 0; i < n_param_values; ++i) {
-                        BOOST_LOG (lg) << "Parameter : " << G_VALUE_TYPE_NAME (param_values + i);
-                }
-
-                GValue const *gValue = param_values;
-                if (!G_VALUE_HOLDS_OBJECT (gValue)) {
-                        throw Core::Exception ("GValue not object.");
-                }
-
-                GObject *object = G_OBJECT (g_value_get_object (gValue));
-                GtkTreeView *treeView = GTK_TREE_VIEW (object);
-
-                // Actual work:
-                gValue = param_values + 1;
-                if (!G_VALUE_HOLDS_BOXED (gValue)) {
-                        throw Core::Exception ("GValue not boxed.");
-                }
-
-                gpointer boxedPtr = g_value_get_boxed (gValue);
-                GtkTreePath *path = static_cast <GtkTreePath *> (boxedPtr);
-
-                gValue = param_values + 2;
-                if (!G_VALUE_HOLDS_OBJECT (gValue)) {
-                        throw Core::Exception ("GValue not object.");
-                }
-
-                object = G_OBJECT (g_value_get_object (gValue));
-                GtkTreeViewColumn *column = GTK_TREE_VIEW_COLUMN (object);
-
-                // Find out which column number it is.
-                guint numOfColumns = gtk_tree_view_get_n_columns (treeView);
-
-                unsigned int activatedColumnNumber = 0;
-                for (; activatedColumnNumber < numOfColumns; ++activatedColumnNumber) {
-                        GtkTreeViewColumn *c = gtk_tree_view_get_column (treeView, activatedColumnNumber);
-
-                        if (c == column) {
-                                break;
+                                // Full match;
+                                if (a->getWidgetId () == widgetIdCopy) {
+                                        signalParametersAdapter = a;
+                                        break;
+                                }
                         }
                 }
+        }
 
-                BOOST_LOG (lg) << "The path to row : " << gtk_tree_path_to_string (path) << ", activatedColumnNumber = " << activatedColumnNumber;
-
+        if (signalParametersAdapter) {
+                BOOST_LOG (lg) << "Signal adapter has been found : signal : [" << signalParametersAdapter->getSignal ()
+                               << "], gObjectname : [" << signalParametersAdapter->getGObjectName ()
+                               << "], widgetId : [" << signalParametersAdapter->getWidgetId () << "]";
+        }
+        else {
+                BOOST_LOG (lg) << "No signal adapter has been found, passing raw signal parameters.";
         }
 
         typedef void (*HandlerType) (const std::string &,
@@ -302,6 +294,11 @@ void gClosureMarshal (GClosure *closure,
         HandlerType callback = (HandlerType) (marshal_data ? marshal_data : cc->callback);
 
         Core::VariantVector params;
+
+        if (signalParametersAdapter) {
+                params = signalParametersAdapter->adapt (n_param_values, param_values);
+        }
+
         callback (dto->handler, params, dto->context);
 }
 
@@ -312,7 +309,7 @@ void gclosureUserDataDelete (gpointer data, GClosure *closure)
         ClosureDTO *dto = static_cast <ClosureDTO *> (data);
         g_free (dto->gObjectName);
         g_free (dto->handler);
-        g_free (dto->signalName);
+        g_free (dto->signal);
         free (dto);
 }
 

@@ -13,5 +13,6 @@
 #include "ReflectionMacros.h"
 #include "controller/Controller.h"
 #include "view/View.h"
+#include "signalAdapter/SignalAdapter.h"
 
 #endif /* GTKFORMS_H_ */
