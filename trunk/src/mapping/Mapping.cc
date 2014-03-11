@@ -92,7 +92,8 @@ void Mapping::model2View (MappingDTO *dto, std::string const &input, std::string
         Core::Variant v = wrapper->get (finalModelName);
 
         if (v.isNone ()) {
-                throw Core::Exception ("Mapping::model2View. Invalid modelName : [" + finalModelName + "]. Property you've tried to set : [" + finalProperty + "] in input widget : [" + input + "].");
+                return;
+//                throw Core::Exception ("Mapping::model2View. Invalid modelName : [" + finalModelName + "]. Property you've tried to set : [" + finalProperty + "] in input widget : [" + input + "].");
         }
 
         BOOST_LOG (lg) << "Mapping::model->view : " << finalModelName << "(" << v << ")" << " -> " << input << "." << finalProperty;

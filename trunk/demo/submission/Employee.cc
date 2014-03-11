@@ -6,31 +6,10 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef LOGINCONTROLLER_H_
-#define LOGINCONTROLLER_H_
-
-#include <GtkForms.h>
-#include <string>
 #include "Employee.h"
 
-class LoginController : public GtkForms::AbstractController {
-public:
-        ctr__ (void)
-        bse_ ("AbstractController")
-
-        virtual ~LoginController () {}
-
-        std::string start ();
-        std::string onSubmit ();
-        std::string end ();
-
-        mth_ (buttonClicked) void buttonClicked (unsigned int column, Core::Variant selectedObject);
-
-private:
-
-        EmployeeVector employees;
-
-        end_ (LoginController)
-};
-
-#endif /* LOGINCONTROLLER_H_ */
+std::ostream &operator<< (std::ostream &o, Employee const &e)
+{
+        o << "Employee [" << e.firstname << ", " << e.lastname << "]";
+        return o;
+}

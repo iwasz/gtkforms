@@ -44,9 +44,9 @@ void TableMapping::model2View (MappingDTO *dto)
         wrapper->setWrappedObject (Core::Variant (&unitScope));
 
         Ptr <IIterator> i = wrapper->iterator (modelCollection);
-
         GtkTreeIter iter;
 
+        // Per row iteration.
         while (i->hasNext ()) {
 
                 // Wiersz kolecji wejściowej - najlepiej, żeby to była lista, wektor, lub set.
@@ -56,15 +56,18 @@ void TableMapping::model2View (MappingDTO *dto)
                 // Dodaj wiersz i uzyskaj iterator.
                 gtk_list_store_append (list, &iter);
 
-                /*
-                 * TODO!!! koniecznie powinien tu pobrać listę kolumn z GtkListStore i spróbować pobrać obiekt Column.
-                 * Jesli jest to OK, to używamy z niego informacji, ale jeśli nie ma, to powinien spróbować tak samo jak
-                 * w przypadku normalnych inputów ustawić dane na pałkę.
-                 */
                 unsigned int colNo = 0;
                 for (Column *column : columns) {
                         GValue gVal = G_VALUE_INIT;
-                        Variant vVal = wrapper->get (&element, column->model);
+                        Variant vVal;
+
+                        if (!column->model.empty ()) {
+                                vVal = wrapper->get (&element, column->model);
+                        }
+                        else {
+                                vVal = element;
+                        }
+
                         GtkForms::variantToGValue (&gVal, vVal);
                         gtk_list_store_set_value (list, &iter, colNo++, &gVal);
                 }

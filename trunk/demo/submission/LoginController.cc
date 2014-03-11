@@ -34,9 +34,9 @@ std::string LoginController::start ()
          */
         getUnitScope ()["form"] = Variant (form);
 
-        employees.push_back (new Employee {"Łukasz", "Iwaszkiewicz", "Mokotów", "/home/iwasz/icon.png"});
-        employees.push_back (new Employee {"Joanna", "Szenajch", "Praga", "/home/iwasz/icon.png"});
-        employees.push_back (new Employee {"Franek", "Iwaszkiewicz", "Śródmiescie", "/home/iwasz/icon.png"});
+        employees.push_back (new Employee {"Łukasz", "Iwaszkiewicz", "Mokotów" });
+        employees.push_back (new Employee {"Joanna", "Szenajch", "Praga" });
+        employees.push_back (new Employee {"Franek", "Iwaszkiewicz", "Śródmiescie" });
         getUnitScope ()["employees"] = Variant (&employees);
 
         app->refresh ("", "");
@@ -58,21 +58,26 @@ std::string LoginController::onSubmit ()
                           "], encrypt : [" << form->encrypt <<
                           "], number : [" << form->number<< "]";
 
-//        bool loginOk = loginService->checkLogin (form->login, form->password);
-//
-//        if (!loginOk) {
-//                getFlashScope ()["errors"] = Variant ("Błędny login lub hasło");
-//                // Wymuś akcję view->model2View ("tylko dla errors"), co poinno zaskutkowac natychmiastowym wyświetleniem się komunikatu.
-//                return "loginPage";
-//        } else {
-//                getFlashScope ()["feedback"] = Variant ("Zalogowano prawidłowo");
-//
+        bool loginOk = (form->login == "admin" && form->password == "zaq12wsx");
+
+        if (!loginOk) {
+                getUnitScope ()["errors"] = Variant ("Błędny login lub hasło");
+                getUnitScope ()["feedback"] = Variant ("");
+                // Wymuś akcję view->model2View ("tylko dla errors"), co poinno zaskutkowac natychmiastowym wyświetleniem się komunikatu.
+                app->refresh ("", "errors");
+                app->refresh ("", "feedback");
+                return "";
+        } else {
+                getUnitScope ()["errors"] = Variant ("");
+                getUnitScope ()["feedback"] = Variant ("Zalogowano prawidłowo");
+                app->refresh ("", "errors");
+                app->refresh ("", "feedback");
+
 //                // Wymuś przejście na kontroler MainWindowController. Tej samej metody uzyją widoki żeby przejść
 //                // na jakis inny unit : onClicked : $app->start ();
 //                getApp ()->start ("main");
-//                return "";
-//        }
-        return "";
+                return "";
+        }
 }
 
 std::string LoginController::end ()
@@ -81,7 +86,9 @@ std::string LoginController::end ()
         return "";
 }
 
-void LoginController::buttonClicked (unsigned int column)
+void LoginController::buttonClicked (unsigned int column, Core::Variant selectedObject)
 {
-        BOOST_LOG (lg) << "LoginController::buttonClicked. Column : [" << column << "]";
+        void *p = vcast <void *> (selectedObject);
+        Employee *e = static_cast <Employee *> (p);
+        BOOST_LOG (lg) << "LoginController::buttonClicked. Column : [" << column << "], selectedObject : [" << *e << "]";
 }

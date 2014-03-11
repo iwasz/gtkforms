@@ -12,6 +12,7 @@
 #include "ReflectionMacros.h"
 #include <string>
 #include <vector>
+#include <ostream>
 
 struct Employee {
         ctr__ (void)
@@ -24,5 +25,7 @@ struct Employee {
 
 typedef std::vector <Employee *> EmployeeVector;
 col_ (EmployeeVector)
+
+std::ostream &operator<< (std::ostream &o, Employee const &);
 
 #endif /* EMPLOYEE_H_ */

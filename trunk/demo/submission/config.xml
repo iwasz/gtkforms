@@ -8,7 +8,7 @@
   <UiFile id="uiFile" file="../demo/submission/submission.ui" />
   
   <GtkView id="loginView" name="loginView" uiFile="@uiFile">
-      <RowActivatedAdapter add-to="signalAdapters" />
+      <RowActivatedAdapter add-to="signalAdapters" modelColumn="4"/>          
   </GtkView>
 
   <!-- +===================================================+ -->
@@ -34,13 +34,16 @@
     <Mapping add-to="mappings" input="form.password" property="text" /> 
     <Mapping add-to="mappings" input="form.number" property="value" /> 
     <Mapping add-to="mappings" input="form.encrypt" property="active" /> 
-
+    <Mapping add-to="mappings" input="errors" model="errors" property="label" /> 
+    <Mapping add-to="mappings" input="feedback" property="label" /> 
+    
     <TableMapping add-to="mappings" input="employees" modelCollection="employees">
         <Column add-to="columns" model="firstname" />
         <Column add-to="columns" model="lastname" />
         <Column add-to="columns" model="city" />
         <Column add-to="columns" model="imagePath" />
-    </TableMapping> 
+        <Column add-to="columns" />
+        </TableMapping> 
   </Page>
 
 </beans>
