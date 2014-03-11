@@ -8,6 +8,7 @@
 
 #include "RowActivatedAdapter.h"
 #include "Logging.h"
+#include "mapping/GValueVariant.h"
 
 namespace GtkForms {
 static src::logger_mt& lg = logger::get ();
@@ -72,6 +73,26 @@ Core::VariantVector RowActivatedAdapter::adapt (guint n_param_values, const GVal
         params.push_back (Core::Variant (treeView));
         params.push_back (Core::Variant (pathStd));
         params.push_back (Core::Variant (activatedColumnNumber));
+
+        if (modelColumn != NO_MODEL_COLUMN) {
+                GtkTreeModel *model = gtk_tree_view_get_model (treeView);
+
+                if (!GTK_IS_LIST_STORE (model)) {
+                        throw Core::Exception ("RowActivatedAdapter::adapt : Could not conver treeViewModel to to GtkListStore.");
+                }
+
+                GtkListStore *list = GTK_LIST_STORE (model);
+                GtkTreeIter iter;
+
+                if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (list), &iter, path)) {
+                        throw Core::Exception ("RowActivatedAdapter::adapt : Something wrong went converting GtkTreePath to GtkTreeIter. The path is : [" + pathStd + "]");
+                }
+
+                GValue gVal = {0};
+                gtk_tree_model_get_value (model, &iter, modelColumn, &gVal);
+                params.push_back (gValueToVariant (&gVal));
+        }
+
         return params;
 }
 

@@ -24,13 +24,17 @@ public:
         ctr__ (void)
         bse_ ("AbstractSignalAdapter")
 
+        RowActivatedAdapter () : modelColumn (NO_MODEL_COLUMN) {}
         virtual ~RowActivatedAdapter () {}
         std::string getSignal () const { return "row-activated"; }
 
         Core::VariantVector adapt (guint n_param_values, const GValue *param_values) const;
 
+        const int NO_MODEL_COLUMN = -2;
+
 private:
 
+        int prp_ (modelColumn);
         end_ (RowActivatedAdapter) // __LINE__, __COUNTER__ conflict!
 };
 
