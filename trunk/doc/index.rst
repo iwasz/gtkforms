@@ -230,6 +230,11 @@ Onscreen keyboard R&D
 
 https://wiki.gnome.org/action/show/Projects/Caribou?action=show&redirect=Caribou
 
+FAQ
+===
+``Wrong vcast to shared_ptr<T>, typeid (T &) != v.ti, where typeid (T*) : N4Core9IIteratorE. Variant info : type=NONE, value=[], type_info=[NULL], object=false.``
+From TableMapping : collection type may be not included in reflection system. User col_ macro.
+
 Indices and tables
 ==================
 

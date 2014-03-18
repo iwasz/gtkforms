@@ -38,10 +38,10 @@ void TableMapping::model2View (MappingDTO *dto)
         }
 
         GtkListStore *list = GTK_LIST_STORE (model);
+        gtk_list_store_clear (list);
 
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
-        Core::VariantMap &unitScope = dto->context->getUnitScope ();
-        wrapper->setWrappedObject (Core::Variant (&unitScope));
+        wrapper->setWrappedObject (Core::Variant (dto->context));
 
         Ptr <IIterator> i = wrapper->iterator (modelCollection);
         GtkTreeIter iter;
