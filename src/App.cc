@@ -215,6 +215,36 @@ void App::run ()
 
 /*--------------------------------------------------------------------------*/
 
+/**
+ * TODO wywalić gdzieś.
+ */
+void guiLoadTheme (const char *directory, const char *theme_name, GObject *toplevel)
+{
+        GtkCssProvider *css_provider;
+        GError *error = NULL;
+        char buf[strlen(directory) + strlen(theme_name) + 32];
+        /* Gtk theme is a directory containing gtk-3.0/gtkrc file */
+        snprintf(buf, sizeof(buf), "%s/%s/gtk-3.0/gtk.css", directory, theme_name);
+        css_provider = gtk_css_provider_new();
+        gtk_css_provider_load_from_file(css_provider, g_file_new_for_path(buf), &error);
+
+        if (error) {
+                g_warning("%s\n", error->message);
+                return;
+        }
+
+        GdkDisplay *display = gdk_display_get_default();
+        GdkScreen *screen = gdk_display_get_default_screen(display);
+
+        gtk_style_context_add_provider_for_screen(screen,
+                        GTK_STYLE_PROVIDER(css_provider),
+                        GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+        g_object_unref (css_provider);
+}
+
+/*--------------------------------------------------------------------------*/
+
 void App::addPage (std::string const &pageName)
 {
         BOOST_LOG (lg) << "+" << pageName;
@@ -240,6 +270,8 @@ void App::addPage (std::string const &pageName)
 
         SlotVector slots = page->getSlots ();
         mainView->reparent (tiles, slots, &impl->context);
+        // TODO jakoś przenieść!
+        guiLoadTheme ("/home/iwasz/.themes/", "BioMorph", G_OBJECT (mainView));
         mainView->show ();
 }
 

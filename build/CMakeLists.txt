@@ -16,8 +16,9 @@ SET (BUILD_CATALOG             OFF CACHE BOOL "")
 
 SET (CMAKE_VERBOSE_MAKEFILE 0) 
 
-SET(CMAKE_C_FLAGS_DEBUG "-O0 -g -ggdb -gstabs+ -Wall" CACHE INTERNAL "c debug compiler flags")
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb -g -gstabs+ -std=c++11 -Wall" CACHE INTERNAL "cxx debug compiler flags")
+#TODO -Wall
+SET(CMAKE_C_FLAGS_DEBUG "-O0 -g -ggdb -gstabs+" CACHE INTERNAL "c debug compiler flags")
+SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb -g -gstabs+ -std=c++11" CACHE INTERNAL "cxx debug compiler flags")
 
 SET(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_DEBUG} CACHE INTERNAL "c compiler flags")
 SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG} CACHE INTERNAL "cxx compiler flags")
