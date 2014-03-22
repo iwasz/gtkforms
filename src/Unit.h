@@ -12,6 +12,7 @@
 #include "controller/IController.h"
 #include "IUnit.h"
 #include "ReflectionMacros.h"
+#include "signalAdapter/AbstractSignalAdapter.h"
 
 namespace GtkForms {
 
@@ -35,10 +36,11 @@ public:
         ControllerMap &getControllers () { return controllers; }
         ControllerMap const &getControllers () const { return controllers; }
 
+        SignalAdapterVector getSignalAdapters ();
+
 private:
 
         ControllerMap prr_ (controllers);
-
         end_ (Unit)
 };
 

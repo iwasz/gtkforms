@@ -10,6 +10,7 @@
 #define GTK_FORMS_SLOT_H_
 
 #include <string>
+#include "GtkTile.h"
 #include "ReflectionMacros.h"
 
 namespace GtkForms {
@@ -20,14 +21,15 @@ namespace GtkForms {
 class Slot {
 public:
         ctr__ (void)
+        Slot () : tile (nullptr) {}
 
         std::string getName () const { return name; }
-        std::string getTileName () const { return tileName; }
+        GtkTile *getTile () const { return tile; }
 
 private:
 
         std::string prr_ (name);
-        std::string prr_ (tileName);
+        GtkTile *prp_ (tile);
 
         end_ (Slot)
 };

@@ -15,13 +15,14 @@
 
 namespace GtkForms {
 class Context;
+class App;
 
 class IView : public Core::Object {
 public:
         virtual ~IView () {}
         virtual std::string getName () const = 0;
 
-        virtual void loadUi (Context *context) = 0;
+        virtual void loadUi (App *app) = 0;
 
         /**
          * Shows for the first time, or if widget is hidden.

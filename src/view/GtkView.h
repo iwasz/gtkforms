@@ -39,12 +39,10 @@ public:
 
         void model2View (std::string const &dataRange);
         void view2Model (std::string const &dataRange);
-        void reparent (GtkTileMap const &tiles, SlotVector const &slots, Context *context);
+        void reparent (SlotVector const &slots, Context *context);
 
         InputMap getInputs (std::string const &dataRange);
         void printStructure ();
-
-//        static char const *INPUT_MARK_CHARACTER;
 
 private:
 

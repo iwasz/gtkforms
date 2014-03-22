@@ -120,6 +120,7 @@ public:
         static Wrapper::BeanWrapper *getBeanWrapper ();
 
         std::string getDefaultProperty (std::string const &widgetType) const;
+        IUnit *getCurrentUnit ();
 
 private:
 

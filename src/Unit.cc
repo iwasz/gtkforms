@@ -82,7 +82,7 @@ ostream &operator<< (ostream &o, IUnit const &u)
         o << "Unit [";
 
         for (auto i = u.getControllers ().begin (); i != u.getControllers ().end (); ) {
-                o << i->second->getName ();
+                o << i->first;
 
                 if (++i != u.getControllers ().end ()) {
                         o << ", ";
@@ -112,6 +112,19 @@ IController *Unit::getController (std::string const &controllerName)
         }
 
         return i->second;
+}
+
+/*--------------------------------------------------------------------------*/
+
+SignalAdapterVector Unit::getSignalAdapters ()
+{
+        SignalAdapterVector adapters;
+
+        for (ControllerMap::value_type &entry : getControllers ()) {
+                std::copy (entry.second->getSignalAdapters ().begin (), entry.second->getSignalAdapters ().end (), std::back_inserter (adapters));
+        }
+
+        return adapters;
 }
 
 } // namespace GtkForms

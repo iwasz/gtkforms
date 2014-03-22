@@ -19,14 +19,18 @@ Page::~Page ()
 
 /*--------------------------------------------------------------------------*/
 
-void Page::loadUi (Context *context)
+void Page::loadUi (App *app)
 {
         if (view) {
-                view->loadUi (context);
+                view->loadUi (app);
         }
 
-        for (auto i : tiles) {
-                i.second->loadUi (context);
+        for (Slot *s : slots) {
+                GtkTile *tile = s->getTile ();
+
+                if (tile) {
+                        tile->loadUi (app);
+                }
         }
 }
 
@@ -34,8 +38,8 @@ void Page::loadUi (Context *context)
 
 void Page::destroyUi ()
 {
-        for (auto elem : tiles) {
-                GtkTile *tile = elem.second;
+        for (Slot *s : slots) {
+                GtkTile *tile = s->getTile ();
                 tile->destroyUi ();
         }
 
@@ -50,10 +54,11 @@ ostream &operator<< (ostream &o, Page const &p)
 {
         o << "Page [view : [" << p.view->getName () << "], tiles : [";
 
-        for (auto i = p.tiles.begin (); i != p.tiles.end (); ) {
-                o << i->second->getName ();
+        for (auto i = p.slots.begin (); i != p.slots.end (); ) {
+                GtkTile *tile = (*i)->getTile ();
+                o << tile->getName ();
 
-                if (++i != p.tiles.end ()) {
+                if (++i != p.slots.end ()) {
                         o << ", ";
                 }
         }

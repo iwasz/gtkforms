@@ -133,7 +133,7 @@ void GtkView::view2Model (std::string const &dataRange)
  *
  * So GtkWidnows should be destroyed explicitely, the others are reference-counted.
  */
-void GtkView::reparent (GtkTileMap const &tiles, SlotVector const &slots, Context *context)
+void GtkView::reparent (SlotVector const &slots, Context *context)
 {
 //        map <string, GtkBin *> slots;
 //        map <string, GtkWidget *> tiles;
@@ -237,15 +237,16 @@ void GtkView::reparent (GtkTileMap const &tiles, SlotVector const &slots, Contex
                         throw Core::Exception ("No such slot [" + slot->getName () + "]");
                 }
 
-                auto j = tiles.find (slot->getTileName ());
+                GtkTile *gtkTile = slot->getTile ();
 
-                if (j != tiles.end ()) {
-                        GtkTile *gtkTile = j->second;
-                        tileWidget = GTK_WIDGET (gtkTile->getUi ());
+                if (!gtkTile) {
+                        throw Core::Exception ("GtkView::reparent : no tile in slot.");
                 }
-                else {
-                        continue;
-                }
+
+                tileWidget = GTK_WIDGET (gtkTile->getUi ());
+
+                BOOST_LOG (lg) << gtkTile << ", " <<gtkTile->getUi ();
+
 
                 // Throw away old child ... ???
                 GtkWidget *oldChild = gtk_bin_get_child (slotWidget);

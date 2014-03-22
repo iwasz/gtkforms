@@ -14,6 +14,7 @@
 
 namespace GtkForms {
 class Context;
+class App;
 
 /**
  * Single GTK+ *.ui file. GtkBuilder is embedded in this class.
@@ -29,7 +30,7 @@ public:
          * Loads file into memory, and returns it (in form of GtkBuilder). If file is allready loaded,
          * it is immediately returned.
          */
-        GtkBuilder *load ();
+        GtkBuilder *load (App *app);
 
         /**
          * Clears memory occupied by loaded UI file.
@@ -38,7 +39,9 @@ public:
 
         std::string getFile () const { return file; }
 
-        void connectSignals (Context *context);
+private:
+
+        void connectSignals (App *app);
 
 private:
 

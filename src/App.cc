@@ -133,7 +133,8 @@ Core::StringSet App::manageUnits ()
                 IController *controller = entry.second;
                 controller->setApp (this);
                 std::string command = controller->end ();
-                impl->context.getSessionScope ().erase (controller->getName ());
+//                impl->context.getSessionScope ().erase (controller->getName ());
+                impl->context.getSessionScope ().erase (entry.first);
 
                 if (!command.empty ()) {
                         viewCommands.insert (command);
@@ -145,7 +146,8 @@ Core::StringSet App::manageUnits ()
                 controller->setApp (this);
                 std::string command = controller->start ();
                 impl->model2ViewRequest = true;
-                impl->context.getSessionScope ()[controller->getName ()] = Core::Variant (controller);
+//                impl->context.getSessionScope ()[controller->getName ()] = Core::Variant (controller);
+                impl->context.getSessionScope ()[entry.first] = Core::Variant (controller);
 
                 if (!command.empty ()) {
                         viewCommands.insert (command);
@@ -259,9 +261,8 @@ void App::addPage (std::string const &pageName)
         impl->pages[pageName] = page;
 
         // Load UI file, or noop if loaded.
-        page->loadUi (&impl->context);
+        page->loadUi (this);
 
-        GtkTileMap tiles = page->getTiles ();
         GtkView *mainView = page->getView ();
 
         if (!mainView) {
@@ -269,9 +270,9 @@ void App::addPage (std::string const &pageName)
         }
 
         SlotVector slots = page->getSlots ();
-        mainView->reparent (tiles, slots, &impl->context);
+        mainView->reparent (slots, &impl->context);
         // TODO jakoś przenieść!
-        guiLoadTheme ("/home/iwasz/.themes/", "BioMorph", G_OBJECT (mainView));
+//        guiLoadTheme ("/home/iwasz/.themes/", "BioMorph", G_OBJECT (mainView));
         mainView->show ();
 }
 
@@ -331,11 +332,11 @@ void App::movePage (std::string const &s, std::string const &pageBName)
         impl->pages.erase (pageAName);
 
         // Load UI file, or noop if loaded.
-        pageB->loadUi (&impl->context);
+        pageB->loadUi (this);
 
         // Get tiles and add them.
-        GtkTileMap tilesA = pageA->getTiles ();
-        GtkTileMap tilesB = pageB->getTiles ();
+//        GtkTileMap tilesA = pageA->getTiles ();
+//        GtkTileMap tilesB = pageB->getTiles ();
 
         // Find out common tiles.
         for (auto elem : tilesA) {
@@ -359,7 +360,7 @@ void App::movePage (std::string const &s, std::string const &pageBName)
 
         SlotVector slots = pageB->getSlots ();
 
-        mainViewB->reparent (tilesB, slots, &impl->context);
+        mainViewB->reparent (slots, &impl->context);
 
         if (mainViewA != mainViewB) {
                 mainViewA->destroyUi();
@@ -651,6 +652,13 @@ Page *App::getPage (std::string const &name)
 {
         Page* page = ocast <Page *> (impl->container->getBean (name));
         return page;
+}
+
+/*--------------------------------------------------------------------------*/
+
+IUnit *App::getCurrentUnit ()
+{
+        return &impl->unit;
 }
 
 /*--------------------------------------------------------------------------*/
