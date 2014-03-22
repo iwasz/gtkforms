@@ -9,6 +9,9 @@
 #ifndef IUNIT_H_
 #define IUNIT_H_
 
+#include "controller/IController.h"
+#include "signalAdapter/AbstractSignalAdapter.h"
+
 namespace GtkForms {
 
 /**
@@ -48,7 +51,7 @@ public:
         virtual IController *getController (std::string const &controllerName) = 0;
         virtual ControllerMap &getControllers () = 0;
         virtual ControllerMap const &getControllers () const = 0;
-
+        virtual SignalAdapterVector getSignalAdapters () = 0;
 };
 
 } // namespace GtkForms

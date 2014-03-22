@@ -13,7 +13,6 @@
 #include "IView.h"
 #include "ReflectionMacros.h"
 #include "UiFile.h"
-#include "signalAdapter/AbstractSignalAdapter.h"
 
 namespace GtkForms {
 class Context;
@@ -36,7 +35,7 @@ public:
          * name. If widget was obtained from the file earlier, it will be returned immediately, and no
          * new instance of this widget will be made.
          */
-        virtual void loadUi (Context *context);
+        virtual void loadUi (App *app);
         virtual void show ();
         virtual void hide ();
 
@@ -55,15 +54,18 @@ public:
          */
         virtual GObject *getUi (std::string const &name);
 
+//private:
+
+//        void connectSignals (Context *context);
+
 private:
 
-        void connectSignals (Context *context);
+        mth_ (contId) void contId (std::string const &id) { name = id; }
 
 private:
 
         std::string prr_ (name);
         UiFile *prp_ (uiFile);
-        SignalAdapterVector prr_ (signalAdapters);
 
         class Impl;
         Impl *impl = 0;

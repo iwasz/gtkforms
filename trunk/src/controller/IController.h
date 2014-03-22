@@ -15,6 +15,7 @@
 #include <map>
 #include <Tiliae.h>
 #include "ReflectionMacros.h"
+#include "signalAdapter/AbstractSignalAdapter.h"
 
 namespace GtkForms {
 
@@ -75,7 +76,9 @@ struct IController : public Core::Object {
         virtual Core::VariantMap &getUnitScope () = 0;
         virtual Core::VariantMap &getFlashScope () = 0;
 
-        virtual std::string getName () const = 0;
+//        virtual std::string getName () const = 0;
+
+        virtual SignalAdapterVector &getSignalAdapters () = 0;
 
 protected:
 

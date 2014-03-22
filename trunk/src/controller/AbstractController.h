@@ -29,8 +29,10 @@ public:
         virtual void onQuit () {}
         virtual void onIdle () {}
 
-        virtual std::string getName () const { return name; }
-        mth_ (setName) void setName (std::string const &name) { this->name = name; }
+//        virtual std::string getName () const { return name; }
+//        void setName (std::string const &name) { this->name = name; }
+
+        SignalAdapterVector &getSignalAdapters () { return signalAdapters; }
 
 protected:
 
@@ -39,11 +41,12 @@ protected:
 private:
 
         void setApp (App *app) { this->app = app; }
+//        mth_ (contId) void contId (std::string const &id) { name = id; }
 
 private:
 
-        std::string name;
-
+//        std::string prp_ (name);
+        SignalAdapterVector prr_ (signalAdapters);
         end_ (AbstractController)
 };
 

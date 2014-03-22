@@ -27,7 +27,6 @@ public:
 
         virtual ~Page ();
 
-        GtkTileMap const &getTiles () const { return tiles; }
         GtkView *getView () { return view; }
         std::string getName () const { return name; }
         SlotVector const &getSlots () const { return slots; }
@@ -36,14 +35,17 @@ public:
         MappingMap const &getMappingsByInput () const;
 //        MappingMap const &getMappingsByModel () const;
 
-        void loadUi (Context *context);
+        void loadUi (App *app);
         void destroyUi ();
 
         friend std::ostream &operator<< (std::ostream &o, Page const &u);
 
 private:
 
-        GtkTileMap prr_ (tiles);
+        mth_ (contId) void contId (std::string const &id) { name = id; }
+
+private:
+
         GtkView *prp_ (view);
         std::string prr_ (name);
         SlotVector prr_ (slots);
