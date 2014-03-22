@@ -338,17 +338,18 @@ void App::movePage (std::string const &s, std::string const &pageBName)
 //        GtkTileMap tilesA = pageA->getTiles ();
 //        GtkTileMap tilesB = pageB->getTiles ();
 
-        // Find out common tiles.
-        for (auto elem : tilesA) {
-                std::string tileAName = elem.first;
-                GtkTile *tileA = elem.second;
-
-                // Add only those tiles, that are not present in tilesB map.
-                GtkTileMap::iterator i;
-                if ((i = tilesB.find (tileAName)) == tilesB.end ()) {
-                        tilesB[tileAName] = tileA;
-                }
-        }
+//        TODO!!!!!
+//        // Find out common tiles.
+//        for (auto elem : tilesA) {
+//                std::string tileAName = elem.first;
+//                GtkTile *tileA = elem.second;
+//
+//                // Add only those tiles, that are not present in tilesB map.
+//                GtkTileMap::iterator i;
+//                if ((i = tilesB.find (tileAName)) == tilesB.end ()) {
+//                        tilesB[tileAName] = tileA;
+//                }
+//        }
 
         // Find out common views.
         GtkView *mainViewA = pageA->getView ();
