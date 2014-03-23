@@ -43,6 +43,7 @@ private:
         std::string prp_ (input);
         std::string prp_ (modelCollection);
         ColumnVector prr_ (columns);
+        Core::VariantVector modelColumnCopy;
 
         end_ (TableMapping)
 };
