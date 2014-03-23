@@ -18,6 +18,7 @@ namespace GtkForms {
  * 0 : GtkTreeView
  * 1 : GtkTreePath (in string form).
  * 2 : index of column cicked (starting from 0).
+ * 3 : whole model.
  */
 class RowActivatedAdapter : public AbstractSignalAdapter {
 public:
