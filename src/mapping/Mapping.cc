@@ -61,7 +61,13 @@ void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string
 
         Core::VariantMap &unitScope = dto->context->getUnitScope ();
         wrapper->setWrappedObject (Core::Variant (&unitScope));
-        wrapper->set (finalModelName, v);
+
+        Core::DebugContext ctx;
+        if (!wrapper->set (finalModelName, v, &ctx)) {
+                Core::Exception e {"Mapping::view2Model : invalid attempt to assign a value to a model property. "};
+                e.addContext (ctx);
+                throw e;
+        }
 }
 
 /*--------------------------------------------------------------------------*/

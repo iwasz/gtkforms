@@ -625,6 +625,26 @@ struct BWInitializer {
                 beanWrapper->addPlugin (new Wrapper::PropertyRWBeanWrapperPlugin ());
                 beanWrapper->addPlugin (new Wrapper::GetPutMethodRWBeanWrapperPlugin ());
                 beanWrapper->addPlugin (new Wrapper::MethodPlugin (Wrapper::MethodPlugin::METHOD));
+
+                Editor::TypeEditor *typeEditor = new Editor::TypeEditor (true);
+                typeEditor->setEqType (new Editor::NoopEditor ());
+                typeEditor->setNullType (new Editor::NoopEditor ());
+
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (int), new Editor::StreamEditor <std::string, int> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (double), new Editor::LexicalEditor <std::string, double> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (float), new Editor::LexicalEditor <std::string, float> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (char), new Editor::LexicalEditor <std::string, char> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (bool), new Editor::LexicalEditor <std::string, bool> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned int), new Editor::StreamEditor <std::string, unsigned int> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned char), new Editor::StreamEditor <std::string, unsigned char> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (long), new Editor::StreamEditor <std::string, long> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned long), new Editor::StreamEditor <std::string, unsigned long> ()));
+
+                Editor::ChainEditor *chain = new Editor::ChainEditor (true);
+                chain->addEditor (typeEditor);
+                chain->addEditor (new Editor::NoopEditor ());
+
+                beanWrapper->setEditor (chain);
         }
 
         Wrapper::BeanWrapper *beanWrapper = 0;
