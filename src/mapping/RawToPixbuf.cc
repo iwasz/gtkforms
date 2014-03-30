@@ -66,7 +66,12 @@ void RawToPixbuf::model2View (MappingDTO *dto)
         }
 
         BOOST_LOG (lg) << finalModelName;
+        // TODO Tak też nie działa, a powinno!
         wrapper->setWrappedObject (Core::Variant (&dto->context));
+
+//        Core::VariantMap &unitScope = dto->context->getUnitScope ();
+//        wrapper->setWrappedObject (Core::Variant (&unitScope));
+
         Core::Variant v = wrapper->get (finalModelName);
 
         if (v.isNone ()) {
