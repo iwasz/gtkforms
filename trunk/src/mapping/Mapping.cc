@@ -61,6 +61,7 @@ void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string
 
         Core::VariantMap &unitScope = dto->context->getUnitScope ();
         wrapper->setWrappedObject (Core::Variant (&unitScope));
+//        wrapper->setWrappedObject (Core::Variant (&dto->context));
 
         Core::DebugContext ctx;
         if (!wrapper->set (finalModelName, v, &ctx)) {
