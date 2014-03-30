@@ -5,15 +5,12 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
+#ifndef RAWDATA_H_
+#define RAWDATA_H_
 
-#ifndef GTKFORMS_H_
-#define GTKFORMS_H_
+#include <vector>
 
-#include "App.h"
-#include "ReflectionMacros.h"
-#include "controller/Controller.h"
-#include "view/View.h"
-#include "signalAdapter/SignalAdapter.h"
-#include "mapping/Mapping.h"
+typedef std::vector <unsigned char> RawData;
 
-#endif /* GTKFORMS_H_ */
+
+#endif /* RAWDATA_H_ */

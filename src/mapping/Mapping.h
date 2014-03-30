@@ -13,6 +13,7 @@
 #include "IMapping.h"
 #include "ReflectionMacros.h"
 #include <Tiliae.h>
+#include "RawData.h"
 
 namespace GtkForms {
 class App;
