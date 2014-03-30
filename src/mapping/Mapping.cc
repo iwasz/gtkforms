@@ -16,19 +16,19 @@ static src::logger_mt& lg = logger::get();
 
 void Mapping::view2Model (MappingDTO *dto)
 {
-        view2Model (dto, input, property, model);
+        view2Model (dto, input, property, model, v2mEditor);
 }
 
 /*--------------------------------------------------------------------------*/
 
 void Mapping::model2View (MappingDTO *dto)
 {
-        model2View (dto, input, property, model);
+        model2View (dto, input, property, model, m2vEditor);
 }
 
 /*--------------------------------------------------------------------------*/
 
-void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model)
+void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
 {
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
 
@@ -72,7 +72,7 @@ void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string
 
 /*--------------------------------------------------------------------------*/
 
-void Mapping::model2View (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model)
+void Mapping::model2View (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
 {
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
 
@@ -99,13 +99,25 @@ void Mapping::model2View (MappingDTO *dto, std::string const &input, std::string
 
         if (v.isNone ()) {
                 return;
-//                throw Core::Exception ("Mapping::model2View. Invalid modelName : [" + finalModelName + "]. Property you've tried to set : [" + finalProperty + "] in input widget : [" + input + "].");
         }
 
-        BOOST_LOG (lg) << "Mapping::model->view : " << finalModelName << "(" << v << ")" << " -> " << input << "." << finalProperty;
+        Core::Variant output;
+        if (editor) {
+                Core::DebugContext ctx;
+                if (!editor->convert (v, &output, &ctx)) {
+                        Core::Exception e {"Mapping::model2View : Nie udało się dokonać konwersji. Wartość wejściowa to : " + v.toString ()};
+                        e.addContext (ctx);
+                        throw e;
+                }
+        }
+        else {
+                output = v;
+        }
+
+        BOOST_LOG (lg) << "Mapping::model->view : " << finalModelName << "(" << output << ")" << " -> " << input << "." << finalProperty;
 
         wrapper->setWrappedObject (Core::Variant (dto->inputWidget));
-        wrapper->set (finalProperty, v);
+        wrapper->set (finalProperty, output);
 }
 
 } /* namespace GtkForms */
