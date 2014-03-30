@@ -92,7 +92,20 @@ void TableMapping::model2View (MappingDTO *dto)
 //                                BOOST_LOG (lg) << "++ Adding model : " << vVal.toString ();
                         }
 
-                        GtkForms::variantToGValue (&gVal, vVal);
+                        Core::Variant output;
+                        if (column->m2vEditor) {
+                                Core::DebugContext ctx;
+                                if (!column->m2vEditor->convert (vVal, &output, &ctx)) {
+                                        Core::Exception e {"Mapping::model2View : Nie udało się dokonać konwersji. Wartość wejściowa to : " + vVal.toString ()};
+                                        e.addContext (ctx);
+                                        throw e;
+                                }
+                        }
+                        else {
+                                output = vVal;
+                        }
+
+                        GtkForms::variantToGValue (&gVal, output);
                         gtk_list_store_set_value (list, &iter, colNo++, &gVal);
                 }
         }
