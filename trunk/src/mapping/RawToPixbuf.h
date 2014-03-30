@@ -10,6 +10,7 @@
 
 #include <GtkForms.h>
 #include "IMapping.h"
+#include <vector>
 
 namespace GtkForms {
 
@@ -21,6 +22,8 @@ public:
         ctr__ (void)
         RawToPixbuf ();
         virtual ~RawToPixbuf ();
+
+        std::string getInput () const { return input; }
 
         void view2Model (MappingDTO *dto);
         void model2View (MappingDTO *dto);
