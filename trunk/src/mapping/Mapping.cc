@@ -59,9 +59,9 @@ void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string
 
         BOOST_LOG (lg) << "Maping::view->model : " << input << "." << finalProperty << "(" << v << ")" << " -> " << finalModelName;
 
+        // We always set to the unitScope. Context has only get method, and no set. Setting is available only to distinct scopes.
         Core::VariantMap &unitScope = dto->context->getUnitScope ();
         wrapper->setWrappedObject (Core::Variant (&unitScope));
-//        wrapper->setWrappedObject (Core::Variant (&dto->context));
 
         Core::DebugContext ctx;
         if (!wrapper->set (finalModelName, v, &ctx)) {
@@ -94,8 +94,7 @@ void Mapping::model2View (MappingDTO *dto, std::string const &input, std::string
                 finalModelName = input;
         }
 
-        Core::VariantMap &unitScope = dto->context->getUnitScope ();
-        wrapper->setWrappedObject (Core::Variant (&unitScope));
+        wrapper->setWrappedObject (Core::Variant (dto->context));
         Core::Variant v = wrapper->get (finalModelName);
 
         if (v.isNone ()) {

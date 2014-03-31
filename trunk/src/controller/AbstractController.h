@@ -25,6 +25,7 @@ public:
         Core::VariantMap &getSessionScope ();
         Core::VariantMap &getUnitScope ();
         Core::VariantMap &getFlashScope ();
+        Core::Variant get (const std::string &name);
 
         virtual void onQuit () {}
         virtual void onIdle () {}
