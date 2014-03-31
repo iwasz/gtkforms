@@ -54,10 +54,6 @@ public:
          */
         virtual GObject *getUi (std::string const &name);
 
-//private:
-
-//        void connectSignals (Context *context);
-
 private:
 
         mth_ (contId) void contId (std::string const &id) { name = id; }

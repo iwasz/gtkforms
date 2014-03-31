@@ -89,7 +89,6 @@ void TableMapping::model2View (MappingDTO *dto)
                                  * additional memory consumption (in this particullar scenario).
                                  */
                                 modelColumnCopy.push_back (vVal);
-//                                BOOST_LOG (lg) << "++ Adding model : " << vVal.toString ();
                         }
 
                         Core::Variant output;
