@@ -31,4 +31,11 @@ Core::VariantMap &AbstractController::getFlashScope ()
         return app->getContext ().getFlashScope ();
 }
 
+/*--------------------------------------------------------------------------*/
+
+Core::Variant AbstractController::get (const std::string &name)
+{
+        return app->getContext ().get (name);
+}
+
 } // namespace GtkForms

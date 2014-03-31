@@ -22,12 +22,12 @@ public:
 
         // TODO Tu jest błąd, który jak się naprawi, to program nie działa....
         Core::VariantMap &getSessionScope () { return session; }
-        Core::VariantMap &getUnitScope () { return session; }
-        Core::VariantMap &getFlashScope () { return session; }
+        Core::VariantMap &getUnitScope () { return unit; }
+        Core::VariantMap &getFlashScope () { return flash; }
 
         void clearSessionScope () { session.clear (); }
-        void clearUnitScope () { session.clear (); }
-        void clearFlashScope () { session.clear (); }
+        void clearUnitScope () { unit.clear (); }
+        void clearFlashScope () { flash.clear (); }
 
         mth_ (get) Core::Variant get (const std::string &name);
 
