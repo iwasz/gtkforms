@@ -17,11 +17,11 @@ namespace GtkForms {
 /**
  *
  */
-class RawToPixbuf : public IMapping {
+class RawToPixbufMapping : public IMapping {
 public:
         ctr__ (void)
-        RawToPixbuf ();
-        virtual ~RawToPixbuf ();
+        RawToPixbufMapping () : maxWidth {-1}, maxHeight {-1}/*, expand {false}*/ {}
+        virtual ~RawToPixbufMapping () {}
 
         std::string getInput () const { return input; }
 
@@ -31,9 +31,10 @@ public:
 private:
         std::string prp_ (input);
         std::string prp_ (model);
-        class Impl;
-        Impl *impl;
-        end_ (RawToPixbuf)
+        int prp_ (maxWidth);
+        int prp_ (maxHeight);
+//        bool prp_ (expand);
+        end_ (RawToPixbufMapping)
 };
 
 } // end namespace
