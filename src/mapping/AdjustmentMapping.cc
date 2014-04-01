@@ -21,8 +21,6 @@ using namespace Core;
 void AdjustmentMapping::view2Model (MappingDTO *dto)
 {
         GtkAdjustment *adjustment = 0;
-        std::string finalProperty;
-        std::string finalModelName;
 
         if (GTK_IS_RANGE (dto->inputWidget)) {
                 adjustment = gtk_range_get_adjustment (GTK_RANGE (dto->inputWidget));
@@ -37,6 +35,9 @@ void AdjustmentMapping::view2Model (MappingDTO *dto)
         if (!adjustment) {
                 throw Core::Exception ("AdjustmentMapping::view2Model : adjustment is NULL.");
         }
+
+        std::string finalProperty;
+        std::string finalModelName;
 
         if (!property.empty ()) {
                 finalProperty = property;
@@ -82,7 +83,6 @@ void AdjustmentMapping::view2Model (MappingDTO *dto)
                 e.addContext (ctx);
                 throw e;
         }
-
 }
 
 /*--------------------------------------------------------------------------*/

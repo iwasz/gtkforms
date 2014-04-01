@@ -10,6 +10,7 @@
 #include "Logging.h"
 #include "App.h"
 #include "Context.h"
+#include "GValueVariant.h"
 
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
@@ -30,8 +31,6 @@ void Mapping::model2View (MappingDTO *dto)
 
 void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
 {
-        Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
-
         std::string finalProperty;
         std::string finalModelName;
 
@@ -49,9 +48,19 @@ void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string
                 finalModelName = input;
         }
 
-        // TODO, to by można było bez Wrappera zrobić, tylko na piechotę. Szybciej by było.
-        wrapper->setWrappedObject (Core::Variant (dto->inputWidget));
-        Core::Variant v = wrapper->get (finalProperty);
+        GParamSpec *spec = g_object_class_find_property (G_OBJECT_GET_CLASS (dto->inputWidget), finalProperty.c_str ());
+
+        if (!spec) {
+                throw Core::Exception ("Mapping::view2Model : Non-existent property (of some GTK+ widget) has been requested. Property name : [" + finalProperty + "]");
+        }
+
+        GType propType = spec->value_type;
+        GValue propValue = {0};
+
+        g_value_init (&propValue, propType);
+        g_object_get_property (G_OBJECT (dto->inputWidget), finalProperty.c_str (), &propValue);
+        Core::Variant v = gValueToVariant (&propValue);
+        g_value_unset (&propValue);
 
         if (v.isNone ()) {
                 throw Core::Exception ("Mapping::view2Model. Invalid property : [" + finalProperty + "] in input widget : [" + input + "].");
@@ -59,7 +68,7 @@ void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string
 
         BOOST_LOG (lg) << "Maping::view->model : " << input << "." << finalProperty << "(" << v << ")" << " -> " << finalModelName;
 
-        // We always set to the unitScope. Context has only get method, and no set. Setting is available only to distinct scopes.
+        Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
         Core::VariantMap &unitScope = dto->context->getUnitScope ();
         wrapper->setWrappedObject (Core::Variant (&unitScope));
 
@@ -116,8 +125,14 @@ void Mapping::model2View (MappingDTO *dto, std::string const &input, std::string
 
         BOOST_LOG (lg) << "Mapping::model->view : " << finalModelName << "(" << output << ")" << " -> " << input << "." << finalProperty;
 
-        wrapper->setWrappedObject (Core::Variant (dto->inputWidget));
-        wrapper->set (finalProperty, output);
+        GValue gVal = G_VALUE_INIT;
+        variantToGValue (&gVal, output);
+        g_object_set_property (G_OBJECT (dto->inputWidget), finalProperty.c_str (), &gVal);
+        g_value_unset (&gVal);
+
+
+//        wrapper->setWrappedObject (Core::Variant (dto->inputWidget));
+//        wrapper->set (finalProperty, output);
 }
 
 } /* namespace GtkForms */
