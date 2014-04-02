@@ -9,7 +9,7 @@
 #define RAWTOPIXBUF_H_
 
 #include <GtkForms.h>
-#include "IMapping.h"
+#include "Mapping.h"
 #include <vector>
 
 namespace GtkForms {
@@ -17,23 +17,23 @@ namespace GtkForms {
 /**
  *
  */
-class RawToPixbufMapping : public IMapping {
+class RawToPixbufMapping : public Mapping {
 public:
         ctr__ (void)
-        RawToPixbufMapping () : maxWidth {-1}, maxHeight {-1}/*, expand {false}*/ {}
+        bse_ ("Mapping")
+        RawToPixbufMapping () : maxWidth {-1}, maxHeight {-1} {}
         virtual ~RawToPixbufMapping () {}
 
-        std::string getInput () const { return input; }
+        virtual void view2Model (MappingDTO *dto) { /* Not implemented and won't be */ }
 
-        void view2Model (MappingDTO *dto);
-        void model2View (MappingDTO *dto);
+protected:
+
+        virtual void setToView (GObject *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
 private:
-        std::string prp_ (input);
-        std::string prp_ (model);
+
         int prp_ (maxWidth);
         int prp_ (maxHeight);
-//        bool prp_ (expand);
         end_ (RawToPixbufMapping)
 };
 

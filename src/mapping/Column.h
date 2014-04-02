@@ -10,16 +10,20 @@
 #define GTK_FORMS_TABLE_MAPPING_COLUMN_H_
 
 #include <Tiliae.h>
+#include "Mapping.h"
 #include "ReflectionMacros.h"
 
 namespace GtkForms {
 
-struct Column {
+struct Column : public Mapping {
         ctr__ (void)
-        Column () : m2vEditor {nullptr}, v2mEditor {nullptr} {}
-        std::string prp_ (model);
-        Editor::IEditor *prp_ (m2vEditor);
-        Editor::IEditor *prp_ (v2mEditor);
+        bse_ ("Mapping")
+        virtual ~Column () {}
+
+protected:
+
+        virtual void setToView (GObject *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
+
         end_ (Column)
 };
 
