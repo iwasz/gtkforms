@@ -11,6 +11,7 @@
 
 #include <string>
 #include <gtk/gtk.h>
+#include <Tiliae.h>
 
 namespace GtkForms {
 class  App;
@@ -22,7 +23,9 @@ class Context;
 struct MappingDTO {
         App *app = 0;
         GObject *inputWidget = 0;
-        Context *context = 0;
+//        Context *context = 0;
+        Core::Variant m2vModelObject;
+        Core::Variant v2mModelObject;
         std::string dataRange;
 };
 

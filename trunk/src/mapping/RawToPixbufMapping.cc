@@ -10,7 +10,6 @@
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include "RawData.h"
-#include "Context.h"
 
 /*
  * https://developer.gnome.org/gdk-pixbuf/unstable//gdk-pixbuf-Image-Data-in-Memory.html#gdk-pixbuf-copy
@@ -18,50 +17,22 @@
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
 
-void RawToPixbufMapping::view2Model (MappingDTO *dto)
+void RawToPixbufMapping::setToView (GObject *viewObject, std::string const &, Core::Variant valueToSet)
 {
-        // Not implemented and won't be.
-        return;
-}
-
-void RawToPixbufMapping::model2View (MappingDTO *dto)
-{
-        if (!GTK_IS_IMAGE (dto->inputWidget)) {
-                throw Core::Exception ("RawToPixbuf::model2View : Could not conver inputWidget to to GtkImage.");
+        if (!GTK_IS_IMAGE (viewObject)) {
+                throw Core::Exception ("TextViewMapping::setToView : Could not conver inputWidget to to GtkImage.");
         }
 
-        GtkImage *image = GTK_IMAGE (dto->inputWidget);
-
-        Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
-
-        std::string finalModelName;
-
-        if (!model.empty ()) {
-                finalModelName = model;
-        }
-        else {
-                finalModelName = input;
-        }
-
-        BOOST_LOG (lg) << finalModelName;
-        wrapper->setWrappedObject (Core::Variant (dto->context));
-        Core::Variant v = wrapper->get (finalModelName);
-
-        if (v.isNone ()) {
-                return;
-        }
-
-        RawData *data = vcast <RawData *> (v);
+        GtkImage *image = GTK_IMAGE (viewObject);
+        RawData *data = vcast <RawData *> (valueToSet);
 
         if (data->empty ()) {
                 gtk_image_clear (image);
                 return;
         }
 
-        // TODO memory deallocation?
         GInputStream *stream = g_memory_input_stream_new_from_data (data->data (), data->size (), NULL);
         GError *e = nullptr;
-        // TODO memory deallocation?
         GdkPixbuf *pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, &e);
 
         if (!pixbuf) {

@@ -6,34 +6,26 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef TABLEMAPPING_H_
-#define TABLEMAPPING_H_
+#ifndef TEXT_VIEW_MAPPING_H_
+#define TEXT_VIEW_MAPPING_H_
 
-#include "IMapping.h"
 #include "ReflectionMacros.h"
 #include "Column.h"
+#include "Mapping.h"
 
 namespace GtkForms {
 
-/**
- * TODO Zrobić jedno z TextViewMapping i Mapping (konfigurowalny) i potem wydziedziczyć itak o.
- */
-class TextViewMapping : public IMapping {
+class TextViewMapping : public Mapping {
 public:
         ctr__ (void)
-        TextViewMapping () : property {"text"} {}
+        bse_ ("Mapping")
         virtual ~TextViewMapping () {}
 
-        std::string getInput () const { return input; }
+protected:
 
-        void view2Model (MappingDTO *dto);
-        void model2View (MappingDTO *dto);
-
-private:
-
-        std::string prp_ (input);
-        std::string prp_ (property);
-        std::string prp_ (model);
+        virtual std::string getDefaultProperty (App *app, std::string const &widgetClass) const { return "text"; }
+        virtual void setToView (GObject *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
+        virtual Core::Variant getFromView (GObject *viewObject, std::string const &finalProperty);
 
         end_ (TextViewMapping)
 };

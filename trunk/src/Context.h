@@ -20,7 +20,6 @@ public:
 
         virtual ~Context () {}
 
-        // TODO Tu jest błąd, który jak się naprawi, to program nie działa....
         Core::VariantMap &getSessionScope () { return session; }
         Core::VariantMap &getUnitScope () { return unit; }
         Core::VariantMap &getFlashScope () { return flash; }

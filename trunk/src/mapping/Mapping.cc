@@ -11,44 +11,116 @@
 #include "App.h"
 #include "Context.h"
 #include "GValueVariant.h"
+#include <cassert>
 
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
 
 void Mapping::view2Model (MappingDTO *dto)
 {
-        view2Model (dto, input, property, model, v2mEditor);
+        std::string finalProperty;
+        std::string finalModelName;
+        finalPropertyAndModel (&finalProperty, &finalModelName, dto);
+
+        Core::Variant v = getFromView (G_OBJECT (dto->inputWidget), finalProperty);
+
+        if (v.isNone ()) {
+                throw Core::Exception ("Mapping::view2Model. Invalid property : [" + finalProperty + "] in input widget : [" + input + "].");
+        }
+
+        BOOST_LOG (lg) << "Maping::view->model : " << input << "." << finalProperty << "(" << v << ")" << " -> " << finalModelName;
+        setToModel (dto->app->getBeanWrapper (), dto->v2mModelObject, finalModelName, v);
 }
 
 /*--------------------------------------------------------------------------*/
 
 void Mapping::model2View (MappingDTO *dto)
 {
-        model2View (dto, input, property, model, m2vEditor);
+        std::string finalProperty;
+        std::string finalModelName;
+        finalPropertyAndModel (&finalProperty, &finalModelName, dto);
+
+        Core::Variant v = getFromModel (dto->app->getBeanWrapper (), dto->m2vModelObject, finalModelName);
+
+        if (v.isNone ()) {
+                return;
+        }
+
+        BOOST_LOG (lg) << "Mapping::model->view : " << finalModelName << "(" << v << ")" << " -> " << input << "." << finalProperty;
+        setToView (G_OBJECT (dto->inputWidget), finalProperty, v);
+}
+
+/****************************************************************************/
+
+void Mapping::finalPropertyAndModel (std::string *finalProperty, std::string *finalModelName, MappingDTO *dto)
+{
+        assert (finalProperty);
+        assert (finalModelName);
+
+        if (!property.empty ()) {
+                *finalProperty = property;
+        }
+        else {
+                *finalProperty = getDefaultProperty (dto->app, "");
+        }
+
+        if (!model.empty ()) {
+                *finalModelName = model;
+        }
+        else {
+                *finalModelName = input;
+        }
 }
 
 /*--------------------------------------------------------------------------*/
 
-void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
+std::string Mapping::getDefaultProperty (App *app, std::string const &widgetClass) const
 {
-        std::string finalProperty;
-        std::string finalModelName;
+        return app->getDefaultProperty (widgetClass);
+}
 
-        if (!property.empty ()) {
-                finalProperty = property;
+/*--------------------------------------------------------------------------*/
+
+Core::Variant Mapping::getFromModel (Wrapper::BeanWrapper *wrapper, Core::Variant objectToWrap, std::string const &finalModelName)
+{
+        wrapper->setWrappedObject (objectToWrap);
+        Core::Variant v = wrapper->get (finalModelName);
+
+        if (v.isNone ()) {
+                return v;
+        }
+
+        Core::Variant output;
+        if (m2vEditor) {
+                Core::DebugContext ctx;
+                if (!m2vEditor->convert (v, &output, &ctx)) {
+                        Core::Exception e {"Mapping::getModel : Nie udało się dokonać konwersji. Wartość wejściowa to : " + v.toString ()};
+                        e.addContext (ctx);
+                        throw e;
+                }
         }
         else {
-                finalProperty = dto->app->getDefaultProperty ("");
+                output = v;
         }
 
-        if (!model.empty ()) {
-                finalModelName = model;
-        }
-        else {
-                finalModelName = input;
-        }
+        return output;
+}
 
-        GParamSpec *spec = g_object_class_find_property (G_OBJECT_GET_CLASS (dto->inputWidget), finalProperty.c_str ());
+/*--------------------------------------------------------------------------*/
+
+void Mapping::setToView (GObject *viewObject, std::string const &finalProperty, Core::Variant valueToSet)
+{
+        GValue gVal = G_VALUE_INIT;
+        variantToGValue (&gVal, valueToSet);
+        g_object_set_property (viewObject, finalProperty.c_str (), &gVal);
+        g_value_unset (&gVal);
+}
+
+/*--------------------------------------------------------------------------*/
+
+Core::Variant Mapping::getFromView (GObject *viewObject, std::string const &finalProperty)
+{
+        GParamSpec *spec = g_object_class_find_property (G_OBJECT_GET_CLASS (viewObject), finalProperty.c_str ());
 
         if (!spec) {
                 throw Core::Exception ("Mapping::view2Model : Non-existent property (of some GTK+ widget) has been requested. Property name : [" + finalProperty + "]");
@@ -58,22 +130,34 @@ void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string
         GValue propValue = {0};
 
         g_value_init (&propValue, propType);
-        g_object_get_property (G_OBJECT (dto->inputWidget), finalProperty.c_str (), &propValue);
+        g_object_get_property (G_OBJECT (viewObject), finalProperty.c_str (), &propValue);
         Core::Variant v = gValueToVariant (&propValue);
         g_value_unset (&propValue);
 
-        if (v.isNone ()) {
-                throw Core::Exception ("Mapping::view2Model. Invalid property : [" + finalProperty + "] in input widget : [" + input + "].");
+        return v;
+}
+
+/*--------------------------------------------------------------------------*/
+
+void Mapping::setToModel (Wrapper::BeanWrapper *wrapper, Core::Variant objectToWrap, std::string const &finalModelName, Core::Variant valueToSet)
+{
+        wrapper->setWrappedObject (objectToWrap);
+
+        Core::Variant output;
+        if (v2mEditor) {
+                Core::DebugContext ctx;
+                if (!v2mEditor->convert (valueToSet, &output, &ctx)) {
+                        Core::Exception e {"Mapping::view2Model : Nie udało się dokonać konwersji. Wartość wejściowa to : " + valueToSet.toString ()};
+                        e.addContext (ctx);
+                        throw e;
+                }
+        }
+        else {
+                output = valueToSet;
         }
 
-        BOOST_LOG (lg) << "Maping::view->model : " << input << "." << finalProperty << "(" << v << ")" << " -> " << finalModelName;
-
-        Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
-        Core::VariantMap &unitScope = dto->context->getUnitScope ();
-        wrapper->setWrappedObject (Core::Variant (&unitScope));
-
         Core::DebugContext ctx;
-        if (!wrapper->set (finalModelName, v, &ctx)) {
+        if (!wrapper->set (finalModelName, valueToSet, &ctx)) {
                 Core::Exception e {"Mapping::view2Model : invalid attempt to assign a value to a model property. "};
                 e.addContext (ctx);
                 throw e;
@@ -82,57 +166,28 @@ void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string
 
 /*--------------------------------------------------------------------------*/
 
+void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
+{
+        static Mapping mapping;
+        mapping.input = input;
+        mapping.property = property;
+        mapping.model = model;
+        mapping.v2mEditor = editor;
+        mapping.m2vEditor = nullptr;
+        mapping.view2Model (dto);
+}
+
+/*--------------------------------------------------------------------------*/
+
 void Mapping::model2View (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
 {
-        Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
-
-        std::string finalProperty;
-        std::string finalModelName;
-
-        if (!property.empty ()) {
-                finalProperty = property;
-        }
-        else {
-                finalProperty = dto->app->getDefaultProperty ("");
-        }
-
-        if (!model.empty ()) {
-                finalModelName = model;
-        }
-        else {
-                finalModelName = input;
-        }
-
-        wrapper->setWrappedObject (Core::Variant (dto->context));
-        Core::Variant v = wrapper->get (finalModelName);
-
-        if (v.isNone ()) {
-                return;
-        }
-
-        Core::Variant output;
-        if (editor) {
-                Core::DebugContext ctx;
-                if (!editor->convert (v, &output, &ctx)) {
-                        Core::Exception e {"Mapping::model2View : Nie udało się dokonać konwersji. Wartość wejściowa to : " + v.toString ()};
-                        e.addContext (ctx);
-                        throw e;
-                }
-        }
-        else {
-                output = v;
-        }
-
-        BOOST_LOG (lg) << "Mapping::model->view : " << finalModelName << "(" << output << ")" << " -> " << input << "." << finalProperty;
-
-        GValue gVal = G_VALUE_INIT;
-        variantToGValue (&gVal, output);
-        g_object_set_property (G_OBJECT (dto->inputWidget), finalProperty.c_str (), &gVal);
-        g_value_unset (&gVal);
-
-
-//        wrapper->setWrappedObject (Core::Variant (dto->inputWidget));
-//        wrapper->set (finalProperty, output);
+        static Mapping mapping;
+        mapping.input = input;
+        mapping.property = property;
+        mapping.model = model;
+        mapping.v2mEditor = nullptr;
+        mapping.m2vEditor = editor;
+        mapping.model2View (dto);
 }
 
 } /* namespace GtkForms */

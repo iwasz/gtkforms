@@ -46,7 +46,7 @@ void TableMapping::model2View (MappingDTO *dto)
         modelColumnCopy.clear ();
 
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
-        wrapper->setWrappedObject (Core::Variant (dto->context));
+        wrapper->setWrappedObject (dto->m2vModelObject);
 
         Ptr <IIterator> i = wrapper->iterator (modelCollection);
         GtkTreeIter iter;
@@ -55,18 +55,29 @@ void TableMapping::model2View (MappingDTO *dto)
         while (i->hasNext ()) {
 
                 Variant element = i->next ();
+
                 wrapper->setWrappedObject (element);
+
+                MappingDTO columnDto;
+                columnDto.app = dto->app;
+                columnDto.inputWidget = G_OBJECT (list);
+                columnDto.m2vModelObject = element;
+                columnDto.v2mModelObject = element;
+                columnDto.dataRange = "";
 
                 // Dodaj wiersz i uzyskaj iterator.
                 gtk_list_store_append (list, &iter);
 
                 unsigned int colNo = 0;
                 for (Column *column : columns) {
+
+
+
                         GValue gVal = G_VALUE_INIT;
                         Variant vVal;
 
-                        if (!column->model.empty ()) {
-                                vVal = wrapper->get (&element, column->model);
+                        if (!column->getModel ().empty ()) {
+                                vVal = wrapper->get (&element, column->getModel ());
                         }
                         else {
                                 vVal = element;
@@ -92,20 +103,22 @@ void TableMapping::model2View (MappingDTO *dto)
                         }
 
                         Core::Variant output;
-                        if (column->m2vEditor) {
-                                Core::DebugContext ctx;
-                                if (!column->m2vEditor->convert (vVal, &output, &ctx)) {
-                                        Core::Exception e {"Mapping::model2View : Nie udało się dokonać konwersji. Wartość wejściowa to : " + vVal.toString ()};
-                                        e.addContext (ctx);
-                                        throw e;
-                                }
-                        }
-                        else {
+//                        if (column->m2vEditor) {
+//                                Core::DebugContext ctx;
+//                                if (!column->m2vEditor->convert (vVal, &output, &ctx)) {
+//                                        Core::Exception e {"Mapping::model2View : Nie udało się dokonać konwersji. Wartość wejściowa to : " + vVal.toString ()};
+//                                        e.addContext (ctx);
+//                                        throw e;
+//                                }
+//                        }
+//                        else {
                                 output = vVal;
-                        }
+//                        }
 
-                        GtkForms::variantToGValue (&gVal, output);
-                        gtk_list_store_set_value (list, &iter, colNo++, &gVal);
+//                        GtkForms::variantToGValue (&gVal, output);
+//                        gtk_list_store_set_value (list, &iter, colNo++, &gVal);
+
+                        column->model2View (&columnDto);
                 }
         }
 }
