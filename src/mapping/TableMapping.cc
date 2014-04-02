@@ -26,11 +26,11 @@ void TableMapping::view2Model (MappingDTO *dto)
 
 void TableMapping::model2View (MappingDTO *dto)
 {
-        if (!GTK_IS_TREE_VIEW (dto->inputWidget)) {
+        if (!GTK_IS_TREE_VIEW (dto->viewElement->inputWidget)) {
                 throw Core::Exception ("TableMapping::view2Model : Could not conver inputWidget to to GtkTreeView.");
         }
 
-        GtkTreeView *treeView = GTK_TREE_VIEW (dto->inputWidget);
+        GtkTreeView *treeView = GTK_TREE_VIEW (dto->viewElement->inputWidget);
         GtkTreeModel *model = gtk_tree_view_get_model (treeView);
 
         if (!model) {
@@ -47,40 +47,31 @@ void TableMapping::model2View (MappingDTO *dto)
 
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
         wrapper->setWrappedObject (dto->m2vModelObject);
-
         Ptr <IIterator> i = wrapper->iterator (modelCollection);
         GtkTreeIter iter;
 
         // Per row iteration.
         while (i->hasNext ()) {
-
                 Variant element = i->next ();
 
-                wrapper->setWrappedObject (element);
-
-                MappingDTO columnDto;
-                columnDto.app = dto->app;
-                columnDto.inputWidget = G_OBJECT (list);
-                columnDto.m2vModelObject = element;
-                columnDto.v2mModelObject = element;
-                columnDto.dataRange = "";
+                MappingDTO columnDTO;
+                columnDTO.app = dto->app;
+                columnDTO.m2vModelObject = element;
+                columnDTO.v2mModelObject = element;
+                columnDTO.dataRange = "";
 
                 // Dodaj wiersz i uzyskaj iterator.
                 gtk_list_store_append (list, &iter);
 
-                unsigned int colNo = 0;
+                ColumnElementDTO elementDTO;
+                elementDTO.columnNumber = 0;
+                elementDTO.inputWidget = G_OBJECT (list);
+                elementDTO.iter = &iter;
+                columnDTO.viewElement = &elementDTO;
+
                 for (Column *column : columns) {
 
-
-
-                        GValue gVal = G_VALUE_INIT;
-                        Variant vVal;
-
-                        if (!column->getModel ().empty ()) {
-                                vVal = wrapper->get (&element, column->getModel ());
-                        }
-                        else {
-                                vVal = element;
+                        if (column->getModel ().empty ()) {
                                 /*
                                  * This copy prevents deletion of smart_pointers. Rationale : TableMapping converts between some
                                  * custom collection (lets call it model-collection) of objects (lets call them modl-objects.
@@ -99,26 +90,17 @@ void TableMapping::model2View (MappingDTO *dto)
                                  * all model objects. So point to remember : collections of values in your domain model will cause
                                  * additional memory consumption (in this particullar scenario).
                                  */
-                                modelColumnCopy.push_back (vVal);
+                                modelColumnCopy.push_back (element);
+                                GValue gVal = G_VALUE_INIT;
+                                GtkForms::variantToGValue (&gVal, element);
+                                gtk_list_store_set_value (list, &iter, elementDTO.columnNumber, &gVal);
+                                g_value_unset (&gVal);
+                        }
+                        else {
+                                column->model2View (&columnDTO);
                         }
 
-                        Core::Variant output;
-//                        if (column->m2vEditor) {
-//                                Core::DebugContext ctx;
-//                                if (!column->m2vEditor->convert (vVal, &output, &ctx)) {
-//                                        Core::Exception e {"Mapping::model2View : Nie udało się dokonać konwersji. Wartość wejściowa to : " + vVal.toString ()};
-//                                        e.addContext (ctx);
-//                                        throw e;
-//                                }
-//                        }
-//                        else {
-                                output = vVal;
-//                        }
-
-//                        GtkForms::variantToGValue (&gVal, output);
-//                        gtk_list_store_set_value (list, &iter, colNo++, &gVal);
-
-                        column->model2View (&columnDto);
+                        ++(elementDTO.columnNumber);
                 }
         }
 }

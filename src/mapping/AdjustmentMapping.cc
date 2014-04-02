@@ -17,7 +17,7 @@
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
 
-Core::Variant AdjustmentMapping::getFromView (GObject *viewObject, std::string const &finalProperty)
+Core::Variant AdjustmentMapping::getFromView (ViewElementDTO *viewObject, std::string const &finalProperty)
 {
         GtkAdjustment *adjustment = 0;
 
@@ -35,12 +35,13 @@ Core::Variant AdjustmentMapping::getFromView (GObject *viewObject, std::string c
                 throw Core::Exception ("AdjustmentMapping::getFromView : adjustment is NULL.");
         }
 
-        return Mapping::getFromView (G_OBJECT (adjustment), finalProperty);
+        ViewElementDTO element {G_OBJECT (adjustment)};
+        return Mapping::getFromView (&element, finalProperty);
 }
 
 /*--------------------------------------------------------------------------*/
 
-void AdjustmentMapping::setToView (GObject *viewObject, std::string const &finalProperty, Core::Variant valueToSet)
+void AdjustmentMapping::setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet)
 {
         GtkAdjustment *adjustment = 0;
 
@@ -58,7 +59,8 @@ void AdjustmentMapping::setToView (GObject *viewObject, std::string const &final
                 throw Core::Exception ("AdjustmentMapping::setToView : adjustment is NULL.");
         }
 
-        Mapping::setToView (G_OBJECT (adjustment), finalProperty, valueToSet);
+        ViewElementDTO element {G_OBJECT (adjustment)};
+        Mapping::setToView (&element, finalProperty, valueToSet);
 }
 
 } /* namespace GtkForms */

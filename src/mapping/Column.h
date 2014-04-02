@@ -12,8 +12,15 @@
 #include <Tiliae.h>
 #include "Mapping.h"
 #include "ReflectionMacros.h"
+#include "MappingDTO.h"
 
 namespace GtkForms {
+
+struct ColumnElementDTO : public ViewElementDTO {
+        ColumnElementDTO () : ViewElementDTO {nullptr} {}
+        GtkTreeIter *iter = nullptr;
+        unsigned int columnNumber = 0;
+};
 
 struct Column : public Mapping {
         ctr__ (void)
@@ -22,7 +29,7 @@ struct Column : public Mapping {
 
 protected:
 
-        virtual void setToView (GObject *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
+        virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
         end_ (Column)
 };

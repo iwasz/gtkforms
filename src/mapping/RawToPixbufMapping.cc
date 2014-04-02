@@ -17,13 +17,18 @@
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
 
-void RawToPixbufMapping::setToView (GObject *viewObject, std::string const &, Core::Variant valueToSet)
+void RawToPixbufMapping::setToView (ViewElementDTO *viewObject, std::string const &, Core::Variant valueToSet)
 {
-        if (!GTK_IS_IMAGE (viewObject)) {
-                throw Core::Exception ("TextViewMapping::setToView : Could not conver inputWidget to to GtkImage.");
+        if (!GTK_IS_IMAGE (viewObject->inputWidget)) {
+                throw Core::Exception ("RawToPixbufMapping::setToView : Could not conver inputWidget to to GtkImage.");
         }
 
-        GtkImage *image = GTK_IMAGE (viewObject);
+        GtkImage *image = GTK_IMAGE (viewObject->inputWidget);
+
+        if (valueToSet.isNull ()) {
+                return;
+        }
+
         RawData *data = vcast <RawData *> (valueToSet);
 
         if (data->empty ()) {
@@ -36,7 +41,8 @@ void RawToPixbufMapping::setToView (GObject *viewObject, std::string const &, Co
         GdkPixbuf *pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, &e);
 
         if (!pixbuf) {
-                throw Core::Exception ("RawToPixbuf::model2View : failed to create GtkPixbuf from RawData. Message : [" + std::string (e->message) + "]");
+                BOOST_LOG (lg) << data->size ();
+                throw Core::Exception ("RawToPixbufMapping::model2View : failed to create GtkPixbuf from RawData. Message : [" + std::string (e->message) + "]");
         }
 
         int oWidth = gdk_pixbuf_get_width (pixbuf);

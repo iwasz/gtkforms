@@ -10,8 +10,8 @@
 #define CONSTANTA_RAWTOPIXBUF_H_
 
 #include <GtkForms.h>
-#include "IMapping.h"
 #include <map>
+#include "Column.h"
 
 namespace GtkForms {
 
@@ -21,19 +21,19 @@ col_ (AssociationMap)
 /**
  *
  */
-class ConstantToPixbufMapping : public IMapping {
+class ConstantToPixbufMapping : public Column {
 public:
         ctr__ (void)
+        bse_ ("Column")
         virtual ~ConstantToPixbufMapping () {}
+        virtual void view2Model (MappingDTO *dto) { /* Not implemented and won't be */ }
 
-        std::string getInput () const { return input; }
+protected:
 
-        void view2Model (MappingDTO *dto);
-        void model2View (MappingDTO *dto);
+        virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
 private:
-        std::string prp_ (input);
-        std::string prp_ (model);
+
         AssociationMap prr_ (dict);
         end_ (ConstantToPixbufMapping)
 };
