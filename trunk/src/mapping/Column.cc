@@ -7,21 +7,23 @@
  ****************************************************************************/
 
 #include "Column.h"
+#include "GValueVariant.h"
 
 namespace GtkForms {
 
-void Column::setToView (GObject *viewObject, std::string const &finalProperty, Core::Variant valueToSet)
+void Column::setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet)
 {
-        if (!GTK_IS_LIST_STORE (viewObject)) {
+        ColumnElementDTO *colElem = static_cast <ColumnElementDTO *> (viewObject);
+
+        if (!GTK_IS_LIST_STORE (colElem->inputWidget)) {
                 throw Core::Exception ("Column::setToView : Could not conver treeViewModel to to GtkListStore.");
         }
 
-        GtkListStore *list = GTK_LIST_STORE (viewObject);
-
+        GtkListStore *list = GTK_LIST_STORE (colElem->inputWidget);
 
         GValue gVal = G_VALUE_INIT;
-        variantToGValue (&gVal, output);
-        gtk_list_store_set_value (list, &iter, colNo++, &gVal);
+        variantToGValue (&gVal, valueToSet);
+        gtk_list_store_set_value (list, colElem->iter, colElem->columnNumber, &gVal);
         g_value_unset (&gVal);
 }
 

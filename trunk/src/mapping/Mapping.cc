@@ -22,7 +22,7 @@ void Mapping::view2Model (MappingDTO *dto)
         std::string finalModelName;
         finalPropertyAndModel (&finalProperty, &finalModelName, dto);
 
-        Core::Variant v = getFromView (G_OBJECT (dto->inputWidget), finalProperty);
+        Core::Variant v = getFromView (dto->viewElement, finalProperty);
 
         if (v.isNone ()) {
                 throw Core::Exception ("Mapping::view2Model. Invalid property : [" + finalProperty + "] in input widget : [" + input + "].");
@@ -47,7 +47,7 @@ void Mapping::model2View (MappingDTO *dto)
         }
 
         BOOST_LOG (lg) << "Mapping::model->view : " << finalModelName << "(" << v << ")" << " -> " << input << "." << finalProperty;
-        setToView (G_OBJECT (dto->inputWidget), finalProperty, v);
+        setToView (dto->viewElement, finalProperty, v);
 }
 
 /****************************************************************************/
@@ -108,19 +108,19 @@ Core::Variant Mapping::getFromModel (Wrapper::BeanWrapper *wrapper, Core::Varian
 
 /*--------------------------------------------------------------------------*/
 
-void Mapping::setToView (GObject *viewObject, std::string const &finalProperty, Core::Variant valueToSet)
+void Mapping::setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet)
 {
         GValue gVal = G_VALUE_INIT;
         variantToGValue (&gVal, valueToSet);
-        g_object_set_property (viewObject, finalProperty.c_str (), &gVal);
+        g_object_set_property (viewObject->inputWidget, finalProperty.c_str (), &gVal);
         g_value_unset (&gVal);
 }
 
 /*--------------------------------------------------------------------------*/
 
-Core::Variant Mapping::getFromView (GObject *viewObject, std::string const &finalProperty)
+Core::Variant Mapping::getFromView (ViewElementDTO *viewObject, std::string const &finalProperty)
 {
-        GParamSpec *spec = g_object_class_find_property (G_OBJECT_GET_CLASS (viewObject), finalProperty.c_str ());
+        GParamSpec *spec = g_object_class_find_property (G_OBJECT_GET_CLASS (viewObject->inputWidget), finalProperty.c_str ());
 
         if (!spec) {
                 throw Core::Exception ("Mapping::view2Model : Non-existent property (of some GTK+ widget) has been requested. Property name : [" + finalProperty + "]");
@@ -130,7 +130,7 @@ Core::Variant Mapping::getFromView (GObject *viewObject, std::string const &fina
         GValue propValue = {0};
 
         g_value_init (&propValue, propType);
-        g_object_get_property (G_OBJECT (viewObject), finalProperty.c_str (), &propValue);
+        g_object_get_property (G_OBJECT (viewObject->inputWidget), finalProperty.c_str (), &propValue);
         Core::Variant v = gValueToVariant (&propValue);
         g_value_unset (&propValue);
 

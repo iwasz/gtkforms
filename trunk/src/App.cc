@@ -480,10 +480,12 @@ void App::doSubmit (SubmitEvent *event)
 
                 MappingDTO dto;
                 dto.app = this;
-                dto.inputWidget = G_OBJECT (elem.second);
                 dto.m2vModelObject = Core::Variant (&impl->context);
                 dto.v2mModelObject = Core::Variant (&impl->context.getUnitScope ());
                 dto.dataRange = event->dataRange;
+
+                ViewElementDTO elementDTO {G_OBJECT (elem.second)};
+                dto.viewElement = &elementDTO;
 
                 MappingMap::const_iterator i;
                 if ((i = mappings.find (inputName)) != mappings.end ()) {
@@ -559,10 +561,12 @@ void App::doRefresh (RefreshEvent *event)
 
                         MappingDTO dto;
                         dto.app = this;
-                        dto.inputWidget = G_OBJECT (elem.second);
                         dto.m2vModelObject = Core::Variant (&impl->context);
                         dto.v2mModelObject = Core::Variant (&impl->context.getUnitScope ());
                         dto.dataRange = event->dataRange;
+
+                        ViewElementDTO elementDTO {G_OBJECT (elem.second)};
+                        dto.viewElement = &elementDTO;
 
                         MappingMap::const_iterator i;
 

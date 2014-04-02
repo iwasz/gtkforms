@@ -28,7 +28,7 @@ public:
 
 protected:
 
-        virtual void setToView (GObject *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
+        virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
 private:
 
