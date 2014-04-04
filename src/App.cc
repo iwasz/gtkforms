@@ -519,8 +519,30 @@ void App::doSubmit (SubmitEvent *event)
                 throw Core::Exception ("You requested submit to a controller which is not currently loaded. Controller name : [" + event->controllerName + "].");
         }
 
-        std::string nextPage = controller->onSubmit ();
-        impl->pagesToShow.insert (nextPage);
+        /*
+         * Validation.
+         */
+        ValidatorVector const &validators = controller->getValidators ();
+        bool hasErrors = false;
+        ValidationResultVector results;
+
+        for (IValidator *validator : validators) {
+                ValidationResult vr = validator->validate (impl->context);
+
+                if (!vr.valid) {
+                        BOOST_LOG (lg) << "Validation error. Model : [" << vr.model << "], message : [" << vr.message << "]";
+                        hasErrors = true;
+                        results.push_back (vr);
+                }
+        }
+
+        if (hasErrors) {
+                // Show errors.
+        }
+        else {
+                std::string nextPage = controller->onSubmit ();
+                impl->pagesToShow.insert (nextPage);
+        }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -556,8 +578,6 @@ void App::doRefresh (RefreshEvent *event)
 
                 for (auto elem : inputMap) {
                         std::string inputName = elem.first;
-                        std::string property;
-                        std::string modelName = inputName;
 
                         MappingDTO dto;
                         dto.app = this;

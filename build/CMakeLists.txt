@@ -69,6 +69,7 @@ IF (BUILD_LIB)
     AUX_SOURCE_DIRECTORY (../src/view LIB_SOURCES)
     AUX_SOURCE_DIRECTORY (../src/mapping LIB_SOURCES)
     AUX_SOURCE_DIRECTORY (../src/signalAdapter LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (../src/validator LIB_SOURCES)    
     add_library (${CMAKE_PROJECT_NAME} SHARED ${LIB_SOURCES})
     
     INSTALL (

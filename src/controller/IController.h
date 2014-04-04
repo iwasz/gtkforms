@@ -16,6 +16,7 @@
 #include <Tiliae.h>
 #include "ReflectionMacros.h"
 #include "signalAdapter/AbstractSignalAdapter.h"
+#include "validator/IValidator.h"
 
 namespace GtkForms {
 
@@ -79,6 +80,8 @@ struct IController : public Core::Object {
 //        virtual std::string getName () const = 0;
 
         virtual SignalAdapterVector &getSignalAdapters () = 0;
+
+        virtual ValidatorVector const &getValidators () const = 0;
 
 protected:
 
