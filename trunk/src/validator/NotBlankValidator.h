@@ -6,15 +6,22 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef GTKFORMS_H_
-#define GTKFORMS_H_
+#ifndef NOTBLANKVALIDATOR_H_
+#define NOTBLANKVALIDATOR_H_
 
-#include "App.h"
-#include "Context.h"
-#include "ReflectionMacros.h"
-#include "controller/Controller.h"
-#include "view/View.h"
-#include "signalAdapter/SignalAdapter.h"
-#include "mapping/Mapping.h"
+#include "AbstractValidator.h"
 
-#endif /* GTKFORMS_H_ */
+namespace GtkForms {
+
+class NotBlankValidator : public AbstractValidator {
+public:
+        ctr__ (void)
+        bse_ ("AbstractValidator")
+        virtual ~NotBlankValidator () {}
+        virtual ValidationResult validate (Context &ctx) const;
+        end_ (NotBlankValidator)
+};
+
+} /* namespace GtkForms */
+
+#endif /* NOTBLANKVALIDATOR_H_ */

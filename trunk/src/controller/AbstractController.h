@@ -34,6 +34,7 @@ public:
 //        void setName (std::string const &name) { this->name = name; }
 
         SignalAdapterVector &getSignalAdapters () { return signalAdapters; }
+        ValidatorVector const &getValidators () const { return validators; }
 
 protected:
 
@@ -46,7 +47,7 @@ private:
 
 private:
 
-//        std::string prp_ (name);
+        ValidatorVector prr_ (validators);
         SignalAdapterVector prr_ (signalAdapters);
         end_ (AbstractController)
 };
