@@ -5,18 +5,20 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
+#ifndef IPAGEDECORATOR_H_
+#define IPAGEDECORATOR_H_
 
-#ifndef GTKFORMS_H_
-#define GTKFORMS_H_
+namespace GtkForms {
 
-#include "App.h"
-#include "Context.h"
-#include "ReflectionMacros.h"
-#include "controller/Controller.h"
-#include "view/View.h"
-#include "signalAdapter/SignalAdapter.h"
-#include "mapping/Mapping.h"
-#include "validator/Validator.h"
-#include "decorator/Decorator.h"
+/**
+ * Some custom actions to be performed on a page/view.
+ */
+class IPageDecorator {
+public:
+        virtual ~IPageDecorator () {}
+        virtual void run (Page *page, Context *ctx) = 0;
+};
 
-#endif /* GTKFORMS_H_ */
+} /* namespace GtkForms */
+
+#endif /* IPAGEDECORATOR_H_ */

@@ -5,18 +5,11 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
+#ifndef GTK_FORMS_DECORATOR_H_
+#define GTK_FORMS_DECORATOR_H_
 
-#ifndef GTKFORMS_H_
-#define GTKFORMS_H_
 
-#include "App.h"
-#include "Context.h"
-#include "ReflectionMacros.h"
-#include "controller/Controller.h"
-#include "view/View.h"
-#include "signalAdapter/SignalAdapter.h"
-#include "mapping/Mapping.h"
-#include "validator/Validator.h"
-#include "decorator/Decorator.h"
 
-#endif /* GTKFORMS_H_ */
+
+
+#endif /* DECORATOR_H_ */
