@@ -21,11 +21,11 @@ Core::Variant AdjustmentMapping::getFromView (ViewElementDTO *viewObject, std::s
 {
         GtkAdjustment *adjustment = 0;
 
-        if (GTK_IS_RANGE (viewObject)) {
-                adjustment = gtk_range_get_adjustment (GTK_RANGE (viewObject));
+        if (GTK_IS_RANGE (viewObject->inputWidget)) {
+                adjustment = gtk_range_get_adjustment (GTK_RANGE (viewObject->inputWidget));
         }
-        else if (GTK_IS_SPIN_BUTTON (viewObject)) {
-                adjustment = gtk_spin_button_get_adjustment (GTK_SPIN_BUTTON (viewObject));
+        else if (GTK_IS_SPIN_BUTTON (viewObject->inputWidget)) {
+                adjustment = gtk_spin_button_get_adjustment (GTK_SPIN_BUTTON (viewObject->inputWidget));
         }
         else {
                 throw Core::Exception ("AdjustmentMapping::getFromView : widget type not supported. Supported types : GtkSpinButton, GtkRange.");
@@ -45,11 +45,11 @@ void AdjustmentMapping::setToView (ViewElementDTO *viewObject, std::string const
 {
         GtkAdjustment *adjustment = 0;
 
-        if (GTK_IS_RANGE (viewObject)) {
-                adjustment = gtk_range_get_adjustment (GTK_RANGE (viewObject));
+        if (GTK_IS_RANGE (viewObject->inputWidget)) {
+                adjustment = gtk_range_get_adjustment (GTK_RANGE (viewObject->inputWidget));
         }
-        else if (GTK_IS_SPIN_BUTTON (viewObject)) {
-                adjustment = gtk_spin_button_get_adjustment (GTK_SPIN_BUTTON (viewObject));
+        else if (GTK_IS_SPIN_BUTTON (viewObject->inputWidget)) {
+                adjustment = gtk_spin_button_get_adjustment (GTK_SPIN_BUTTON (viewObject->inputWidget));
         }
         else {
                 throw Core::Exception ("AdjustmentMapping::setToView : widget type not supported. Supported types : GtkSpinButton, GtkRange.");
