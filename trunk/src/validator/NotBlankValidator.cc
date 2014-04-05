@@ -12,23 +12,23 @@
 
 namespace GtkForms {
 
-ValidationResult NotBlankValidator::validate (Context &ctx) const
+ValidationAndBindingResult NotBlankValidator::validate (Context &ctx) const
 {
         Core::Variant v = ctx.get (getModel ());
 
         if (v.isNone () || v.isNull ()) {
-                return createResult (false, "Wypełnij pole");
+                return createResult (false);
         }
 
         if (ccast <std::string> (v)) {
                 std::string s = vcast <std::string> (v);
                 boost::trim (s);
                 if (s.empty ()) {
-                        return createResult (false, "Wypełnij pole");
+                        return createResult (false);
                 }
         }
 
-        return createResult ();
+        return createResult (true);
 }
 
 } /* namespace GtkForms */

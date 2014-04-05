@@ -11,8 +11,7 @@
 
 #include <ostream>
 #include <set>
-
-#include "ReflectionMacros.h"
+#include "decorator/IPageDecorator.h"
 #include "view/IView.h"
 #include "mapping/Mapping.h"
 #include "view/GtkTile.h"
@@ -38,6 +37,8 @@ public:
         void loadUi (App *app);
         void destroyUi ();
 
+        PageDecoratorVector &getDecorators () { return decorators; }
+
         friend std::ostream &operator<< (std::ostream &o, Page const &u);
 
 private:
@@ -52,7 +53,7 @@ private:
         MappingVector prr_ (mappings);
         mutable MappingMap *mappingsByInputCache = 0;
         mutable MappingMap *mappingsByModelCache = 0;
-
+        PageDecoratorVector prr_ (decorators);
         end_ (Page)
 };
 

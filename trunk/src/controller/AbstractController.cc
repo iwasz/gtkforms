@@ -12,25 +12,40 @@
 
 namespace GtkForms {
 
-Core::VariantMap &AbstractController::getSessionScope ()
+void AbstractController::setToSessionScope (std::string const &path, Core::Variant v)
 {
-        return app->getContext ().getSessionScope ();
+        app->getContext ().setToSessionScope (path, v);
 }
 
-/*--------------------------------------------------------------------------*/
-
-Core::VariantMap &AbstractController::getUnitScope ()
+void AbstractController::setToUnitScope (std::string const &path, Core::Variant v)
 {
-        return app->getContext ().getUnitScope ();
+        app->getContext ().setToUnitScope (path, v);
 }
 
-/*--------------------------------------------------------------------------*/
-
-Core::VariantMap &AbstractController::getFlashScope ()
+void AbstractController::setToFlashScope (std::string const &path, Core::Variant v)
 {
-        return app->getContext ().getFlashScope ();
+        app->getContext ().setToFlashScope (path, v);
 }
 
+//Core::VariantMap &AbstractController::getSessionScope ()
+//{
+//        return app->getContext ().getSessionScope ();
+//}
+//
+///*--------------------------------------------------------------------------*/
+//
+//Core::VariantMap &AbstractController::getUnitScope ()
+//{
+//        return app->getContext ().getUnitScope ();
+//}
+//
+///*--------------------------------------------------------------------------*/
+//
+//Core::VariantMap &AbstractController::getFlashScope ()
+//{
+//        return app->getContext ().getFlashScope ();
+//}
+//
 /*--------------------------------------------------------------------------*/
 
 Core::Variant AbstractController::get (const std::string &name)

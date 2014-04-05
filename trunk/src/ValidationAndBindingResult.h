@@ -6,32 +6,29 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef MAPPINGDTO_H_
-#define MAPPINGDTO_H_
+#ifndef VALIDATIONANDBINDINGRESULT_H_
+#define VALIDATIONANDBINDINGRESULT_H_
 
 #include <string>
-#include <gtk/gtk.h>
 #include <Tiliae.h>
+#include <vector>
 
-namespace GtkForms {
-class  App;
-class Context;
+/**
+ *
+ */
+struct ValidationAndBindingResult {
+        ValidationAndBindingResult () {}
 
-struct ViewElementDTO {
-        ViewElementDTO (GObject *i) : inputWidget {i} {}
-        GObject *inputWidget = 0;
+        void addParam (std::string const &key, Core::Variant value) { params[key] = value; }
+
+        std::string model;
+        bool valid = true;
+        Core::VariantMap params;
 };
 
 /**
- * Helper class to pass data between App and mappers.
+ *
  */
-struct MappingDTO {
-        App *app = 0;
-        ViewElementDTO *viewElement = 0;
-        Core::Variant m2vModelObject;
-        Core::Variant v2mModelObject;
-        std::string dataRange;
-};
+typedef std::vector <ValidationAndBindingResult> ValidationResultVector;
 
-} /* namespace GtkForms */
-#endif /* MAPPINGDTO_H_ */
+#endif /* VALIDATIONANDBINDINGRESULT_H_ */

@@ -22,10 +22,10 @@ public:
 
 protected:
 
-        virtual ValidationResult createResult (bool valid = true, std::string const &m = "") const
+        virtual ValidationAndBindingResult createResult (bool valid = true) const
         {
-                ValidationResult vr;
-                vr.message = m;
+                ValidationAndBindingResult vr;
+                vr.params = params;
                 vr.valid = valid;
                 vr.model = model;
                 return vr;
@@ -34,6 +34,7 @@ protected:
 private:
 
         std::string prp_ (model);
+        Core::VariantMap prr_ (params);
         end_ (AbstractValidator)
 };
 

@@ -18,8 +18,10 @@ namespace GtkForms {
 static src::logger_mt& lg = logger::get();
 using namespace Core;
 
-void TableMapping::view2Model (MappingDTO *dto)
+ValidationAndBindingResult TableMapping::view2Model (MappingDTO *dto)
 {
+        // TODO
+        return ValidationAndBindingResult {};
 }
 
 /*--------------------------------------------------------------------------*/

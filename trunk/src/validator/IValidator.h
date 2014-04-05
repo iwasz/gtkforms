@@ -11,8 +11,8 @@
 
 #include <Tiliae.h>
 #include <string>
-#include <vector>
 #include "ReflectionMacros.h"
+#include "ValidationAndBindingResult.h"
 
 namespace GtkForms {
 class Context;
@@ -20,28 +20,10 @@ class Context;
 /**
  *
  */
-struct ValidationResult {
-        ValidationResult (std::string const &m) : message {m} {}
-        ValidationResult () {}
-
-        std::string model;
-        std::string message;
-        bool valid = true;
-
-};
-
-/**
- *
- */
-typedef std::vector <ValidationResult> ValidationResultVector;
-
-/**
- *
- */
 class IValidator : public Core::Object {
 public:
         virtual ~IValidator () {}
-        virtual ValidationResult validate (Context &ctx) const = 0;
+        virtual ValidationAndBindingResult validate (Context &ctx) const = 0;
         virtual std::string getModel () const = 0;
 };
 

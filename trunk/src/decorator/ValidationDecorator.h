@@ -5,32 +5,22 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
-#ifndef IMAPPING_H_
-#define IMAPPING_H_
+#ifndef VALIDATIONDECORATOR_H_
+#define VALIDATIONDECORATOR_H_
 
-#include <string>
-#include <core/Object.h>
-#include <gtk/gtk.h>
-#include "MappingDTO.h"
-#include "ValidationAndBindingResult.h"
+#include "IPageDecorator.h"
+#include "ReflectionMacros.h"
 
 namespace GtkForms {
-class App;
-class Context;
 
-class IMapping : public Core::Object {
+class ValidationDecorator : public IPageDecorator {
 public:
-        virtual ~IMapping () {}
-
-        /**
-         * Name of input widget on the UI.
-         */
-        virtual std::string getInput () const = 0;
-
-        virtual ValidationAndBindingResult view2Model (MappingDTO *dto) = 0;
-        virtual void model2View (MappingDTO *dto) = 0;
+        ctr__ (void)
+        virtual ~ValidationDecorator () {}
+        virtual void run (Page *page, Context *ctx);
+        end_ (ValidationDecorator)
 };
 
 } /* namespace GtkForms */
 
-#endif /* IMAPPING_H_ */
+#endif /* VALIDATIONDECORATOR_H_ */

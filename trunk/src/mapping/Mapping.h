@@ -28,10 +28,10 @@ public:
         virtual std::string getProperty () const { return property; }
         virtual std::string getModel () const { return model; }
 
-        virtual void view2Model (MappingDTO *dto);
+        virtual ValidationAndBindingResult view2Model (MappingDTO *dto);
         virtual void model2View (MappingDTO *dto);
 
-        static void view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor = nullptr);
+        static ValidationAndBindingResult view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor = nullptr);
         static void model2View (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor = nullptr);
 
 protected:
@@ -39,7 +39,7 @@ protected:
         virtual void finalPropertyAndModel (std::string *finalProperty, std::string *finalModelName, MappingDTO *dto);
 
         virtual Core::Variant getFromModel (Wrapper::BeanWrapper *wrapper, Core::Variant objectToWrap, std::string const &finalModelName);
-        virtual void setToModel (Wrapper::BeanWrapper *wrapper, Core::Variant objectToWrap, std::string const &finalModelName, Core::Variant valueToSet);
+        virtual ValidationAndBindingResult setToModel (Wrapper::BeanWrapper *wrapper, Core::Variant objectToWrap, std::string const &finalModelName, Core::Variant valueToSet);
         virtual Core::Variant getFromView (ViewElementDTO *viewObject, std::string const &finalProperty);
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 

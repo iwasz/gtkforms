@@ -18,7 +18,7 @@ public:
         ctr__ (void)
         bse_ ("AbstractValidator")
         virtual ~NotBlankValidator () {}
-        virtual ValidationResult validate (Context &ctx) const;
+        virtual ValidationAndBindingResult validate (Context &ctx) const;
         end_ (NotBlankValidator)
 };
 
