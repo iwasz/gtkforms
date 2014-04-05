@@ -10,7 +10,7 @@
 
 namespace GtkForms {
 
-Core::Variant Context::get (const std::string &name)
+Core::Variant ContextPriv::get (const std::string &name)
 {
         Core::VariantMap::iterator i = flash.find (name);
 
@@ -31,6 +31,30 @@ Core::Variant Context::get (const std::string &name)
         }
 
         return Core::Variant ();
+}
+
+Core::Variant Context::get (const std::string &name)
+{
+        wrapper->setWrappedObject (Core::Variant (&contextPriv));
+        return wrapper->get (name);
+}
+
+void Context::setToSessionScope (std::string const &path, Core::Variant v)
+{
+        wrapper->setWrappedObject (Core::Variant {&contextPriv.getSessionScope ()});
+        wrapper->set (path, v);
+}
+
+void Context::setToUnitScope (std::string const &path, Core::Variant v)
+{
+        wrapper->setWrappedObject (Core::Variant {&contextPriv.getUnitScope ()});
+        wrapper->set (path, v);
+}
+
+void Context::setToFlashScope (std::string const &path, Core::Variant v)
+{
+        wrapper->setWrappedObject (Core::Variant {&contextPriv.getFlashScope ()});
+        wrapper->set (path, v);
 }
 
 } // namespace GtkForms

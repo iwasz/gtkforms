@@ -16,7 +16,7 @@
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
 
-void Mapping::view2Model (MappingDTO *dto)
+ValidationAndBindingResult Mapping::view2Model (MappingDTO *dto)
 {
         std::string finalProperty;
         std::string finalModelName;
@@ -29,7 +29,7 @@ void Mapping::view2Model (MappingDTO *dto)
         }
 
         BOOST_LOG (lg) << "Maping::view->model : " << input << "." << finalProperty << "(" << v << ")" << " -> " << finalModelName;
-        setToModel (dto->app->getBeanWrapper (), dto->v2mModelObject, finalModelName, v);
+        return setToModel (dto->app->getBeanWrapper (), dto->v2mModelObject, finalModelName, v);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -139,17 +139,21 @@ Core::Variant Mapping::getFromView (ViewElementDTO *viewObject, std::string cons
 
 /*--------------------------------------------------------------------------*/
 
-void Mapping::setToModel (Wrapper::BeanWrapper *wrapper, Core::Variant objectToWrap, std::string const &finalModelName, Core::Variant valueToSet)
+ValidationAndBindingResult Mapping::setToModel (Wrapper::BeanWrapper *wrapper, Core::Variant objectToWrap, std::string const &finalModelName, Core::Variant valueToSet)
 {
+        ValidationAndBindingResult result;
+        result.model = finalModelName;
         wrapper->setWrappedObject (objectToWrap);
 
         Core::Variant output;
         if (v2mEditor) {
                 Core::DebugContext ctx;
                 if (!v2mEditor->convert (valueToSet, &output, &ctx)) {
-                        Core::Exception e {"Mapping::view2Model : Nie udało się dokonać konwersji. Wartość wejściowa to : " + valueToSet.toString ()};
-                        e.addContext (ctx);
-                        throw e;
+                        result.valid = false;
+                        result.params["message"] = Core::Variant {"Conversion failed. Input value : " + valueToSet.toString ()};
+                        ctx.addMessage ("Mapping::view2Model : Nie udało się dokonać konwersji. Wartość wejściowa to : " + valueToSet.toString ());
+                        BOOST_LOG (lg) << ctx.getMessage ();
+                        return result;
                 }
         }
         else {
@@ -158,15 +162,19 @@ void Mapping::setToModel (Wrapper::BeanWrapper *wrapper, Core::Variant objectToW
 
         Core::DebugContext ctx;
         if (!wrapper->set (finalModelName, valueToSet, &ctx)) {
-                Core::Exception e {"Mapping::view2Model : invalid attempt to assign a value to a model property. "};
-                e.addContext (ctx);
-                throw e;
+                result.valid = false;
+                result.params["message"] = Core::Variant {"Invalid attempt to assign a value to a model property."};
+                ctx.addMessage ("Mapping::view2Model : invalid attempt to assign a value to a model property. ");
+                BOOST_LOG (lg) << ctx.getMessage ();
+                return result;
         }
+
+        return result;
 }
 
 /*--------------------------------------------------------------------------*/
 
-void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
+ValidationAndBindingResult Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
 {
         static Mapping mapping;
         mapping.input = input;
@@ -174,7 +182,7 @@ void Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string
         mapping.model = model;
         mapping.v2mEditor = editor;
         mapping.m2vEditor = nullptr;
-        mapping.view2Model (dto);
+        return mapping.view2Model (dto);
 }
 
 /*--------------------------------------------------------------------------*/

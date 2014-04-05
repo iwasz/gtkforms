@@ -57,6 +57,7 @@ struct IController : public Core::Object {
         virtual std::string onSubmit () = 0;
         virtual void onQuit () = 0;
         virtual void onIdle () = 0;
+        virtual ValidationAndBindingResult validate () = 0;
 
         /**
          * Gets called by managing objects when controller is about to be closed. Returns name
@@ -73,11 +74,14 @@ struct IController : public Core::Object {
          */
         virtual App *getApp () = 0;
 
-        virtual Core::VariantMap &getSessionScope () = 0;
-        virtual Core::VariantMap &getUnitScope () = 0;
-        virtual Core::VariantMap &getFlashScope () = 0;
+//        virtual Core::VariantMap &getSessionScope () = 0;
+//        virtual Core::VariantMap &getUnitScope () = 0;
+//        virtual Core::VariantMap &getFlashScope () = 0;
 
-//        virtual std::string getName () const = 0;
+        virtual void setToSessionScope (std::string const &path, Core::Variant v) = 0;
+        virtual void setToUnitScope (std::string const &path, Core::Variant v) = 0;
+        virtual void setToFlashScope (std::string const &path, Core::Variant v) = 0;
+        virtual Core::Variant get (const std::string &name) = 0;
 
         virtual SignalAdapterVector &getSignalAdapters () = 0;
 

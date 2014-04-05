@@ -35,7 +35,7 @@ public:
 
         std::string getInput () const { return input; }
 
-        void view2Model (MappingDTO *dto);
+        ValidationAndBindingResult view2Model (MappingDTO *dto);
         void model2View (MappingDTO *dto);
 
 private:

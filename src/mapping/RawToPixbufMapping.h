@@ -24,7 +24,7 @@ public:
         RawToPixbufMapping () : maxWidth {-1}, maxHeight {-1} {}
         virtual ~RawToPixbufMapping () {}
 
-        virtual void view2Model (MappingDTO *dto) { /* Not implemented and won't be */ }
+        virtual ValidationAndBindingResult view2Model (MappingDTO *dto) { /* Not implemented and won't be */ return ValidationAndBindingResult{}; }
 
 protected:
 

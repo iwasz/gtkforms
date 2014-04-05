@@ -27,6 +27,7 @@ SET(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -Wall -fvisibility=hidden -DTILIAE_DLL" 
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -std=c++11 -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "cxx release compiler flags")
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK "-pthread")
+ADD_DEFINITIONS (-DREFLECTION_ENABLED)
 
 INSTALL (
     DIRECTORY "${PROJECT_SOURCE_DIR}/../src/"
@@ -70,6 +71,7 @@ IF (BUILD_LIB)
     AUX_SOURCE_DIRECTORY (../src/mapping LIB_SOURCES)
     AUX_SOURCE_DIRECTORY (../src/signalAdapter LIB_SOURCES)
     AUX_SOURCE_DIRECTORY (../src/validator LIB_SOURCES)    
+    AUX_SOURCE_DIRECTORY (../src/decorator LIB_SOURCES)    
     add_library (${CMAKE_PROJECT_NAME} SHARED ${LIB_SOURCES})
     
     INSTALL (

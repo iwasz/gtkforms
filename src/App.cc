@@ -56,9 +56,11 @@ struct App::Impl {
         PageMap pages;
 
         Ptr <BeanFactoryContainer> container;
-        Context context;
+        Context context {getBeanWrapper()};
         GtkTileManager tileManager;
         bool model2ViewRequest = false;
+
+        static Wrapper::BeanWrapper *getBeanWrapper ();
 };
 
 /*--------------------------------------------------------------------------*/
@@ -68,7 +70,7 @@ App::App (std::string const &configurationFile)
         impl = new Impl;
         createContainer (configurationFile);
         g_idle_add (guiThread, static_cast <gpointer> (this));
-        impl->context.getSessionScope ()["app"] = Core::Variant (*this);
+        impl->context.setToSessionScope ("app", Core::Variant (*this));
 }
 
 /*--------------------------------------------------------------------------*/
@@ -147,7 +149,8 @@ Core::StringSet App::manageUnits ()
                 std::string command = controller->start ();
                 impl->model2ViewRequest = true;
 //                impl->context.getSessionScope ()[controller->getName ()] = Core::Variant (controller);
-                impl->context.getSessionScope ()[entry.first] = Core::Variant (controller);
+//                impl->context.getSessionScope ()[entry.first] = Core::Variant (controller);
+                impl->context.setToSessionScope (entry.first, Core::Variant (controller));
 
                 if (!command.empty ()) {
                         viewCommands.insert (command);
@@ -472,6 +475,7 @@ void App::doSubmit (SubmitEvent *event)
 #endif
 
         GtkView::InputMap inputMap = v->getInputs (event->dataRange);
+        bool hasErrors = false;
 
         for (auto elem : inputMap) {
                 std::string inputName = elem.first;
@@ -490,12 +494,25 @@ void App::doSubmit (SubmitEvent *event)
                 MappingMap::const_iterator i;
                 if ((i = mappings.find (inputName)) != mappings.end ()) {
                         IMapping *mapping = i->second;
-                        mapping->view2Model (&dto);
+                        ValidationAndBindingResult vr = mapping->view2Model (&dto);
+                        impl->context.getValidationResults ().push_back (vr);
+
+                        if (!vr.valid) {
+                                BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
+                                hasErrors = true;
+                        }
+
                         continue;
                 }
 
                 // Default.
-                Mapping::view2Model (&dto, inputName, "", "");
+                ValidationAndBindingResult vr = Mapping::view2Model (&dto, inputName, "", "");
+                impl->context.getValidationResults ().push_back (vr);
+
+                if (!vr.valid) {
+                        BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
+                        hasErrors = true;
+                }
         }
 
         /*
@@ -523,23 +540,33 @@ void App::doSubmit (SubmitEvent *event)
          * Validation.
          */
         ValidatorVector const &validators = controller->getValidators ();
-        bool hasErrors = false;
-        ValidationResultVector results;
 
         for (IValidator *validator : validators) {
-                ValidationResult vr = validator->validate (impl->context);
+                ValidationAndBindingResult vr = validator->validate (impl->context);
+                impl->context.getValidationResults ().push_back (vr);
 
                 if (!vr.valid) {
-                        BOOST_LOG (lg) << "Validation error. Model : [" << vr.model << "], message : [" << vr.message << "]";
+                        BOOST_LOG (lg) << "Validation error. Model : [" << vr.model << "]";
                         hasErrors = true;
-                        results.push_back (vr);
                 }
         }
 
-        if (hasErrors) {
-                // Show errors.
+        ValidationAndBindingResult vr = controller->validate ();
+        impl->context.getValidationResults ().push_back (vr);
+
+        if (!vr.valid) {
+                BOOST_LOG (lg) << "Validation error. Model : [" << vr.model << "]";
+                hasErrors = true;
         }
-        else {
+
+        // Fire decorators.
+        PageDecoratorVector &decorators = page->getDecorators ();
+
+        for (IPageDecorator *decorator : decorators) {
+                decorator->run (page, &impl->context);
+        }
+
+        if (!hasErrors) {
                 std::string nextPage = controller->onSubmit ();
                 impl->pagesToShow.insert (nextPage);
         }
@@ -680,6 +707,11 @@ struct BWInitializer {
 /*--------------------------------------------------------------------------*/
 
 Wrapper::BeanWrapper *App::getBeanWrapper ()
+{
+        return App::Impl::getBeanWrapper ();
+}
+
+Wrapper::BeanWrapper *App::Impl::getBeanWrapper ()
 {
         static BWInitializer bwInitializer;
         return bwInitializer.beanWrapper;

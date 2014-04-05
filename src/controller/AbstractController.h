@@ -22,13 +22,17 @@ public:
 
         App *getApp () { return app; }
 
-        Core::VariantMap &getSessionScope ();
-        Core::VariantMap &getUnitScope ();
-        Core::VariantMap &getFlashScope ();
+//        Core::VariantMap &getSessionScope ();
+//        Core::VariantMap &getUnitScope ();
+//        Core::VariantMap &getFlashScope ();
+        void setToSessionScope (std::string const &path, Core::Variant v);
+        void setToUnitScope (std::string const &path, Core::Variant v);
+        void setToFlashScope (std::string const &path, Core::Variant v);
         Core::Variant get (const std::string &name);
 
         virtual void onQuit () {}
         virtual void onIdle () {}
+        virtual ValidationAndBindingResult validate () { return ValidationAndBindingResult {}; }
 
 //        virtual std::string getName () const { return name; }
 //        void setName (std::string const &name) { this->name = name; }
@@ -49,6 +53,9 @@ private:
 
         ValidatorVector prr_ (validators);
         SignalAdapterVector prr_ (signalAdapters);
+
+
+
         end_ (AbstractController)
 };
 

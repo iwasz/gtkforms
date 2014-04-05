@@ -26,7 +26,7 @@ public:
         ctr__ (void)
         bse_ ("Column")
         virtual ~ConstantToPixbufMapping () {}
-        virtual void view2Model (MappingDTO *dto) { /* Not implemented and won't be */ }
+        virtual ValidationAndBindingResult view2Model (MappingDTO *dto) { return ValidationAndBindingResult {}; /* Not implemented and won't be */ }
 
 protected:
 
@@ -35,6 +35,7 @@ protected:
 private:
 
         AssociationMap prr_ (dict);
+
         end_ (ConstantToPixbufMapping)
 };
 
