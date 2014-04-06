@@ -56,6 +56,10 @@ struct IController : public Core::Object {
          */
         virtual std::string onSubmit () = 0;
         virtual void onQuit () = 0;
+
+        /**
+         * Gets called every getLoopDelayMs miliseconds.
+         */
         virtual void onIdle () = 0;
         virtual ValidationAndBindingResult validate () = 0;
 
@@ -74,18 +78,16 @@ struct IController : public Core::Object {
          */
         virtual App *getApp () = 0;
 
-//        virtual Core::VariantMap &getSessionScope () = 0;
-//        virtual Core::VariantMap &getUnitScope () = 0;
-//        virtual Core::VariantMap &getFlashScope () = 0;
-
         virtual void setToSessionScope (std::string const &path, Core::Variant v) = 0;
         virtual void setToUnitScope (std::string const &path, Core::Variant v) = 0;
         virtual void setToFlashScope (std::string const &path, Core::Variant v) = 0;
         virtual Core::Variant get (const std::string &name) = 0;
 
         virtual SignalAdapterVector &getSignalAdapters () = 0;
-
         virtual ValidatorVector const &getValidators () const = 0;
+
+        virtual int getLoopDelayMs () const = 0;
+        virtual int &getLastMs () = 0;
 
 protected:
 

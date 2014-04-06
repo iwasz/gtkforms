@@ -11,6 +11,7 @@
 
 #include <string>
 #include <map>
+#include <gtk/gtk.h>
 #include "ReflectionMacros.h"
 
 namespace GtkForms {
@@ -39,8 +40,13 @@ public:
          */
         virtual void destroyUi () = 0;
 
-//        virtual void model2View (std::string const &dataRange) = 0;
-//        virtual void view2Model (std::string const &dataRange) = 0;
+        /**
+         * Called on RefreshEvent.
+         */
+        virtual void refresh (Context *ctx) = 0;
+
+        typedef std::map <std::string, GtkWidget *> InputMap;
+        virtual InputMap getInputs (std::string const &dataRange) = 0;
 
 };
 

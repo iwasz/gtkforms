@@ -13,24 +13,15 @@
 #include "App.h"
 #include "Context.h"
 #include "Slot.h"
-#include <boost/algorithm/string/erase.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/regex.hpp>
 
 namespace GtkForms {
 using namespace std;
 static src::logger_mt& lg = logger::get ();
-//char const *GtkView::INPUT_MARK_CHARACTER = "!";
 
 /**
  *
  */
 struct GtkView::Impl {
-
-        static void onIterateWidget (GtkWidget *widget, gpointer data);
-        static void onPrintWidget (GtkWidget *widget, gpointer data);
-        static bool nameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange);
-//        static std::string strip (std::string const &widgetName);
 
 };
 
@@ -98,19 +89,7 @@ void GtkView::show ()
 //        impl->builder = 0;
 //}
 
-/*--------------------------------------------------------------------------*/
 
-void GtkView::model2View (std::string const &dataRange)
-{
-
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::view2Model (std::string const &dataRange)
-{
-
-}
 
 /*--------------------------------------------------------------------------*/
 
@@ -292,152 +271,6 @@ GtkView::SlotWidgetMap GtkView::getSlotWidgets (SlotVector const &slots)
         }
 
         return slotWidgets;
-}
-
-/*--------------------------------------------------------------------------*/
-
-struct InputsSearchDTO {
-        std::string dataRange;
-        GtkView::InputMap inputs;
-};
-
-/*--------------------------------------------------------------------------*/
-
-bool GtkView::Impl::nameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange)
-{
-        boost::regex e;
-
-        if (dataRange.empty ()) {
-                e = boost::regex {"!(.*)"};
-        }
-        else {
-                std::string copy = dataRange;
-                boost::replace_all (copy, ".", "\\.*");
-                boost::replace_all (copy, "*", ".*");
-                e = boost::regex {"!(" + copy + ")"};
-        }
-
-        boost::smatch what;
-
-        if (boost::regex_match (widgetName, what, e, boost::match_extra)) {
-                if (what.size () == 2) {
-                        *inputName = what[1];
-                }
-
-                return true;
-        }
-
-        return false;
-}
-
-/*--------------------------------------------------------------------------*/
-
-//std::string GtkView::Impl::strip (std::string const &widgetName)
-//{
-//        return boost::erase_all_copy (widgetName, GtkView::INPUT_MARK_CHARACTER);
-//}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::Impl::onIterateWidget (GtkWidget *widget, gpointer data)
-{
-        if (!widget || !GTK_IS_BUILDABLE (widget)) {
-                return;
-        }
-
-        InputsSearchDTO *dto = static_cast <InputsSearchDTO *> (data);
-        gchar const *buildableName = gtk_buildable_get_name (GTK_BUILDABLE (widget));
-
-        if (buildableName) {
-                std::string inputName;
-
-                if (GtkView::Impl::nameMatches (buildableName, &inputName, dto->dataRange)) {
-                        dto->inputs[inputName] = GTK_WIDGET (widget);
-                }
-        }
-
-        if (GTK_IS_CONTAINER (widget)) {
-                gtk_container_foreach (GTK_CONTAINER (widget), &GtkView::Impl::onIterateWidget, dto);
-        }
-}
-
-/*--------------------------------------------------------------------------*/
-
-GtkView::InputMap GtkView::getInputs (std::string const &dataRange)
-{
-        if (!GTK_IS_BUILDABLE (getUi ())) {
-                BOOST_LOG (lg) << "Warn : UI is not of type GtkBuildable. Can not get ID then.";
-                return GtkView::InputMap {};
-        }
-
-        InputsSearchDTO dto;
-        dto.dataRange = dataRange;
-
-        GtkBuildable *mainWidget = GTK_BUILDABLE (getUi ());
-        gchar const *buildableName = gtk_buildable_get_name (mainWidget);
-
-        if (buildableName) {
-                std::string inputName;
-
-                if (GtkView::Impl::nameMatches (buildableName, &inputName, dataRange)) {
-                        dto.inputs[inputName] = GTK_WIDGET (mainWidget);
-                }
-        }
-
-        if (!GTK_IS_CONTAINER (getUi ())) {
-                return dto.inputs;
-        }
-
-        gtk_container_foreach (GTK_CONTAINER (mainWidget), &GtkView::Impl::onIterateWidget, &dto);
-
-        return dto.inputs;
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::Impl::onPrintWidget (GtkWidget *widget, gpointer data)
-{
-        if (!widget || !GTK_IS_BUILDABLE (widget)) {
-                return;
-        }
-
-        int *indent = static_cast <int *> (data);
-        std::string id;
-
-        for (int i = 0; i < *indent; ++i) {
-                id += " ";
-        }
-
-        gchar const *buildableName = gtk_buildable_get_name (GTK_BUILDABLE (widget));
-        gchar const *widgetName = gtk_widget_get_name (GTK_WIDGET (widget));
-        BOOST_LOG (lg) << id << ((widgetName) ? (widgetName) : ("")) << ":" << ((buildableName) ? (buildableName) : (""));
-
-        if (GTK_IS_CONTAINER (widget)) {
-                int newIndent = *indent + 1;
-                gtk_container_foreach (GTK_CONTAINER (widget), &GtkView::Impl::onPrintWidget, &newIndent);
-        }
-}
-
-/*--------------------------------------------------------------------------*/
-
-void GtkView::printStructure ()
-{
-        if (!GTK_IS_BUILDABLE (getUi ())) {
-                BOOST_LOG (lg) << "UI is not of type GtkBuildable. Can not get ID then.";
-        }
-
-        GtkBuildable *mainWidget = GTK_BUILDABLE (getUi ());
-
-        gchar const *buildableName = gtk_buildable_get_name (mainWidget);
-        gchar const *widgetName = gtk_widget_get_name (GTK_WIDGET (mainWidget));
-        BOOST_LOG (lg) << ((widgetName) ? (widgetName) : ("")) << ":" << ((buildableName) ? (buildableName) : (""));
-
-        if (!GTK_IS_CONTAINER (getUi ())) {
-                return;
-        }
-
-        int indent = 1;
-        gtk_container_foreach (GTK_CONTAINER (mainWidget), &GtkView::Impl::onPrintWidget, &indent);
 }
 
 } // namespace GtkForms
