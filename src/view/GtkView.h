@@ -29,20 +29,13 @@ public:
         ctr__ (void)
         bse_ ("GtkAbstractView")
 
-        typedef std::map <std::string, GtkWidget *> InputMap;
         typedef std::map <std::string, GtkBin *> SlotWidgetMap;
 
         GtkView ();
         virtual ~GtkView ();
 
         void show ();
-
-        void model2View (std::string const &dataRange);
-        void view2Model (std::string const &dataRange);
         void reparent (SlotVector const &slots, Context *context);
-
-        InputMap getInputs (std::string const &dataRange);
-        void printStructure ();
 
 private:
 

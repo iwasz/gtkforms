@@ -18,11 +18,12 @@
 #include "controller/IController.h"
 #include "view/GtkTileManager.h"
 #include <boost/regex.hpp>
-
 #include "controller/RefreshEvent.h"
 #include "view/Slot.h"
 #include "Logging.h"
 #include "mapping/GObjectWrapperPlugin.h"
+#include "Config.h"
+#include <time.h>
 
 namespace GtkForms {
 using namespace Container;
@@ -58,9 +59,12 @@ struct App::Impl {
         Ptr <BeanFactoryContainer> container;
         Context context {getBeanWrapper()};
         GtkTileManager tileManager;
-        bool model2ViewRequest = false;
+        Config *config = nullptr;
+        bool controllersIdling = true;
 
         static Wrapper::BeanWrapper *getBeanWrapper ();
+        unsigned int getCurrentMs () const;
+        unsigned int lastMs = 0;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -147,9 +151,6 @@ Core::StringSet App::manageUnits ()
                 IController *controller = entry.second;
                 controller->setApp (this);
                 std::string command = controller->start ();
-                impl->model2ViewRequest = true;
-//                impl->context.getSessionScope ()[controller->getName ()] = Core::Variant (controller);
-//                impl->context.getSessionScope ()[entry.first] = Core::Variant (controller);
                 impl->context.setToSessionScope (entry.first, Core::Variant (controller));
 
                 if (!command.empty ()) {
@@ -173,7 +174,6 @@ void App::managePages (Core::StringSet const &viewCommands)
                 if (boost::regex_match (viewCommand, what, e1, boost::match_extra)) {
                         if (what.size () == 2) {
                                 addPage (what[1]);
-                                impl->model2ViewRequest = true;
                         }
                 }
                 else if (boost::regex_match (viewCommand, what, e2, boost::match_extra)) {
@@ -192,8 +192,6 @@ void App::managePages (Core::StringSet const &viewCommands)
                                 else if (what.size () == 2) {
                                         movePage ("", what[1]);
                                 }
-
-                                impl->model2ViewRequest = true;
                         }
                         else {
                                 throw Core::Exception ("Invalid view command. Use +, - or -> operations.");
@@ -205,17 +203,42 @@ void App::managePages (Core::StringSet const &viewCommands)
 
 /*--------------------------------------------------------------------------*/
 
+unsigned int App::Impl::getCurrentMs () const
+{
+        struct timespec spec;
+        clock_gettime (CLOCK_REALTIME, &spec);
+        unsigned int ms = round (spec.tv_nsec / 1.0e6); // Convert nanoseconds to milliseconds
+        return spec.tv_sec * 1000 + ms;
+}
+
 void App::run ()
 {
-        Core::StringSet viewCommands = manageUnits ();
-        managePages (viewCommands);
+        unsigned int currentMs = impl->getCurrentMs ();
+        if (impl->lastMs + MAIN_LOOP_DEFAULT_DELAY_MS <= currentMs) {
+                impl->lastMs = currentMs;
+                Core::StringSet viewCommands = manageUnits ();
+                managePages (viewCommands);
 
-        if (impl->model2ViewRequest) {
-                // Model -> view conversion
+                if (impl->controllersIdling) {
+                        ControllerMap &controllers = impl->unit.getControllers ();
+
+                        for (ControllerMap::value_type const &entry : controllers) {
+                                 IController *controller = entry.second;
+
+                                 if (controller->getLoopDelayMs () < 0) {
+                                         continue;
+                                 }
+
+                                 if (controller->getLastMs () + controller->getLoopDelayMs () <= currentMs) {
+                                         controller->getLastMs () = currentMs;
+                                         controller->onIdle ();
+                                 }
+                        }
+                }
         }
-
-        impl->model2ViewRequest = false;
-        usleep (MAIN_LOOP_USLEEP);
+        else {
+                usleep (((impl->lastMs + MAIN_LOOP_DEFAULT_DELAY_MS) - currentMs) * 1000);
+        }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -407,6 +430,16 @@ std::pair <IView *, Page *> App::Impl::getActiveViewOrThrow (std::string const &
                 if (view->getName () == viewName) {
                         break;
                 }
+
+                SlotVector const &slots = page->getSlots ();
+                for (Slot *slot : slots) {
+                        GtkTile *tile = slot->getTile ();
+
+                        if (tile->getName () == viewName) {
+                                view = tile;
+                                break;
+                        }
+                }
         }
 
         // Throw an error if no such view was found
@@ -466,7 +499,7 @@ void App::doSubmit (SubmitEvent *event)
         BOOST_LOG (lg) << "SubmitEvent::run. viewName : [" << event->viewName << "], dataRange : [" << event->dataRange << "], controllerName : [" << event->controllerName << "].";
 
         std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (event->viewName);
-        GtkView *v = dynamic_cast <GtkView *> (ret.first);
+        IView *v = ret.first;
         Page *page = ret.second;
         MappingMap const &mappings = page->getMappingsByInput ();
 
@@ -495,9 +528,9 @@ void App::doSubmit (SubmitEvent *event)
                 if ((i = mappings.find (inputName)) != mappings.end ()) {
                         IMapping *mapping = i->second;
                         ValidationAndBindingResult vr = mapping->view2Model (&dto);
-                        impl->context.getValidationResults ().push_back (vr);
 
                         if (!vr.valid) {
+                                impl->context.getValidationResults ().push_back (vr);
                                 BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
                                 hasErrors = true;
                         }
@@ -507,9 +540,10 @@ void App::doSubmit (SubmitEvent *event)
 
                 // Default.
                 ValidationAndBindingResult vr = Mapping::view2Model (&dto, inputName, "", "");
-                impl->context.getValidationResults ().push_back (vr);
 
                 if (!vr.valid) {
+                        // TODO!!! obsługa tych błedów i czyszczenie - zły algorytm teraz.
+                        impl->context.getValidationResults ().push_back (vr);
                         BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
                         hasErrors = true;
                 }
@@ -584,23 +618,31 @@ std::string App::getDefaultProperty (std::string const &widgetType) const
 
 void App::doRefresh (RefreshEvent *event)
 {
+#if 0
         BOOST_LOG (lg) << "RefreshEvent::doRefresh. viewName : [" << event->viewName << "], dataRange : [" << event->dataRange << "].";
+#endif
 
-        PageMap refreshPages;
+        typedef std::pair <IView *, Page *> ViewPagePair;
+        typedef std::vector <ViewPagePair> ViewPagePairVector;
+
+        ViewPagePairVector viewsToRefresh;
+
         if (!event->viewName.empty ()) {
-                std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (event->viewName);
-                Page *page = ret.second;
-                refreshPages[page->getName ()] = page;
+                ViewPagePair ret = impl->getActiveViewOrThrow (event->viewName);
+                viewsToRefresh.push_back (ret);
         }
         else {
-               refreshPages = impl->pages;
+               for (PageMap::value_type const &elem : impl->pages) {
+                       Page *page = elem.second;
+                       ViewPagePair pair {page->getView (), page};
+                       viewsToRefresh.push_back (pair);
+               }
         }
 
-        for (auto elem : refreshPages) {
-                Page *page = elem.second;
-                // ? why dynamic_cast!
-                GtkView *v = dynamic_cast <GtkView *> (page->getView ());
-                GtkView::InputMap inputMap = v->getInputs (event->dataRange);
+        for (ViewPagePair &pair : viewsToRefresh) {
+                Page *page = pair.second;
+                IView *view = pair.first;
+                GtkView::InputMap inputMap = view->getInputs (event->dataRange);
                 MappingMap const &mappings = page->getMappingsByInput ();
 
                 for (auto elem : inputMap) {
@@ -626,6 +668,8 @@ void App::doRefresh (RefreshEvent *event)
                         // Default.
                         Mapping::model2View (&dto, inputName, "", "");
                 }
+
+                view->refresh (&impl->context);
         }
 }
 
@@ -710,6 +754,8 @@ Wrapper::BeanWrapper *App::getBeanWrapper ()
 {
         return App::Impl::getBeanWrapper ();
 }
+
+/*--------------------------------------------------------------------------*/
 
 Wrapper::BeanWrapper *App::Impl::getBeanWrapper ()
 {

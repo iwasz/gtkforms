@@ -9,7 +9,6 @@
 #ifndef GTK_ABSTRACT_VIEW_H_
 #define GTK_ABSTRACT_VIEW_H_
 
-#include <gtk/gtk.h>
 #include "IView.h"
 #include "ReflectionMacros.h"
 #include "UiFile.h"
@@ -38,6 +37,7 @@ public:
         virtual void loadUi (App *app);
         virtual void show ();
         virtual void hide ();
+        virtual void refresh (Context *) {}
 
         /**
          * Destroys
@@ -53,6 +53,9 @@ public:
          * Get arbitrary object from UI.
          */
         virtual GObject *getUi (std::string const &name);
+
+        InputMap getInputs (std::string const &dataRange);
+        void printStructure ();
 
 private:
 

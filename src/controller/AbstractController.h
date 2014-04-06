@@ -17,14 +17,10 @@ namespace GtkForms {
 class AbstractController : public IController {
 public:
         abt__
-
         virtual ~AbstractController () {}
 
         App *getApp () { return app; }
 
-//        Core::VariantMap &getSessionScope ();
-//        Core::VariantMap &getUnitScope ();
-//        Core::VariantMap &getFlashScope ();
         void setToSessionScope (std::string const &path, Core::Variant v);
         void setToUnitScope (std::string const &path, Core::Variant v);
         void setToFlashScope (std::string const &path, Core::Variant v);
@@ -34,26 +30,27 @@ public:
         virtual void onIdle () {}
         virtual ValidationAndBindingResult validate () { return ValidationAndBindingResult {}; }
 
-//        virtual std::string getName () const { return name; }
-//        void setName (std::string const &name) { this->name = name; }
-
         SignalAdapterVector &getSignalAdapters () { return signalAdapters; }
         ValidatorVector const &getValidators () const { return validators; }
 
+        int getLoopDelayMs () const { return loopDelayMs; }
+        int &getLastMs () { return lastMs; }
+
 protected:
 
+        AbstractController () : loopDelayMs {-1} {}
         App *app = 0;
 
 private:
 
         void setApp (App *app) { this->app = app; }
-//        mth_ (contId) void contId (std::string const &id) { name = id; }
 
 private:
 
         ValidatorVector prr_ (validators);
         SignalAdapterVector prr_ (signalAdapters);
-
+        int prp_ (loopDelayMs);
+        int lastMs = 0;
 
 
         end_ (AbstractController)
