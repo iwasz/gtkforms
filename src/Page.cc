@@ -84,21 +84,4 @@ MappingMap const &Page::getMappingsByInput () const
         return *mappingsByInputCache;
 }
 
-/*--------------------------------------------------------------------------*/
-
-//MappingMap const &Page::getMappingsByModel () const
-//{
-//        if (mappingsByModelCache) {
-//                return *mappingsByModelCache;
-//        }
-//
-//        mappingsByModelCache = new MappingMap;
-//
-//        for (IMapping *mapping : mappings) {
-//                mappingsByModelCache->operator[] (mapping->getModel ()) = mapping;
-//        }
-//
-//        return *mappingsByModelCache;
-//}
-
 } // namespace GtkForms
