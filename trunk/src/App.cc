@@ -211,6 +211,8 @@ unsigned int App::Impl::getCurrentMs () const
         return spec.tv_sec * 1000 + ms;
 }
 
+/*--------------------------------------------------------------------------*/
+
 void App::run ()
 {
         unsigned int currentMs = impl->getCurrentMs ();
@@ -345,7 +347,6 @@ void App::movePage (std::string const &s, std::string const &pageBName)
         Page *pageB = getPage (pageBName);
 
         if (impl->pages.find (pageBName) != impl->pages.end ()) {
-                // TODO What should happen here? Nothing? Exception? Another instance of view?
                 throw Core::Exception ("Illegal attempt to open multiple instances of page : [" + pageBName + "]");
         }
 
@@ -357,25 +358,11 @@ void App::movePage (std::string const &s, std::string const &pageBName)
 
         impl->pages.erase (pageAName);
 
-        // Load UI file, or noop if loaded.
+        // Make sure  the entire pageB is loaded (i.e. all its elements that is : its view and its tiles.
         pageB->loadUi (this);
 
-        // Get tiles and add them.
-//        GtkTileMap tilesA = pageA->getTiles ();
-//        GtkTileMap tilesB = pageB->getTiles ();
-
-//        TODO!!!!!
-//        // Find out common tiles.
-//        for (auto elem : tilesA) {
-//                std::string tileAName = elem.first;
-//                GtkTile *tileA = elem.second;
-//
-//                // Add only those tiles, that are not present in tilesB map.
-//                GtkTileMap::iterator i;
-//                if ((i = tilesB.find (tileAName)) == tilesB.end ()) {
-//                        tilesB[tileAName] = tileA;
-//                }
-//        }
+        SlotVector const &slotsA = pageA->getSlots ();
+        SlotVector const &slotsB = pageB->getSlots ();
 
         // Find out common views.
         GtkView *mainViewA = pageA->getView ();
@@ -385,9 +372,27 @@ void App::movePage (std::string const &s, std::string const &pageBName)
                 throw Core::Exception ("view property of object Page is NULL.");
         }
 
-        SlotVector slots = pageB->getSlots ();
+        mainViewB->reparent (slotsB, &impl->context);
 
-        mainViewB->reparent (slots, &impl->context);
+
+// TODO generalnie kierunek dobry, ale błędy:
+//        // Find out tiles that are not needed anymore.
+//        for (Slot *slotA : slotsA) {
+//                GtkTile *tileA = slotA->getTile ();
+//
+//                bool tileAPresentInPageB = false;
+//                for (Slot *slotB : slotsB) {
+//                        GtkTile *tileB = slotB->getTile ();
+//                        if (tileB == tileA) {
+//                                tileAPresentInPageB = true;
+//                                break;
+//                        }
+//                }
+//
+//                if (!tileAPresentInPageB) {
+//                        tileA->destroyUi ();
+//                }
+//        }
 
         if (mainViewA != mainViewB) {
                 mainViewA->destroyUi();

@@ -32,7 +32,6 @@ public:
 
         MappingVector const &getMappings () const { return mappings; };
         MappingMap const &getMappingsByInput () const;
-//        MappingMap const &getMappingsByModel () const;
 
         void loadUi (App *app);
         void destroyUi ();

@@ -55,6 +55,8 @@ void GtkAbstractView::loadUi (App *app)
                 return;
         }
 
+        BOOST_LOG (lg) << "+ GtkAbstractView::loadUi : [" << name << "]";
+
         impl->builder = uiFile->load (app);
         impl->widget = GTK_WIDGET (gtk_builder_get_object (impl->builder, name.c_str ()));
 
@@ -81,6 +83,12 @@ void GtkAbstractView::hide ()
 
 void GtkAbstractView::destroyUi ()
 {
+        if (!impl->widget) {
+                return;
+        }
+
+        BOOST_LOG (lg) << "- GtkAbstractView::destroyUi : [" << name << "]";
+
         hide ();
         gtk_widget_destroy (impl->widget);
         impl->widget = 0;
