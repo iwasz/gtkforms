@@ -32,9 +32,6 @@ private:
         Core::VariantMap session;
         Core::VariantMap unit;
         Core::VariantMap flash;
-
-
-
         end_ (ContextPriv)
 };
 
@@ -70,8 +67,6 @@ private:
         Wrapper::BeanWrapper *wrapper = nullptr;
         ContextPriv contextPriv;
         ValidationResultVector validationResults;
-
-
         end_ (Context)
 };
 

@@ -51,8 +51,6 @@ private:
         SignalAdapterVector prr_ (signalAdapters);
         int prp_ (loopDelayMs);
         int lastMs = 0;
-
-
         end_ (AbstractController)
 };
 

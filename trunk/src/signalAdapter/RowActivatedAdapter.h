@@ -36,7 +36,7 @@ public:
 private:
 
         int prp_ (modelColumn);
-        end_ (RowActivatedAdapter) // __LINE__, __COUNTER__ conflict!
+        end_ (RowActivatedAdapter)
 };
 
 } /* namespace GtkForms */
