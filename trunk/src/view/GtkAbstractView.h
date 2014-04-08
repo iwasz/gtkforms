@@ -48,6 +48,7 @@ public:
          * Gets the main object (GTK+ GObject) from the ui file.
          */
         virtual GObject *getUi ();
+        virtual bool isLoaded () const;
 
         /**
          * Get arbitrary object from UI.

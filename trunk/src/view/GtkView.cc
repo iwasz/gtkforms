@@ -224,9 +224,6 @@ void GtkView::reparent (SlotVector const &slots, Context *context)
 
                 tileWidget = GTK_WIDGET (gtkTile->getUi ());
 
-                BOOST_LOG (lg) << gtkTile << ", " <<gtkTile->getUi ();
-
-
                 // Throw away old child ... ???
                 GtkWidget *oldChild = gtk_bin_get_child (slotWidget);
 
@@ -243,7 +240,8 @@ void GtkView::reparent (SlotVector const &slots, Context *context)
                         gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
                 }
 
-                BOOST_LOG (lg) << "Reparented : tile [" << (void *)tileWidget << "], to slot [" << (void*)slotWidget << "]";
+                BOOST_LOG (lg) << "Reparented : tile : [" << (void*)gtkTile << "], tileName : [" << gtkTile->getName () << "], tileWidget [" << (void *)tileWidget << "], to slot [" << (void*)slotWidget << "]";
+                gtk_widget_show_all (tileWidget);
         }
 }
 

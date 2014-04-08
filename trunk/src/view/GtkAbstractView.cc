@@ -104,6 +104,13 @@ GObject *GtkAbstractView::getUi ()
 
 /*--------------------------------------------------------------------------*/
 
+bool GtkAbstractView::isLoaded () const
+{
+        return static_cast <bool> (impl->widget);
+}
+
+/*--------------------------------------------------------------------------*/
+
 GObject *GtkAbstractView::getUi (std::string const &name)
 {
         GObject *obj =  gtk_builder_get_object (impl->builder, name.c_str ());
