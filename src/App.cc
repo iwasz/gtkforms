@@ -374,8 +374,17 @@ void App::movePage (std::string const &s, std::string const &pageBName)
 
         mainViewB->reparent (slotsB, &impl->context);
 
+/*
+ * TODO Tak się nie da:( W ogóle, to GtkBuilder ZAWSZE zwroci tą samą instancję obiektu (po ID).
+ * Nawet kiedy ten obiekt zniszczymy, to będzie zwracał wskaźnik to tego zniszczonego. Jedyny
+ * sposób, żeby zniszczyć i stworzyć obiekt na nowo, to zniszczyć i stworzyć cały GtkBuilder, ale
+ * wtedy zniszczymy też i inne obiekty!. Czyli to by dobrze działo, gdyby każde okno było w osobnym
+ * pliku, ale to by trzeba było jakoś sprytnie wymusić, na przykład żeby GtkView i GtkTile miały
+ * propery ui, gdzie by się podawało nazwę pliku. I wtedy nawet gdyby ktoś robił tak jak my wszystko
+ * w jednym pliku (wszystkie okna), to taki XML ładował by się tyle razy ile zdefiniowano GtkView i
+ * GtkTie.
+ */
 
-// TODO generalnie kierunek dobry, ale błędy:
 //        // Find out tiles that are not needed anymore.
 //        for (Slot *slotA : slotsA) {
 //                GtkTile *tileA = slotA->getTile ();

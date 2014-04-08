@@ -48,6 +48,7 @@ public:
         typedef std::map <std::string, GtkWidget *> InputMap;
         virtual InputMap getInputs (std::string const &dataRange) = 0;
 
+        virtual bool isLoaded () const = 0;
 };
 
 typedef std::map <std::string, IView *> ViewMap;
