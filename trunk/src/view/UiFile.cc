@@ -84,6 +84,13 @@ UiFile::~UiFile ()
 
 /*--------------------------------------------------------------------------*/
 
+GtkBuilder *UiFile::getBuilder ()
+{
+        return impl->builder;
+}
+
+/*--------------------------------------------------------------------------*/
+
 GtkBuilder *UiFile::load (App *app)
 {
         if (impl->loaded) {
@@ -115,6 +122,7 @@ void UiFile::destroy ()
 {
         g_object_unref (impl->builder);
         impl->loaded = false;
+        impl->builder = nullptr;
 }
 
 /*--------------------------------------------------------------------------*/

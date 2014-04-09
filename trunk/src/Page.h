@@ -35,6 +35,7 @@ public:
 
         void loadUi (App *app);
         void destroyUi ();
+        void reparent (Context *context);
 
         PageDecoratorVector &getDecorators () { return decorators; }
 
@@ -43,6 +44,14 @@ public:
 private:
 
         mth_ (contId) void contId (std::string const &id) { name = id; }
+        typedef std::map <std::string, GtkBin *> SlotWidgetMap;
+
+        /**
+         * Get slot widgets with thier names from GtkView and all GtkTiles attached to thid
+         * page.
+         */
+        SlotWidgetMap getSlotWidgets ();
+        void addToMapOrThrow (GObject *obj, Slot *slot, SlotWidgetMap *slotWidgets);
 
 private:
 
