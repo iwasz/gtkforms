@@ -31,6 +31,7 @@ public:
          * it is immediately returned.
          */
         GtkBuilder *load (App *app);
+        GtkBuilder *getBuilder ();
 
         /**
          * Clears memory occupied by loaded UI file.
@@ -38,6 +39,7 @@ public:
         void destroy ();
 
         std::string getFile () const { return file; }
+        void setFile (std::string const &f) { file = f; }
 
 private:
 

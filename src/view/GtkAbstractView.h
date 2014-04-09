@@ -53,6 +53,7 @@ public:
         /**
          * Get arbitrary object from UI.
          */
+        virtual GObject *getUiOrThrow (std::string const &name);
         virtual GObject *getUi (std::string const &name);
 
         InputMap getInputs (std::string const &dataRange);
@@ -65,6 +66,7 @@ private:
 private:
 
         std::string prr_ (name);
+        std::string prr_ (ui);
         UiFile *prp_ (uiFile);
 
         class Impl;

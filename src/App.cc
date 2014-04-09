@@ -297,8 +297,7 @@ void App::addPage (std::string const &pageName)
                 throw Core::Exception ("view property of object Page is NULL.");
         }
 
-        SlotVector slots = page->getSlots ();
-        mainView->reparent (slots, &impl->context);
+        page->reparent (&impl->context);
         // TODO jakoś przenieść!
 //        guiLoadTheme ("/home/iwasz/.themes/", "BioMorph", G_OBJECT (mainView));
         mainView->show ();
@@ -372,7 +371,7 @@ void App::movePage (std::string const &s, std::string const &pageBName)
                 throw Core::Exception ("view property of object Page is NULL.");
         }
 
-        mainViewB->reparent (slotsB, &impl->context);
+        pageB->reparent (&impl->context);
 
 /*
  * TODO Tak się nie da:( W ogóle, to GtkBuilder ZAWSZE zwroci tą samą instancję obiektu (po ID).
@@ -385,23 +384,23 @@ void App::movePage (std::string const &s, std::string const &pageBName)
  * GtkTie.
  */
 
-//        // Find out tiles that are not needed anymore.
-//        for (Slot *slotA : slotsA) {
-//                GtkTile *tileA = slotA->getTile ();
-//
-//                bool tileAPresentInPageB = false;
-//                for (Slot *slotB : slotsB) {
-//                        GtkTile *tileB = slotB->getTile ();
-//                        if (tileB == tileA) {
-//                                tileAPresentInPageB = true;
-//                                break;
-//                        }
-//                }
-//
-//                if (!tileAPresentInPageB) {
-//                        tileA->destroyUi ();
-//                }
-//        }
+        // Find out tiles that are not needed anymore.
+        for (Slot *slotA : slotsA) {
+                GtkTile *tileA = slotA->getTile ();
+
+                bool tileAPresentInPageB = false;
+                for (Slot *slotB : slotsB) {
+                        GtkTile *tileB = slotB->getTile ();
+                        if (tileB == tileA) {
+                                tileAPresentInPageB = true;
+                                break;
+                        }
+                }
+
+                if (!tileAPresentInPageB) {
+                        tileA->destroyUi ();
+                }
+        }
 
         if (mainViewA != mainViewB) {
                 mainViewA->destroyUi();
