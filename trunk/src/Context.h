@@ -12,26 +12,26 @@
 #include <Tiliae.h>
 #include "validator/IValidator.h"
 #include "ReflectionMacros.h"
+#include "Unit.h"
 
 namespace GtkForms {
 
 class ContextPriv {
 public:
         abt__
-
+        ContextPriv (Unit **u) : unit {u} {}
         virtual ~ContextPriv () {}
 
-        Core::VariantMap &getSessionScope () { return session; }
-        Core::VariantMap &getUnitScope () { return unit; }
-        Core::VariantMap &getFlashScope () { return flash; }
+        Core::VariantMap &getSessionScope () { return sessionScope; }
+        Core::VariantMap &getUnitScope () { return unitScope; }
 
         mth_ (get) Core::Variant get (const std::string &name);
 
 private:
 
-        Core::VariantMap session;
-        Core::VariantMap unit;
-        Core::VariantMap flash;
+        Core::VariantMap sessionScope;
+        Core::VariantMap unitScope;
+        Unit **unit = nullptr;
         end_ (ContextPriv)
 };
 
@@ -41,20 +41,18 @@ private:
 class Context {
 public:
         abt__
-        Context (Wrapper::BeanWrapper *w) : wrapper {w} {}
+        Context (Wrapper::BeanWrapper *w, Unit *u) : wrapper {w}, unit {u} {}
         virtual ~Context () {}
 
         Core::VariantMap &getSessionScope () { return contextPriv.getSessionScope (); }
         Core::VariantMap &getUnitScope () { return contextPriv.getUnitScope (); }
-        Core::VariantMap &getFlashScope () { return contextPriv.getFlashScope (); }
 
         void clearSessionScope () { contextPriv.getSessionScope ().clear (); }
         void clearUnitScope () { contextPriv.getUnitScope ().clear (); }
-        void clearFlashScope () { contextPriv.getFlashScope ().clear (); }
 
         void setToSessionScope (std::string const &path, Core::Variant v);
         void setToUnitScope (std::string const &path, Core::Variant v);
-        void setToFlashScope (std::string const &path, Core::Variant v);
+        void setToFlashScope (Core::VariantMap *flash, std::string const &path, Core::Variant v);
 
         mth_ (get) Core::Variant get (const std::string &name);
 
@@ -65,7 +63,8 @@ public:
 private:
 
         Wrapper::BeanWrapper *wrapper = nullptr;
-        ContextPriv contextPriv;
+        Unit *unit = nullptr;
+        ContextPriv contextPriv {&unit};
         ValidationResultVector validationResults;
         end_ (Context)
 };

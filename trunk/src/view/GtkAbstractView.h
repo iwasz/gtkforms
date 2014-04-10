@@ -56,7 +56,7 @@ public:
         virtual GObject *getUiOrThrow (std::string const &name);
         virtual GObject *getUi (std::string const &name);
 
-        InputMap getInputs (std::string const &dataRange);
+        InputMap getInputs (std::string const &dataRange, bool outputs = false);
         void printStructure ();
 
 private:

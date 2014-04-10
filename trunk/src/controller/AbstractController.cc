@@ -24,28 +24,9 @@ void AbstractController::setToUnitScope (std::string const &path, Core::Variant 
 
 void AbstractController::setToFlashScope (std::string const &path, Core::Variant v)
 {
-        app->getContext ().setToFlashScope (path, v);
+        app->getContext ().setToFlashScope (&getFlashScope (), path, v);
 }
 
-//Core::VariantMap &AbstractController::getSessionScope ()
-//{
-//        return app->getContext ().getSessionScope ();
-//}
-//
-///*--------------------------------------------------------------------------*/
-//
-//Core::VariantMap &AbstractController::getUnitScope ()
-//{
-//        return app->getContext ().getUnitScope ();
-//}
-//
-///*--------------------------------------------------------------------------*/
-//
-//Core::VariantMap &AbstractController::getFlashScope ()
-//{
-//        return app->getContext ().getFlashScope ();
-//}
-//
 /*--------------------------------------------------------------------------*/
 
 Core::Variant AbstractController::get (const std::string &name)

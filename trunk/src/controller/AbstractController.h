@@ -24,6 +24,8 @@ public:
         void setToSessionScope (std::string const &path, Core::Variant v);
         void setToUnitScope (std::string const &path, Core::Variant v);
         void setToFlashScope (std::string const &path, Core::Variant v);
+        Core::VariantMap &getFlashScope () { return flash; }
+        void clearFlashScope () { flash.clear (); }
         Core::Variant get (const std::string &name);
 
         virtual void onQuit () {}
@@ -51,6 +53,8 @@ private:
         SignalAdapterVector prr_ (signalAdapters);
         int prp_ (loopDelayMs);
         int lastMs = 0;
+        Core::VariantMap flash;
+
         end_ (AbstractController)
 };
 

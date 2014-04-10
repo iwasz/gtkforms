@@ -26,7 +26,7 @@ struct GtkAbstractView::Impl {
 
         static void onIterateWidget (GtkWidget *widget, gpointer data);
         static void onPrintWidget (GtkWidget *widget, gpointer data);
-        static bool nameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange);
+        static bool nameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange, bool outputs);
 };
 
 /*--------------------------------------------------------------------------*/
@@ -149,22 +149,38 @@ GObject *GtkAbstractView::getUi (std::string const &name)
 struct InputsSearchDTO {
         std::string dataRange;
         GtkAbstractView::InputMap inputs;
+        bool outputs = false;
 };
 
 /*--------------------------------------------------------------------------*/
 
-bool GtkAbstractView::Impl::nameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange)
+bool GtkAbstractView::Impl::nameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange, bool outputs)
 {
+#if 0
+        BOOST_LOG (lg) << widgetName;
+#endif
+
         boost::regex e;
 
         if (dataRange.empty ()) {
-                e = boost::regex {"!(.*)"};
+                if (outputs) {
+                        e = boost::regex {"[!>](.*)"};
+                }
+                else {
+                        e = boost::regex {"[!<](.*)"};
+                }
         }
         else {
                 std::string copy = dataRange;
                 boost::replace_all (copy, ".", "\\.*");
                 boost::replace_all (copy, "*", ".*");
-                e = boost::regex {"!(" + copy + ")"};
+
+                if (outputs) {
+                        e = boost::regex {"[!>](" + copy + ")"};
+                }
+                else {
+                        e = boost::regex {"[!<](" + copy + ")"};
+                }
         }
 
         boost::smatch what;
@@ -201,7 +217,7 @@ void GtkAbstractView::Impl::onIterateWidget (GtkWidget *widget, gpointer data)
         if (buildableName) {
                 std::string inputName;
 
-                if (GtkAbstractView::Impl::nameMatches (buildableName, &inputName, dto->dataRange)) {
+                if (GtkAbstractView::Impl::nameMatches (buildableName, &inputName, dto->dataRange, dto->outputs)) {
                         dto->inputs[inputName] = GTK_WIDGET (widget);
                 }
         }
@@ -213,7 +229,7 @@ void GtkAbstractView::Impl::onIterateWidget (GtkWidget *widget, gpointer data)
 
 /*--------------------------------------------------------------------------*/
 
-GtkAbstractView::InputMap GtkAbstractView::getInputs (std::string const &dataRange)
+GtkAbstractView::InputMap GtkAbstractView::getInputs (std::string const &dataRange, bool outputs)
 {
         if (!GTK_IS_BUILDABLE (getUi ())) {
                 BOOST_LOG (lg) << "Warn : UI is not of type GtkBuildable. Can not get ID then.";
@@ -222,6 +238,7 @@ GtkAbstractView::InputMap GtkAbstractView::getInputs (std::string const &dataRan
 
         InputsSearchDTO dto;
         dto.dataRange = dataRange;
+        dto.outputs = outputs;
 
         GtkBuildable *mainWidget = GTK_BUILDABLE (getUi ());
         gchar const *buildableName = gtk_buildable_get_name (mainWidget);
@@ -229,7 +246,7 @@ GtkAbstractView::InputMap GtkAbstractView::getInputs (std::string const &dataRan
         if (buildableName) {
                 std::string inputName;
 
-                if (GtkAbstractView::Impl::nameMatches (buildableName, &inputName, dataRange)) {
+                if (GtkAbstractView::Impl::nameMatches (buildableName, &inputName, dataRange, outputs)) {
                         dto.inputs[inputName] = GTK_WIDGET (mainWidget);
                 }
         }

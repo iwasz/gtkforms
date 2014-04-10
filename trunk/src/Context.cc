@@ -12,49 +12,85 @@ namespace GtkForms {
 
 Core::Variant ContextPriv::get (const std::string &name)
 {
-        Core::VariantMap::iterator i = flash.find (name);
+        ControllerMap &cMap = (*unit)->getControllers ();
+        Core::VariantMap::iterator i;
 
-        if (i != flash.end ()) {
+        for (ControllerMap::value_type elem : cMap) {
+                IController *ctr = elem.second;
+                i = ctr->getFlashScope ().find (name);
+
+                if (i != ctr->getFlashScope ().end ()) {
+                        return i->second;
+                }
+        }
+
+        i = unitScope.find (name);
+
+        if (i != unitScope.end ()) {
                 return i->second;
         }
 
-        i = unit.find (name);
+        i = sessionScope.find (name);
 
-        if (i != unit.end ()) {
-                return i->second;
-        }
-
-        i = session.find (name);
-
-        if (i != session.end ()) {
+        if (i != sessionScope.end ()) {
                 return i->second;
         }
 
         return Core::Variant ();
 }
 
+/*##########################################################################*/
+
 Core::Variant Context::get (const std::string &name)
 {
         wrapper->setWrappedObject (Core::Variant (&contextPriv));
-        return wrapper->get (name);
+        Core::DebugContext ctx;
+        bool error = false;
+        Core::Variant v = wrapper->get (name, &error, &ctx);
+
+        if (error) {
+                Core::Exception e ("Context::get failed. name = [" + name + "]");
+                e.addContext (ctx);
+                throw e;
+        }
+
+        return v;
 }
 
 void Context::setToSessionScope (std::string const &path, Core::Variant v)
 {
         wrapper->setWrappedObject (Core::Variant {&contextPriv.getSessionScope ()});
-        wrapper->set (path, v);
+        Core::DebugContext ctx;
+
+        if (!wrapper->set (path, v)) {
+                Core::Exception e ("Context::setToSessionScope failed. path = [" + path + "]");
+                e.addContext (ctx);
+                throw e;
+        }
 }
 
 void Context::setToUnitScope (std::string const &path, Core::Variant v)
 {
         wrapper->setWrappedObject (Core::Variant {&contextPriv.getUnitScope ()});
-        wrapper->set (path, v);
+        Core::DebugContext ctx;
+
+        if (!wrapper->set (path, v)) {
+                Core::Exception e ("Context::setToSessionScope failed. path = [" + path + "]");
+                e.addContext (ctx);
+                throw e;
+        }
 }
 
-void Context::setToFlashScope (std::string const &path, Core::Variant v)
+void Context::setToFlashScope (Core::VariantMap *flash, std::string const &path, Core::Variant v)
 {
-        wrapper->setWrappedObject (Core::Variant {&contextPriv.getFlashScope ()});
-        wrapper->set (path, v);
+        wrapper->setWrappedObject (Core::Variant {flash});
+        Core::DebugContext ctx;
+
+        if (!wrapper->set (path, v)) {
+                Core::Exception e ("Context::setToSessionScope failed. path = [" + path + "]");
+                e.addContext (ctx);
+                throw e;
+        }
 }
 
 } // namespace GtkForms

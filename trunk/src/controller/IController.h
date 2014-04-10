@@ -81,6 +81,8 @@ struct IController : public Core::Object {
         virtual void setToSessionScope (std::string const &path, Core::Variant v) = 0;
         virtual void setToUnitScope (std::string const &path, Core::Variant v) = 0;
         virtual void setToFlashScope (std::string const &path, Core::Variant v) = 0;
+        virtual Core::VariantMap &getFlashScope () = 0;
+        virtual void clearFlashScope () = 0;
         virtual Core::Variant get (const std::string &name) = 0;
 
         virtual SignalAdapterVector &getSignalAdapters () = 0;
