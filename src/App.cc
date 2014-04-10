@@ -21,7 +21,7 @@
 #include "controller/RefreshEvent.h"
 #include "view/Slot.h"
 #include "Logging.h"
-#include "mapping/GObjectWrapperPlugin.h"
+//#include "mapping/GObjectWrapperPlugin.h"
 #include "Config.h"
 #include <time.h>
 
@@ -57,7 +57,7 @@ struct App::Impl {
         PageMap pages;
 
         Ptr <BeanFactoryContainer> container;
-        Context context {getBeanWrapper()};
+        Context context {getBeanWrapper(), &unit};
         GtkTileManager tileManager;
         Config *config = nullptr;
         bool controllersIdling = true;
@@ -139,7 +139,7 @@ Core::StringSet App::manageUnits ()
                 IController *controller = entry.second;
                 controller->setApp (this);
                 std::string command = controller->end ();
-//                impl->context.getSessionScope ().erase (controller->getName ());
+                controller->clearFlashScope ();
                 impl->context.getSessionScope ().erase (entry.first);
 
                 if (!command.empty ()) {
@@ -150,6 +150,7 @@ Core::StringSet App::manageUnits ()
         for (ControllerMap::value_type const &entry : uoResult.added) {
                 IController *controller = entry.second;
                 controller->setApp (this);
+                controller->clearFlashScope ();
                 std::string command = controller->start ();
                 impl->context.setToSessionScope (entry.first, Core::Variant (controller));
 
@@ -511,6 +512,29 @@ void App::doSubmit (SubmitEvent *event)
 {
         BOOST_LOG (lg) << "SubmitEvent::run. viewName : [" << event->viewName << "], dataRange : [" << event->dataRange << "], controllerName : [" << event->controllerName << "].";
 
+        /*
+         * Potrzebne dane:
+         * - Z jakiego widoku ściągamy dane (bo może byćwięcej niż jeden widok w Page..
+         *
+         * - jakie dane. Konwertuje dane z formularza do modelu. Konweruje całość, lub tylko część. Decyzja jest podejmowana
+         * na podstawie jakichś dodatiowych parametrów. Np jezeli guzik OK ma calback $submit() (bez parametrów),
+         * to konwerujemy całość. Jeżeli ma tak : $submit ('form'), to konwertowane jest kazde pole które zaczyna
+         * się od "form." bo mogą być węcej niż 1 obiektów formularza). Jeżeli damyh $submit ('form.login'), to
+         * tylko login. Moznaby się pokusić jeszcze o listę typu : $submit (['form.a', 'form.b']).
+         *
+         * Na przykłąad domyślnie jeśli mamy GtkContainer o nazwie loginFormm, a w nim pola o nazwach form.login i form.password,
+         * a na końcu (w tym samym kontenerze) guzik z podpiętą akcją $app->submit () (czy podobnie), to
+         *
+         * - Jakiemu kontrolerowi wuwołąć onSubmit : nazwa kontrolera brana z GtkContainer.
+         */
+        IController *controller = impl->unit.getController (event->controllerName);
+
+        if (!controller) {
+                throw Core::Exception ("You requested submit to a controller which is not currently loaded. Controller name : [" + event->controllerName + "].");
+        }
+
+        controller->clearFlashScope ();
+
         std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (event->viewName);
         IView *v = ret.first;
         Page *page = ret.second;
@@ -560,27 +584,6 @@ void App::doSubmit (SubmitEvent *event)
                         BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
                         hasErrors = true;
                 }
-        }
-
-        /*
-         * Potrzebne dane:
-         * - Z jakiego widoku ściągamy dane (bo może byćwięcej niż jeden widok w Page..
-         *
-         * - jakie dane. Konwertuje dane z formularza do modelu. Konweruje całość, lub tylko część. Decyzja jest podejmowana
-         * na podstawie jakichś dodatiowych parametrów. Np jezeli guzik OK ma calback $submit() (bez parametrów),
-         * to konwerujemy całość. Jeżeli ma tak : $submit ('form'), to konwertowane jest kazde pole które zaczyna
-         * się od "form." bo mogą być węcej niż 1 obiektów formularza). Jeżeli damyh $submit ('form.login'), to
-         * tylko login. Moznaby się pokusić jeszcze o listę typu : $submit (['form.a', 'form.b']).
-         *
-         * Na przykłąad domyślnie jeśli mamy GtkContainer o nazwie loginFormm, a w nim pola o nazwach form.login i form.password,
-         * a na końcu (w tym samym kontenerze) guzik z podpiętą akcją $app->submit () (czy podobnie), to
-         *
-         * - Jakiemu kontrolerowi wuwołąć onSubmit : nazwa kontrolera brana z GtkContainer.
-         */
-        IController *controller = impl->unit.getController (event->controllerName);
-
-        if (!controller) {
-                throw Core::Exception ("You requested submit to a controller which is not currently loaded. Controller name : [" + event->controllerName + "].");
         }
 
         /*
@@ -655,7 +658,7 @@ void App::doRefresh (RefreshEvent *event)
         for (ViewPagePair &pair : viewsToRefresh) {
                 Page *page = pair.second;
                 IView *view = pair.first;
-                GtkView::InputMap inputMap = view->getInputs (event->dataRange);
+                GtkView::InputMap inputMap = view->getInputs (event->dataRange, true);
                 MappingMap const &mappings = page->getMappingsByInput ();
 
                 for (auto elem : inputMap) {
@@ -731,7 +734,7 @@ struct BWInitializer {
         BWInitializer ()
         {
                 beanWrapper = new Wrapper::BeanWrapper (true);
-                beanWrapper->addPlugin (new GObjectWrapperPlugin);
+//                beanWrapper->addPlugin (new GObjectWrapperPlugin);
                 beanWrapper->addPlugin (new Wrapper::PropertyRWBeanWrapperPlugin ());
                 beanWrapper->addPlugin (new Wrapper::GetPutMethodRWBeanWrapperPlugin ());
                 beanWrapper->addPlugin (new Wrapper::MethodPlugin (Wrapper::MethodPlugin::METHOD));
