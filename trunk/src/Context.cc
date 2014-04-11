@@ -12,14 +12,24 @@ namespace GtkForms {
 
 Core::Variant ContextPriv::get (const std::string &name)
 {
-        ControllerMap &cMap = (*unit)->getControllers ();
         Core::VariantMap::iterator i;
 
-        for (ControllerMap::value_type elem : cMap) {
-                IController *ctr = elem.second;
-                i = ctr->getFlashScope ().find (name);
+        if (fromAllFlashes) {
+                ControllerMap &cMap = currentUnit->getControllers ();
 
-                if (i != ctr->getFlashScope ().end ()) {
+                for (ControllerMap::value_type elem : cMap) {
+                        IController *ctr = elem.second;
+                        i = ctr->getFlashScope ().find (name);
+
+                        if (i != ctr->getFlashScope ().end ()) {
+                                return i->second;
+                        }
+                }
+        }
+        else {
+                i = currentController->getFlashScope ().find (name);
+
+                if (i != currentController->getFlashScope ().end ()) {
                         return i->second;
                 }
         }
@@ -37,6 +47,11 @@ Core::Variant ContextPriv::get (const std::string &name)
         }
 
         return Core::Variant ();
+}
+
+void ContextPriv::set (const std::string &name, Core::Variant v)
+{
+        currentController->getFlashScope ()[name] = v;
 }
 
 /*##########################################################################*/
