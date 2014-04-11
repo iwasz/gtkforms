@@ -21,7 +21,6 @@
 #include "controller/RefreshEvent.h"
 #include "view/Slot.h"
 #include "Logging.h"
-//#include "mapping/GObjectWrapperPlugin.h"
 #include "Config.h"
 #include <time.h>
 
@@ -57,7 +56,7 @@ struct App::Impl {
         PageMap pages;
 
         Ptr <BeanFactoryContainer> container;
-        Context context {getBeanWrapper(), &unit};
+        Context context {getBeanWrapper()};
         GtkTileManager tileManager;
         Config *config = nullptr;
         bool controllersIdling = true;
@@ -534,6 +533,9 @@ void App::doSubmit (SubmitEvent *event)
         }
 
         controller->clearFlashScope ();
+        impl->context.setCurrentUnit (&impl->unit);
+        impl->context.setCurrentController (controller);
+        impl->context.setFromAllFlashes (true);
 
         std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (event->viewName);
         IView *v = ret.first;
