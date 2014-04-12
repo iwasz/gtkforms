@@ -91,6 +91,9 @@ struct IController : public Core::Object {
         virtual int getLoopDelayMs () const = 0;
         virtual int &getLastMs () = 0;
 
+        virtual ValidationAndBindingResultContainer const &getValidationResults () const = 0;
+        virtual ValidationAndBindingResultContainer &getValidationResults () = 0;
+
 protected:
 
         friend class App;

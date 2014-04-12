@@ -38,6 +38,9 @@ public:
         int getLoopDelayMs () const { return loopDelayMs; }
         int &getLastMs () { return lastMs; }
 
+        ValidationAndBindingResultContainer const &getValidationResults () const { return validationResults; }
+        ValidationAndBindingResultContainer &getValidationResults () { return validationResults; }
+
 protected:
 
         AbstractController () : loopDelayMs {-1} {}
@@ -54,6 +57,7 @@ private:
         int prp_ (loopDelayMs);
         int lastMs = 0;
         Core::VariantMap flash;
+        ValidationAndBindingResultContainer validationResults;
 
         end_ (AbstractController)
 };

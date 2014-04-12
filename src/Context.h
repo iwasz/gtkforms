@@ -26,11 +26,11 @@ public:
         Core::VariantMap &getUnitScope () { return unitScope; }
 
         mth_ (get) Core::Variant get (const std::string &name);
-        void set (const std::string &name, Core::Variant v);
+        mth_ (set) void set (const std::string &name, Core::Variant v);
 
         void setCurrentUnit (Unit *u) { currentUnit = u; }
         void setCurrentController (IController *c) { currentController = c; }
-        void setFromAllFlashesn (bool b) { fromAllFlashes = b; }
+        void setFromAllFlashes (bool b) { fromAllFlashes = b; }
 
 private:
 
@@ -64,20 +64,19 @@ public:
 
         Core::Variant get (const std::string &name);
 
-        ValidationResultVector const &getValidationResults () const { return validationResults; }
-        ValidationResultVector &getValidationResults () { return validationResults; }
-        void clearValidationResults () { validationResults.clear (); }
+        ValidationAndBindingResultContainer *getValidationResults () { return validationResults; }
+        void setValidationResults (ValidationAndBindingResultContainer *r) { validationResults = r; }
 
         void setCurrentUnit (Unit *u) { contextPriv.setCurrentUnit (u); }
         void setCurrentController (IController *c) { contextPriv.setCurrentController (c); }
-        void setFromAllFlashesn (bool b) { contextPriv.setFromAllFlashesn (b); }
+        void setFromAllFlashes (bool b) { /*contextPriv.setFromAllFlashes (b);*/ }
         ContextPriv &getContextPriv () { return contextPriv; }
 
 private:
 
         Wrapper::BeanWrapper *wrapper = nullptr;
         ContextPriv contextPriv;
-        ValidationResultVector validationResults;
+        ValidationAndBindingResultContainer *validationResults = nullptr;
 };
 
 } // namespace GtkForms

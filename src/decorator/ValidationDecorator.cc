@@ -17,7 +17,11 @@ static src::logger_mt& lg = logger::get();
 
 void ValidationDecorator::run (Page *page, Context *ctx)
 {
-        ValidationResultVector &results = ctx->getValidationResults ();
+        if (!ctx->getValidationResults ()) {
+                return;
+        }
+
+        ValidationResultList const &results = ctx->getValidationResults ()->getResults ();
 
         if (results.empty ()) {
                 return;
