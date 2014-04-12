@@ -11,7 +11,9 @@
 
 #include <string>
 #include <Tiliae.h>
-#include <vector>
+#include <list>
+
+namespace GtkForms {
 
 /**
  *
@@ -29,6 +31,20 @@ struct ValidationAndBindingResult {
 /**
  *
  */
-typedef std::vector <ValidationAndBindingResult> ValidationResultVector;
+typedef std::list <ValidationAndBindingResult> ValidationResultList;
+
+class ValidationAndBindingResultContainer {
+public:
+
+        bool add (ValidationAndBindingResult const &v);
+        void clear () { previous = results; results.clear (); }
+        ValidationResultList const &getResults () const { return results; }
+
+private:
+        ValidationResultList results;
+        ValidationResultList previous;
+};
+
+}
 
 #endif /* VALIDATIONANDBINDINGRESULT_H_ */

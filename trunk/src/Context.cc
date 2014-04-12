@@ -58,6 +58,7 @@ void ContextPriv::set (const std::string &name, Core::Variant v)
 
 Core::Variant Context::get (const std::string &name)
 {
+        contextPriv.setFromAllFlashes (false);
         wrapper->setWrappedObject (Core::Variant (&contextPriv));
         Core::DebugContext ctx;
         bool error = false;
@@ -66,9 +67,11 @@ Core::Variant Context::get (const std::string &name)
         if (error) {
                 Core::Exception e ("Context::get failed. name = [" + name + "]");
                 e.addContext (ctx);
+                contextPriv.setFromAllFlashes (true);
                 throw e;
         }
 
+        contextPriv.setFromAllFlashes (true);
         return v;
 }
 

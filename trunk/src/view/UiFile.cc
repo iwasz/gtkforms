@@ -143,7 +143,7 @@ void UiFile::connectSignals (App *app)
 
 void handler (const std::string &sourceCode, const Core::VariantVector &paramVector, Context *context)
 {
-        Core::Variant domain {context};
+        Core::Variant domain {&context->getContextPriv ()};
         k202::K202 *k202 = App::getK202 ();
 
         Core::Variant result = k202->run (sourceCode, domain, paramVector);
