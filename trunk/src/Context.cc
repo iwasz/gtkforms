@@ -10,46 +10,67 @@
 
 namespace GtkForms {
 
-Core::Variant ContextPriv::get (const std::string &name)
+Core::Variant AllFlashAccessor::get (const std::string &name)
 {
         Core::VariantMap::iterator i;
+        ControllerMap &cMap = currentUnit->getControllers ();
 
-        if (fromAllFlashes) {
-                ControllerMap &cMap = currentUnit->getControllers ();
+        for (ControllerMap::value_type elem : cMap) {
+                IController *ctr = elem.second;
+                i = ctr->getFlashScope ().find (name);
 
-                for (ControllerMap::value_type elem : cMap) {
-                        IController *ctr = elem.second;
-                        i = ctr->getFlashScope ().find (name);
-
-                        if (i != ctr->getFlashScope ().end ()) {
-                                return i->second;
-                        }
-                }
-        }
-        else {
-                i = currentController->getFlashScope ().find (name);
-
-                if (i != currentController->getFlashScope ().end ()) {
+                if (i != ctr->getFlashScope ().end ()) {
                         return i->second;
                 }
         }
 
-        i = unitScope.find (name);
+        i = unitScope->find (name);
 
-        if (i != unitScope.end ()) {
+        if (i != unitScope->end ()) {
                 return i->second;
         }
 
-        i = sessionScope.find (name);
+        i = sessionScope->find (name);
 
-        if (i != sessionScope.end ()) {
+        if (i != sessionScope->end ()) {
                 return i->second;
         }
 
         return Core::Variant ();
 }
 
-void ContextPriv::set (const std::string &name, Core::Variant v)
+void AllFlashAccessor::set (const std::string &name, Core::Variant v)
+{
+        currentController->getFlashScope ()[name] = v;
+}
+
+/*##########################################################################*/
+
+Core::Variant SingleFlashAccessor::get (const std::string &name)
+{
+        Core::VariantMap::iterator i;
+        i = currentController->getFlashScope ().find (name);
+
+        if (i != currentController->getFlashScope ().end ()) {
+                return i->second;
+        }
+
+        i = unitScope->find (name);
+
+        if (i != unitScope->end ()) {
+                return i->second;
+        }
+
+        i = sessionScope->find (name);
+
+        if (i != sessionScope->end ()) {
+                return i->second;
+        }
+
+        return Core::Variant ();
+}
+
+void SingleFlashAccessor::set (const std::string &name, Core::Variant v)
 {
         currentController->getFlashScope ()[name] = v;
 }
@@ -58,8 +79,7 @@ void ContextPriv::set (const std::string &name, Core::Variant v)
 
 Core::Variant Context::get (const std::string &name)
 {
-        contextPriv.setFromAllFlashes (false);
-        wrapper->setWrappedObject (Core::Variant (&contextPriv));
+        wrapper->setWrappedObject (Core::Variant (&singleFlashAccessor));
         Core::DebugContext ctx;
         bool error = false;
         Core::Variant v = wrapper->get (name, &error, &ctx);
@@ -67,17 +87,15 @@ Core::Variant Context::get (const std::string &name)
         if (error) {
                 Core::Exception e ("Context::get failed. name = [" + name + "]");
                 e.addContext (ctx);
-                contextPriv.setFromAllFlashes (true);
                 throw e;
         }
 
-        contextPriv.setFromAllFlashes (true);
         return v;
 }
 
 void Context::setToSessionScope (std::string const &path, Core::Variant v)
 {
-        wrapper->setWrappedObject (Core::Variant {&contextPriv.getSessionScope ()});
+        wrapper->setWrappedObject (Core::Variant {&getSessionScope ()});
         Core::DebugContext ctx;
 
         if (!wrapper->set (path, v)) {
@@ -89,7 +107,7 @@ void Context::setToSessionScope (std::string const &path, Core::Variant v)
 
 void Context::setToUnitScope (std::string const &path, Core::Variant v)
 {
-        wrapper->setWrappedObject (Core::Variant {&contextPriv.getUnitScope ()});
+        wrapper->setWrappedObject (Core::Variant {&getUnitScope ()});
         Core::DebugContext ctx;
 
         if (!wrapper->set (path, v)) {

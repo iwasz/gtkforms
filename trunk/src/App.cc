@@ -138,10 +138,8 @@ Core::StringSet App::manageUnits ()
         for (ControllerMap::value_type const &entry : uoResult.removed) {
                 IController *controller = entry.second;
                 controller->setApp (this);
-                impl->context.setFromAllFlashes (false);
                 impl->context.setCurrentController (controller);
                 std::string command = controller->end ();
-                impl->context.setFromAllFlashes (true);
                 controller->clearFlashScope ();
                 impl->context.getSessionScope ().erase (entry.first);
 
@@ -154,10 +152,8 @@ Core::StringSet App::manageUnits ()
                 IController *controller = entry.second;
                 controller->setApp (this);
                 controller->clearFlashScope ();
-                impl->context.setFromAllFlashes (false);
                 impl->context.setCurrentController (controller);
                 std::string command = controller->start ();
-                impl->context.setFromAllFlashes (false);
                 impl->context.setToSessionScope (entry.first, Core::Variant (controller));
 
                 if (!command.empty ()) {
@@ -240,10 +236,8 @@ void App::run ()
 
                                  if (controller->getLastMs () + controller->getLoopDelayMs () <= currentMs) {
                                          controller->getLastMs () = currentMs;
-                                         impl->context.setFromAllFlashes (false);
                                          impl->context.setCurrentController (controller);
                                          controller->onIdle ();
-                                         impl->context.setFromAllFlashes (true);
                                  }
                         }
                 }
@@ -384,7 +378,7 @@ void App::movePage (std::string const &s, std::string const &pageBName)
         pageB->reparent (&impl->context);
 
 /*
- * TODO Tak się nie da:( W ogóle, to GtkBuilder ZAWSZE zwroci tą samą instancję obiektu (po ID).
+ * W ogóle, to GtkBuilder ZAWSZE zwroci tą samą instancję obiektu (po ID).
  * Nawet kiedy ten obiekt zniszczymy, to będzie zwracał wskaźnik to tego zniszczonego. Jedyny
  * sposób, żeby zniszczyć i stworzyć obiekt na nowo, to zniszczyć i stworzyć cały GtkBuilder, ale
  * wtedy zniszczymy też i inne obiekty!. Czyli to by dobrze działo, gdyby każde okno było w osobnym
@@ -565,8 +559,8 @@ void App::doSubmit (SubmitEvent *event)
 
                 MappingDTO dto;
                 dto.app = this;
-                dto.m2vModelObject = Core::Variant (&impl->context.getContextPriv ());
-                dto.v2mModelObject = Core::Variant (&impl->context.getContextPriv ());
+                dto.m2vModelObject = Core::Variant (&impl->context.getSingleFlashAccessor ());
+                dto.v2mModelObject = Core::Variant (&impl->context.getSingleFlashAccessor ());
                 dto.dataRange = event->dataRange;
 
                 ViewElementDTO elementDTO {G_OBJECT (elem.second)};
@@ -611,9 +605,7 @@ void App::doSubmit (SubmitEvent *event)
                 }
         }
 
-        impl->context.setFromAllFlashes (false);
         ValidationAndBindingResult vr = controller->validate ();
-        impl->context.setFromAllFlashes (true);
         controller->getValidationResults ().add (vr);
 
         if (!vr.valid) {
@@ -630,10 +622,7 @@ void App::doSubmit (SubmitEvent *event)
         }
 
         if (!hasErrors) {
-                impl->context.setFromAllFlashes (false);
                 std::string nextPage = controller->onSubmit ();
-                impl->context.setFromAllFlashes (true);
-
                 impl->pagesToShow.insert (nextPage);
         }
 }
@@ -655,8 +644,6 @@ void App::doRefresh (RefreshEvent *event)
 #endif
 
         impl->context.setCurrentController (nullptr);
-        impl->context.setFromAllFlashes (true);
-
         typedef std::pair <IView *, Page *> ViewPagePair;
         typedef std::vector <ViewPagePair> ViewPagePairVector;
 
@@ -685,8 +672,8 @@ void App::doRefresh (RefreshEvent *event)
 
                         MappingDTO dto;
                         dto.app = this;
-                        dto.m2vModelObject = Core::Variant (&impl->context.getContextPriv ());
-                        dto.v2mModelObject = Core::Variant (&impl->context.getContextPriv ());
+                        dto.m2vModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
+                        dto.v2mModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
                         dto.dataRange = event->dataRange;
 
                         ViewElementDTO elementDTO {G_OBJECT (elem.second)};
