@@ -17,31 +17,53 @@
 
 namespace GtkForms {
 
-class ContextPriv {
+class AbstractAccessor {
+public:
+
+        AbstractAccessor (Core::VariantMap *s, Core::VariantMap *u) : sessionScope {s}, unitScope {u} {}
+        virtual ~AbstractAccessor () {}
+        virtual Core::Variant get (const std::string &name) = 0;
+        virtual void set (const std::string &name, Core::Variant v) = 0;
+
+        void setSessionScope (Core::VariantMap *s) { sessionScope = s; }
+        void setUnitScope (Core::VariantMap *u) { unitScope = u; }
+        void setCurrentController (IController *c) { currentController = c; }
+
+protected:
+
+        Core::VariantMap *sessionScope = nullptr;
+        Core::VariantMap *unitScope = nullptr;
+        IController *currentController = nullptr;
+
+};
+
+class AllFlashAccessor : public AbstractAccessor {
 public:
         abt__
-        virtual ~ContextPriv () {}
-
-        Core::VariantMap &getSessionScope () { return sessionScope; }
-        Core::VariantMap &getUnitScope () { return unitScope; }
+        AllFlashAccessor (Core::VariantMap *s, Core::VariantMap *u) : AbstractAccessor (s, u) {}
+        virtual ~AllFlashAccessor () {}
 
         mth_ (get) Core::Variant get (const std::string &name);
         mth_ (set) void set (const std::string &name, Core::Variant v);
 
         void setCurrentUnit (Unit *u) { currentUnit = u; }
-        void setCurrentController (IController *c) { currentController = c; }
-        void setFromAllFlashes (bool b) { fromAllFlashes = b; }
 
 private:
 
-        Core::VariantMap sessionScope;
-        Core::VariantMap unitScope;
-
         Unit *currentUnit = nullptr;
-        IController *currentController = nullptr;
-        bool fromAllFlashes = true;
+        end_ (AllFlashAccessor)
+};
 
-        end_ (ContextPriv)
+class SingleFlashAccessor : public AbstractAccessor {
+public:
+        abt__
+        SingleFlashAccessor (Core::VariantMap *s, Core::VariantMap *u) : AbstractAccessor (s, u) {}
+        virtual ~SingleFlashAccessor () {}
+
+        mth_ (get) Core::Variant get (const std::string &name);
+        mth_ (set) void set (const std::string &name, Core::Variant v);
+
+        end_ (SingleFlashAccessor)
 };
 
 /**
@@ -52,11 +74,11 @@ public:
         Context (Wrapper::BeanWrapper *w) : wrapper {w} {}
         virtual ~Context () {}
 
-        Core::VariantMap &getSessionScope () { return contextPriv.getSessionScope (); }
-        Core::VariantMap &getUnitScope () { return contextPriv.getUnitScope (); }
+        Core::VariantMap &getSessionScope () { return sessionScope; }
+        Core::VariantMap &getUnitScope () { return unitScope; }
 
-        void clearSessionScope () { contextPriv.getSessionScope ().clear (); }
-        void clearUnitScope () { contextPriv.getUnitScope ().clear (); }
+        void clearSessionScope () { sessionScope.clear (); }
+        void clearUnitScope () { unitScope.clear (); }
 
         void setToSessionScope (std::string const &path, Core::Variant v);
         void setToUnitScope (std::string const &path, Core::Variant v);
@@ -67,15 +89,19 @@ public:
         ValidationAndBindingResultContainer *getValidationResults () { return validationResults; }
         void setValidationResults (ValidationAndBindingResultContainer *r) { validationResults = r; }
 
-        void setCurrentUnit (Unit *u) { contextPriv.setCurrentUnit (u); }
-        void setCurrentController (IController *c) { contextPriv.setCurrentController (c); }
-        void setFromAllFlashes (bool b) { /*contextPriv.setFromAllFlashes (b);*/ }
-        ContextPriv &getContextPriv () { return contextPriv; }
+        void setCurrentUnit (Unit *u) { allFlashAccessor.setCurrentUnit (u); }
+        void setCurrentController (IController *c) { singleFlashAccessor.setCurrentController (c); allFlashAccessor.setCurrentController (c); }
+
+        AllFlashAccessor &getAllFlashAccessor () { return allFlashAccessor; }
+        SingleFlashAccessor &getSingleFlashAccessor () { return singleFlashAccessor; }
 
 private:
 
-        Wrapper::BeanWrapper *wrapper = nullptr;
-        ContextPriv contextPriv;
+        Core::VariantMap sessionScope;
+        Core::VariantMap unitScope;
+        Wrapper::BeanWrapper *wrapper;
+        AllFlashAccessor allFlashAccessor {&sessionScope, &unitScope};
+        SingleFlashAccessor singleFlashAccessor {&sessionScope, &unitScope};
         ValidationAndBindingResultContainer *validationResults = nullptr;
 };
 
