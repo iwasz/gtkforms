@@ -6,11 +6,14 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef GTK_FORMS_MAIN_CONTROLLER_FILE_CONTROLLER_H_
-#define GTK_FORMS_MAIN_CONTROLLER_FILE_CONTROLLER_H_
+#include "DefaultQuitHandler.h"
+#include "App.h"
 
-#include "AbstractController.h"
-#include "DummyController.h"
-#include "IHandler.h"
+namespace GtkForms {
 
-#endif /* CONTROLLER_H_ */
+void DefaultQuitHandler::run (App *app)
+{
+        app->quit ();
+}
+
+} /* namespace GtkForms */

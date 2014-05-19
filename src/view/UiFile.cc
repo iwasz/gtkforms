@@ -134,9 +134,6 @@ void UiFile::connectSignals (App *app)
         gtk_builder_connect_signals_full (impl->builder, myConnectFunc, static_cast <gpointer> (&impl->connectDTO));
 
         BOOST_LOG (lg) << "builder = [" << impl->builder << "], myConnectFunc = [" << myConnectFunc << "], connectDTO = [" << &impl->connectDTO << "]";
-
-//        window = GTK_WIDGET (gtk_builder_get_object (builder, widgetName.c_str ()));
-//        g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), &window);
 }
 
 /*--------------------------------------------------------------------------*/
