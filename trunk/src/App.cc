@@ -23,6 +23,7 @@
 #include "Logging.h"
 #include "Config.h"
 #include <time.h>
+#include "controller/DefaultQuitHandler.h"
 
 namespace GtkForms {
 using namespace Container;
@@ -64,6 +65,8 @@ struct App::Impl {
         static Wrapper::BeanWrapper *getBeanWrapper ();
         unsigned int getCurrentMs () const;
         unsigned int lastMs = 0;
+        bool quitRequested = false;
+        DefaultQuitHandler defaultQuitHandler;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -73,7 +76,7 @@ App::App (std::string const &configurationFile)
         impl = new Impl;
         createContainer (configurationFile);
         g_idle_add (guiThread, static_cast <gpointer> (this));
-        impl->context.setToSessionScope ("app", Core::Variant (*this));
+        impl->context.setToSessionScope ("app", Core::Variant (this));
         impl->context.setCurrentUnit (&impl->unit);
 }
 
@@ -219,7 +222,7 @@ unsigned int App::Impl::getCurrentMs () const
 void App::run ()
 {
         unsigned int currentMs = impl->getCurrentMs ();
-        if (impl->lastMs + MAIN_LOOP_DEFAULT_DELAY_MS <= currentMs) {
+        if (impl->lastMs + impl->config->loopDelayMs <= currentMs) {
                 impl->lastMs = currentMs;
                 Core::StringSet viewCommands = manageUnits ();
                 managePages (viewCommands);
@@ -243,7 +246,7 @@ void App::run ()
                 }
         }
         else {
-                usleep (((impl->lastMs + MAIN_LOOP_DEFAULT_DELAY_MS) - currentMs) * 1000);
+                usleep (((impl->lastMs + impl->config->loopDelayMs) - currentMs) * 1000);
         }
 }
 
@@ -497,6 +500,18 @@ void App::refresh (std::string const &viewName, std::string const &dataRange)
 
 /*--------------------------------------------------------------------------*/
 
+void App::userQuitRequest ()
+{
+        if (impl->config->quitHandler) {
+                impl->config->quitHandler->run (this);
+        }
+        else {
+                impl->defaultQuitHandler.run (this);
+        }
+}
+
+/*--------------------------------------------------------------------------*/
+
 /*
  * Metoda start kontrolera zwraca nazwę widoku. ViewResolver otrzymuje tą nazwę i podejmuje decyzję jaki widok pokazać.
  * Możliwe, że ładuje go z pojedyczego pliku. Możliwe, że nie ładuje, bo on juz jest widoczny, mozliwe, że ładuje i skleja
@@ -714,8 +729,7 @@ void App::createContainer (std::string const &configFile)
 //        impl->container->addSingleton (i->first.c_str (), i->second);
 
         ContainerFactory::init (impl->container.get (), metaContainer.get ());
-//        impl->config = vcast <U::Config *> (impl->container->getBean ("config"));
-//        config (impl->config);
+        impl->config = vcast <Config *> (impl->container->getBean ("config"));
 }
 
 /*--------------------------------------------------------------------------*/
@@ -810,11 +824,25 @@ IUnit *App::getCurrentUnit ()
 
 /*--------------------------------------------------------------------------*/
 
+void App::quit ()
+{
+        BOOST_LOG (lg) << "App::quit : quit requested.";
+        impl->quitRequested = true;
+}
+
+/*--------------------------------------------------------------------------*/
+
 gboolean guiThread (gpointer userData)
 {
         App *app = static_cast <App *> (userData);
         app->run ();
-        return G_SOURCE_CONTINUE;
+        if (app->impl->quitRequested) {
+                gtk_main_quit ();
+                return G_SOURCE_REMOVE;
+        }
+        else {
+                return G_SOURCE_CONTINUE;
+        }
 }
 
 } // namespace GtkForms

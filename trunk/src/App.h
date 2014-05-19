@@ -53,22 +53,11 @@ public:
          */
         void split (std::string const &unitName);
 
-//        /**
-//         * Ends current unit. If this is a root controller, whole application
-//         * gets closed.
-//         */
-//        void end ()
-//        {
-//
-//        }
-
         /**
-         * Quits entire application regardless of controller nesting level.
+         * Quits entire application regardless of controller nesting level. Programmer
+         * (user of the library) invokes this to end the app.
          */
-        void quit ()
-        {
-
-        }
+        mth_ (quit) void quit ();
 
         /*
          * There is always exactly one active unit which reacts to user requests (in fact its controllers do this). If we want to
@@ -97,6 +86,12 @@ public:
          * performs all the work.
          */
         mth_ (submit) void submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName);
+
+        /**
+         * Handles quit request from GUI user (i.e. when he clicks widow manager's close button). Can be invoked
+         * programmaticaly by the programmer as well, for example as a handler of "quit" menu action.
+         */
+        mth_ (userQuitRequest) void userQuitRequest ();
 
         /**
          * Do the opposite of submit i.e. converts data from model suitable to be presented on the

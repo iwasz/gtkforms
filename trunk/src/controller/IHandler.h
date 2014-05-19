@@ -6,11 +6,18 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef GTK_FORMS_MAIN_CONTROLLER_FILE_CONTROLLER_H_
-#define GTK_FORMS_MAIN_CONTROLLER_FILE_CONTROLLER_H_
+#ifndef GTK_FORMS_IHANDLER_H_
+#define GTK_FORMS_IHANDLER_H_
 
-#include "AbstractController.h"
-#include "DummyController.h"
-#include "IHandler.h"
+namespace GtkForms {
+class App;
 
-#endif /* CONTROLLER_H_ */
+class IHandler {
+public:
+        virtual ~IHandler () {}
+        virtual void run (App *app) = 0;
+};
+
+} /* namespace GtkForms */
+
+#endif /* IHANDLER_H_ */

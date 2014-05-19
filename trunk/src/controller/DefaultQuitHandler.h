@@ -5,12 +5,19 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
+#ifndef DEFAULTQUITHANDLER_H_
+#define DEFAULTQUITHANDLER_H_
 
-#ifndef GTK_FORMS_MAIN_CONTROLLER_FILE_CONTROLLER_H_
-#define GTK_FORMS_MAIN_CONTROLLER_FILE_CONTROLLER_H_
-
-#include "AbstractController.h"
-#include "DummyController.h"
 #include "IHandler.h"
 
-#endif /* CONTROLLER_H_ */
+namespace GtkForms {
+
+class DefaultQuitHandler : public IHandler {
+public:
+        virtual ~DefaultQuitHandler () {}
+        void run (App *app);
+};
+
+} /* namespace GtkForms */
+
+#endif /* DEFAULTQUITHANDLER_H_ */
