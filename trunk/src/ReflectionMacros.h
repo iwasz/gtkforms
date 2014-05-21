@@ -28,6 +28,7 @@
 #define stt_      REFLECTION_SETTER
 #define stt__     REFLECTION_SETTER_
 #define end_      REFLECTION_END
+#define end__     REFLECTION_END_
 #define endt_     REFLECTION_END_TOKEN
 #define endt__    REFLECTION_END_TOKEN_
 #define tbg_      REFLECTION_TEMPLATE_BEGIN
