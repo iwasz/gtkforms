@@ -70,15 +70,7 @@ public:
          * app->back () inside one of child controllers will result in returning to previous root controller.
          * back and forward methods operate only on root controllers.
          */
-        void back ()
-        {
-
-        }
-
-        void forward ()
-        {
-
-        }
+        mth_ (back) void back ();
 
         /**
          * Users can request a submit using this action. It not perform any actions, only
