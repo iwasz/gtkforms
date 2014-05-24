@@ -67,6 +67,9 @@ struct App::Impl {
         unsigned int lastMs = 0;
         bool quitRequested = false;
         DefaultQuitHandler defaultQuitHandler;
+
+        typedef std::stack <std::string> UnitNameStack;
+        UnitNameStack previousUnits;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -97,6 +100,7 @@ Core::StringSet App::manageUnits ()
         if (!impl->unitToStart.empty ()) {
                 IUnit *unit = getUnit (impl->unitToStart);
                 uoResult += impl->unit.start (unit);
+                impl->previousUnits.push (impl->unitToStart);
                 BOOST_LOG (lg) << "Unit to be started : name : [" << impl->unitToStart << "], unit itself : [" << *unit << "]";
                 mainUnitModified = true;
         }
@@ -420,6 +424,17 @@ void App::movePage (std::string const &s, std::string const &pageBName)
 void App::start (std::string const &unitName)
 {
         impl->unitToStart = unitName;
+}
+
+/*--------------------------------------------------------------------------*/
+
+void App::back ()
+{
+        if (impl->previousUnits.size () >= 2) {
+                impl->previousUnits.pop ();
+        }
+
+        impl->unitToStart = impl->previousUnits.top ();
 }
 
 /*--------------------------------------------------------------------------*/
