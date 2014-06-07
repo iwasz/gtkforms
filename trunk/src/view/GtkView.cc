@@ -57,7 +57,7 @@ void GtkView::loadUi (App *app)
 
 void GtkView::show ()
 {
-        gtk_widget_show_all (GTK_WIDGET (getUi ()));
+        gtk_widget_show (GTK_WIDGET (getUi ()));
 }
 
 /*--------------------------------------------------------------------------*/

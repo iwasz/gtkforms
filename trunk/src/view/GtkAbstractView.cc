@@ -75,7 +75,7 @@ void GtkAbstractView::loadUi (App *app)
                 throw Core::Exception ("No widget with name : [" + name + "] was found in file : [" + uiFile->getFile () + "].");
         }
 
-        gtk_widget_show_all (impl->widget);
+        gtk_widget_show (impl->widget);
 }
 
 /*--------------------------------------------------------------------------*/
