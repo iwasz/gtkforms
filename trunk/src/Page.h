@@ -26,22 +26,25 @@ public:
 
         virtual ~Page ();
 
-        GtkView *getView () { return view; }
-        std::string getName () const { return name; }
-        SlotVector const &getSlots () const { return slots; }
+        virtual GtkView *getView () { return view; }
+        virtual std::string getName () const { return name; }
+        virtual SlotVector const &getSlots () const { return slots; }
 
-        MappingVector const &getMappings () const { return mappings; };
-        MappingMap const &getMappingsByInput () const;
+        virtual MappingVector const &getMappings () const { return mappings; };
+        virtual MappingMap const &getMappingsByInput () const;
 
-        void loadUi (App *app);
-        void destroyUi ();
-        void reparent (Context *context);
+        virtual void loadUi (App *app);
+        virtual void destroyUi ();
+        virtual void reparent (Context *context);
 
-        PageDecoratorVector &getDecorators () { return decorators; }
+        virtual GObject *getUiOrThrow (std::string const &name);
+        virtual GObject *getUi (std::string const &name);
+
+        virtual PageDecoratorVector &getDecorators () { return decorators; }
 
         friend std::ostream &operator<< (std::ostream &o, Page const &u);
 
-private:
+protected:
 
         mth_ (contId) void contId (std::string const &id) { name = id; }
         typedef std::map <std::string, GtkBin *> SlotWidgetMap;
@@ -50,8 +53,8 @@ private:
          * Get slot widgets with thier names from GtkView and all GtkTiles attached to thid
          * page.
          */
-        SlotWidgetMap getSlotWidgets ();
-        void addToMapOrThrow (GObject *obj, Slot *slot, SlotWidgetMap *slotWidgets);
+        virtual SlotWidgetMap getSlotWidgets ();
+        virtual void addToMapOrThrow (GObject *obj, Slot *slot, SlotWidgetMap *slotWidgets);
 
 private:
 

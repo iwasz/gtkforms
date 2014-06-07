@@ -700,6 +700,10 @@ void App::doRefresh (RefreshEvent *event)
                 for (auto elem : inputMap) {
                         std::string inputName = elem.first;
 
+#if 0
+                        std::cerr << "++" << inputName << std::endl;
+#endif
+
                         MappingDTO dto;
                         dto.app = this;
                         dto.m2vModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
