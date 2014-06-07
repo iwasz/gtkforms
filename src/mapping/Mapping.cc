@@ -28,7 +28,9 @@ ValidationAndBindingResult Mapping::view2Model (MappingDTO *dto)
                 throw Core::Exception ("Mapping::view2Model. Invalid property : [" + finalProperty + "] in input widget : [" + input + "].");
         }
 
+#if 0
         BOOST_LOG (lg) << "Maping::view->model : " << input << "." << finalProperty << "(" << v << ")" << " -> " << finalModelName;
+#endif
         return setToModel (dto->app->getBeanWrapper (), dto->v2mModelObject, finalModelName, v);
 }
 
@@ -40,13 +42,19 @@ void Mapping::model2View (MappingDTO *dto)
         std::string finalModelName;
         finalPropertyAndModel (&finalProperty, &finalModelName, dto);
 
+#if 0
+        std::cerr << "++++ finalProperty : " << finalProperty << ",   finalModelName : " << finalModelName << std::endl;
+#endif
+
         Core::Variant v = getFromModel (dto->app->getBeanWrapper (), dto->m2vModelObject, finalModelName);
 
         if (v.isNone ()) {
                 return;
         }
 
+#if 0
         BOOST_LOG (lg) << "Mapping::model->view : " << finalModelName << "(" << v << ")" << " -> " << input << "." << finalProperty;
+#endif
         setToView (dto->viewElement, finalProperty, v);
 }
 

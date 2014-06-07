@@ -41,6 +41,46 @@ void Page::loadUi (App *app)
 
 /*--------------------------------------------------------------------------*/
 
+GObject *Page::getUiOrThrow (std::string const &name)
+{
+        GObject *obj = getUi (name);
+
+        if (!obj) {
+                throw Core::Exception ("Page::getUiOrThrow could not find ARBITRARY object in UI (mainView + all tiles). Object name : [" + std::string (name) + "].");
+        }
+
+        return obj;
+}
+
+/*--------------------------------------------------------------------------*/
+
+GObject *Page::getUi (std::string const &name)
+{
+        GObject *obj = nullptr;
+
+        if (view) {
+                obj = view->getUi (name);
+
+                if (obj) {
+                        return obj;
+                }
+        }
+
+        for (Slot *s : slots) {
+                GtkTile *tile = s->getTile ();
+
+                if (tile) {
+                        obj = tile->getUi (name);
+
+                        if (obj) {
+                                return obj;
+                        }
+                }
+        }
+}
+
+/*--------------------------------------------------------------------------*/
+
 void Page::destroyUi ()
 {
         for (Slot *s : slots) {
