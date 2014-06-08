@@ -35,6 +35,8 @@ public:
 
         virtual void loadUi (App *app);
         virtual void destroyUi ();
+        virtual void show ();
+        virtual void hide ();
         virtual void reparent (Context *context);
 
         virtual GObject *getUiOrThrow (std::string const &name);
