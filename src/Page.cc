@@ -77,6 +77,8 @@ GObject *Page::getUi (std::string const &name)
                         }
                 }
         }
+
+        return 0;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -91,6 +93,28 @@ void Page::destroyUi ()
         if (view) {
                 view->destroyUi ();
         }
+}
+
+/*--------------------------------------------------------------------------*/
+
+void Page::show ()
+{
+        if (!view) {
+                throw Core::Exception ("Page::show : no main view to show.");
+        }
+
+        view->show ();
+}
+
+/*--------------------------------------------------------------------------*/
+
+void Page::hide ()
+{
+        if (!view) {
+                throw Core::Exception ("Page::hide : no main view to hide.");
+        }
+
+        view->hide ();
 }
 
 /*--------------------------------------------------------------------------*/

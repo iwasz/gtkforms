@@ -311,7 +311,7 @@ void App::addPage (std::string const &pageName)
         page->reparent (&impl->context);
         // TODO jakoś przenieść!
 //        guiLoadTheme ("/home/iwasz/.themes/", "BioMorph", G_OBJECT (mainView));
-        mainView->show ();
+        page->show ();
 }
 
 /*--------------------------------------------------------------------------*/
