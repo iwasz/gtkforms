@@ -33,23 +33,23 @@ void TableMapping::model2View (MappingDTO *dto)
         }
 
         GtkTreeView *treeView = GTK_TREE_VIEW (dto->viewElement->inputWidget);
-        GtkTreeModel *model = gtk_tree_view_get_model (treeView);
+        GtkTreeModel *treeModel = gtk_tree_view_get_model (treeView);
 
-        if (!model) {
+        if (!treeModel) {
                 throw Core::Exception ("TableMapping::view2Model : GtkTreeModel is NULL in GtkTreeView.");
         }
 
-        if (!GTK_IS_LIST_STORE (model)) {
+        if (!GTK_IS_LIST_STORE (treeModel)) {
                 throw Core::Exception ("TableMapping::view2Model : Could not conver treeViewModel to to GtkListStore.");
         }
 
-        GtkListStore *list = GTK_LIST_STORE (model);
+        GtkListStore *list = GTK_LIST_STORE (treeModel);
         gtk_list_store_clear (list);
         modelColumnCopy.clear ();
 
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
         wrapper->setWrappedObject (dto->m2vModelObject);
-        Ptr <IIterator> i = wrapper->iterator (modelCollection);
+        Ptr <IIterator> i = wrapper->iterator (model);
         GtkTreeIter iter;
 
         // Per row iteration.

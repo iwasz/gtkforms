@@ -23,7 +23,12 @@ public:
         void run (App *app);
 
         std::string viewName;
-        std::string dataRange;
+
+        /**
+         * Models to be converted and displayed on the view. If empty, then all inputs wil be
+         * iterated and models set according to mappings.
+         */
+        std::string modelRange;
 };
 
 } /* namespace GtkForms */

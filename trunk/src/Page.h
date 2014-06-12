@@ -26,12 +26,13 @@ public:
 
         virtual ~Page ();
 
-        virtual GtkView *getView () { return view; }
-        virtual std::string getName () const { return name; }
-        virtual SlotVector const &getSlots () const { return slots; }
+        GtkView *getView () { return view; }
+        std::string getName () const { return name; }
+        SlotVector const &getSlots () const { return slots; }
 
-        virtual MappingVector const &getMappings () const { return mappings; };
-        virtual MappingMap const &getMappingsByInput () const;
+        MappingVector const &getMappings () const { return mappings; };
+        MappingMap const &getMappingsByInput () const;
+        MappingMap getMappingsByModelRange (std::string const &modelRange) const;
 
         virtual void loadUi (App *app);
         virtual void destroyUi ();
@@ -42,7 +43,7 @@ public:
         virtual GObject *getUiOrThrow (std::string const &name);
         virtual GObject *getUi (std::string const &name);
 
-        virtual PageDecoratorVector &getDecorators () { return decorators; }
+        PageDecoratorVector &getDecorators () { return decorators; }
 
         friend std::ostream &operator<< (std::ostream &o, Page const &u);
 

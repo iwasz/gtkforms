@@ -494,22 +494,22 @@ std::pair <IView *, Page *> App::Impl::getActiveViewOrThrow (std::string const &
 
 /*--------------------------------------------------------------------------*/
 
-void App::submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName)
+void App::submit (std::string const &viewName, std::string const &inputRange, std::string const &controllerName)
 {
         std::unique_ptr <SubmitEvent> event {new SubmitEvent};
         event->viewName = viewName;
-        event->dataRange = dataRange;
+        event->inputRange = inputRange;
         event->controllerName = controllerName;
         impl->events.push (std::move (event));
 }
 
 /*--------------------------------------------------------------------------*/
 
-void App::refresh (std::string const &viewName, std::string const &dataRange)
+void App::refresh (std::string const &viewName, std::string const &modelRange)
 {
         std::unique_ptr <RefreshEvent> event {new RefreshEvent};
         event->viewName = viewName;
-        event->dataRange = dataRange;
+        event->modelRange = modelRange;
         impl->events.push (std::move (event));
 }
 
@@ -543,7 +543,7 @@ void App::userQuitRequest ()
  */
 void App::doSubmit (SubmitEvent *event)
 {
-        BOOST_LOG (lg) << "SubmitEvent::run. viewName : [" << event->viewName << "], dataRange : [" << event->dataRange << "], controllerName : [" << event->controllerName << "].";
+        BOOST_LOG (lg) << "SubmitEvent::run. viewName : [" << event->viewName << "], dataRange : [" << event->inputRange << "], controllerName : [" << event->controllerName << "].";
 
         /*
          * Potrzebne dane:
@@ -579,7 +579,7 @@ void App::doSubmit (SubmitEvent *event)
         v->printStructure ();
 #endif
 
-        GtkView::InputMap inputMap = v->getInputs (event->dataRange);
+        GtkView::InputMap inputMap = v->getInputs (event->inputRange);
         bool hasErrors = false;
 
         for (auto elem : inputMap) {
@@ -591,7 +591,7 @@ void App::doSubmit (SubmitEvent *event)
                 dto.app = this;
                 dto.m2vModelObject = Core::Variant (&impl->context.getSingleFlashAccessor ());
                 dto.v2mModelObject = Core::Variant (&impl->context.getSingleFlashAccessor ());
-                dto.dataRange = event->dataRange;
+                dto.dataRange = event->inputRange;
 
                 ViewElementDTO elementDTO {G_OBJECT (elem.second)};
                 dto.viewElement = &elementDTO;
@@ -670,7 +670,7 @@ std::string App::getDefaultProperty (std::string const &widgetType) const
 void App::doRefresh (RefreshEvent *event)
 {
 #if 0
-        BOOST_LOG (lg) << "RefreshEvent::doRefresh. viewName : [" << event->viewName << "], dataRange : [" << event->dataRange << "].";
+        BOOST_LOG (lg) << "RefreshEvent::doRefresh. viewName : [" << event->viewName << "], dataRange : [" << event->modelRange << "].";
 #endif
 
         impl->context.setCurrentController (nullptr);
@@ -694,7 +694,42 @@ void App::doRefresh (RefreshEvent *event)
         for (ViewPagePair &pair : viewsToRefresh) {
                 Page *page = pair.second;
                 IView *view = pair.first;
-                GtkView::InputMap inputMap = view->getInputs (event->dataRange, true);
+                GtkView::InputMap inputMap;
+
+                if (event->modelRange.empty ()) {
+                        /*
+                         * If model range is empty, then we have to fall back to the default behavior, which
+                         * would iterate over all the inputs and try to find models coresponding to those
+                         * inputs.
+                         */
+                        inputMap = view->getInputs (event->modelRange, true);
+                }
+                else {
+                        // 1. From mappings
+                        MappingMap mappings = page->getMappingsByModelRange (event->modelRange);
+
+                        for (MappingMap::value_type &elem : mappings) {
+                                GtkView::InputMap tmp = view->getInputs (elem.second->getInput (), true);
+                                assert (tmp.size () == 1);
+                                GtkWidget *input = tmp.begin ()->second;
+
+                                MappingDTO dto;
+                                dto.app = this;
+                                dto.m2vModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
+                                dto.v2mModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
+                                dto.dataRange = event->modelRange;
+
+                                ViewElementDTO elementDTO {G_OBJECT (input)};
+                                dto.viewElement = &elementDTO;
+
+                                elem.second->model2View (&dto);
+                        }
+
+                        // 2. From inputs
+                        GtkView::InputMap tmp = view->getInputs (event->modelRange, true);
+                        std::copy (tmp.begin (), tmp.end (), std::inserter (inputMap, inputMap.end ()));
+                }
+
                 MappingMap const &mappings = page->getMappingsByInput ();
 
                 for (auto elem : inputMap) {
@@ -708,7 +743,7 @@ void App::doRefresh (RefreshEvent *event)
                         dto.app = this;
                         dto.m2vModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
                         dto.v2mModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
-                        dto.dataRange = event->dataRange;
+                        dto.dataRange = event->modelRange;
 
                         ViewElementDTO elementDTO {G_OBJECT (elem.second)};
                         dto.viewElement = &elementDTO;
