@@ -6,28 +6,17 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef SUBMITEVENT_H_
-#define SUBMITEVENT_H_
-
-#include "IEvent.h"
-#include <string>
-#include "mapping/Mapping.h"
+#ifndef REGEXHELPER_H_
+#define REGEXHELPER_H_
 
 namespace GtkForms {
-class IView;
-class Context;
-class IController;
 
-struct SubmitEvent : public IEvent {
+struct RegexHelper {
 
-        virtual ~SubmitEvent (){}
-        void run (App *app);
-
-        std::string viewName;
-        std::string controllerName;
-        std::string inputRange;
+        static bool inputNameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange, bool outputs);
+        static bool modelNameMatches (std::string const &modelName, std::string const &dataRange);
 };
 
-} // namespace GtkForms
+} /* namespace GtkForms */
 
-#endif /* SUBMITEVENT_H_ */
+#endif /* REGEXHELPER_H_ */

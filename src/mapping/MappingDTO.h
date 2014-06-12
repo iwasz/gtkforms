@@ -30,6 +30,8 @@ struct MappingDTO {
         ViewElementDTO *viewElement = 0;
         Core::Variant m2vModelObject;
         Core::Variant v2mModelObject;
+
+        /// modelRange or inputRange - depends on what event is processed.
         std::string dataRange;
 };
 

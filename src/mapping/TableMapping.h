@@ -34,6 +34,7 @@ public:
         virtual ~TableMapping () {}
 
         std::string getInput () const { return input; }
+        std::string getModel () const { return model; }
 
         ValidationAndBindingResult view2Model (MappingDTO *dto);
         void model2View (MappingDTO *dto);
@@ -41,7 +42,7 @@ public:
 private:
 
         std::string prp_ (input);
-        std::string prp_ (modelCollection);
+        std::string prp_ (model);
         ColumnVector prr_ (columns);
         Core::VariantVector modelColumnCopy;
 

@@ -27,6 +27,11 @@ public:
          */
         virtual std::string getInput () const = 0;
 
+        /**
+         * Name of model property which is mapped to the view.
+         */
+        virtual std::string getModel () const = 0;
+
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto) = 0;
         virtual void model2View (MappingDTO *dto) = 0;
 };

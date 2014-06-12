@@ -11,6 +11,7 @@
 #include "view/GtkView.h"
 #include "view/Slot.h"
 #include "Logging.h"
+#include "RegexHelper.h"
 
 namespace GtkForms {
 static src::logger_mt& lg = logger::get ();
@@ -151,6 +152,21 @@ MappingMap const &Page::getMappingsByInput () const
         }
 
         return *mappingsByInputCache;
+}
+
+/*--------------------------------------------------------------------------*/
+
+MappingMap Page::getMappingsByModelRange (std::string const &modelRange) const
+{
+        MappingMap ret;
+
+        for (IMapping *mapping : mappings) {
+                if (RegexHelper::modelNameMatches (mapping->getModel (), modelRange)) {
+                        ret[mapping->getModel ()] = mapping;
+                }
+        }
+
+        return ret;
 }
 
 /*

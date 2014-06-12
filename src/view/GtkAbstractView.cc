@@ -6,9 +6,6 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <boost/algorithm/string/erase.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/regex.hpp>
 #include <gtk/gtk.h>
 #include "GtkAbstractView.h"
 #include <Tiliae.h>
@@ -16,6 +13,7 @@
 #include "Context.h"
 #include "Logging.h"
 #include "mapping/GValueVariant.h"
+#include "RegexHelper.h"
 
 namespace GtkForms {
 static src::logger_mt& lg = logger::get ();
@@ -26,7 +24,6 @@ struct GtkAbstractView::Impl {
 
         static void onIterateWidget (GtkWidget *widget, gpointer data);
         static void onPrintWidget (GtkWidget *widget, gpointer data);
-        static bool nameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange, bool outputs);
 };
 
 /*--------------------------------------------------------------------------*/
@@ -152,49 +149,6 @@ struct InputsSearchDTO {
         bool outputs = false;
 };
 
-/*--------------------------------------------------------------------------*/
-
-bool GtkAbstractView::Impl::nameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange, bool outputs)
-{
-#if 0
-        BOOST_LOG (lg) << widgetName;
-#endif
-
-        boost::regex e;
-
-        if (dataRange.empty ()) {
-                if (outputs) {
-                        e = boost::regex {"[!>](.*)"};
-                }
-                else {
-                        e = boost::regex {"[!<](.*)"};
-                }
-        }
-        else {
-                std::string copy = dataRange;
-                boost::replace_all (copy, ".", "\\.*");
-                boost::replace_all (copy, "*", ".*");
-
-                if (outputs) {
-                        e = boost::regex {"[!>](" + copy + ")"};
-                }
-                else {
-                        e = boost::regex {"[!<](" + copy + ")"};
-                }
-        }
-
-        boost::smatch what;
-
-        if (boost::regex_match (widgetName, what, e, boost::match_extra)) {
-                if (what.size () == 2) {
-                        *inputName = what[1];
-                }
-
-                return true;
-        }
-
-        return false;
-}
 
 /*--------------------------------------------------------------------------*/
 
@@ -217,7 +171,7 @@ void GtkAbstractView::Impl::onIterateWidget (GtkWidget *widget, gpointer data)
         if (buildableName) {
                 std::string inputName;
 
-                if (GtkAbstractView::Impl::nameMatches (buildableName, &inputName, dto->dataRange, dto->outputs)) {
+                if (RegexHelper::inputNameMatches (buildableName, &inputName, dto->dataRange, dto->outputs)) {
                         dto->inputs[inputName] = GTK_WIDGET (widget);
                 }
         }
@@ -246,7 +200,7 @@ GtkAbstractView::InputMap GtkAbstractView::getInputs (std::string const &dataRan
         if (buildableName) {
                 std::string inputName;
 
-                if (GtkAbstractView::Impl::nameMatches (buildableName, &inputName, dataRange, outputs)) {
+                if (RegexHelper::inputNameMatches (buildableName, &inputName, dataRange, outputs)) {
                         dto.inputs[inputName] = GTK_WIDGET (mainWidget);
                 }
         }
