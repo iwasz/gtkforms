@@ -31,8 +31,8 @@ public:
         SlotVector const &getSlots () const { return slots; }
 
         MappingVector const &getMappings () const { return mappings; };
-        MappingMap const &getMappingsByInput () const;
-        MappingMap getMappingsByModelRange (std::string const &modelRange) const;
+        MappingMultiMap const &getMappingsByInput () const;
+        MappingMultiMap getMappingsByModelRange (std::string const &modelRange) const;
 
         virtual void loadUi (App *app);
         virtual void destroyUi ();
@@ -65,8 +65,8 @@ private:
         std::string prr_ (name);
         SlotVector prr_ (slots);
         MappingVector prr_ (mappings);
-        mutable MappingMap *mappingsByInputCache = 0;
-        mutable MappingMap *mappingsByModelCache = 0;
+        mutable MappingMultiMap *mappingsByInputCache = 0;
+//        mutable MappingMap *mappingsByModelCache = 0;
         PageDecoratorVector prr_ (decorators);
         end_ (Page)
 };
