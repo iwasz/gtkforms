@@ -573,7 +573,7 @@ void App::doSubmit (SubmitEvent *event)
         std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (event->viewName);
         IView *v = ret.first;
         Page *page = ret.second;
-        MappingMap const &mappings = page->getMappingsByInput ();
+        MappingMultiMap const &mappings = page->getMappingsByInput ();
 
 #if 0
         v->printStructure ();
@@ -596,10 +596,13 @@ void App::doSubmit (SubmitEvent *event)
                 ViewElementDTO elementDTO {G_OBJECT (elem.second)};
                 dto.viewElement = &elementDTO;
 
-                MappingMap::const_iterator i;
-                if ((i = mappings.find (inputName)) != mappings.end ()) {
+                MappingMultiMap::const_iterator i;
+                auto eq = mappings.equal_range (inputName);
+                bool mappingFoundForInput = false;
+                for (i = eq.first; i != eq.second; ++i) {
                         IMapping *mapping = i->second;
                         ValidationAndBindingResult vr = mapping->view2Model (&dto);
+                        mappingFoundForInput = true;
                         controller->getValidationResults ().add (vr);
 
                         if (!vr.valid) {
@@ -610,13 +613,15 @@ void App::doSubmit (SubmitEvent *event)
                         continue;
                 }
 
-                // Default.
-                ValidationAndBindingResult vr = Mapping::view2Model (&dto, inputName, "", "");
-                controller->getValidationResults ().add (vr);
+                // Falling back to default mapping if none specifica were found.
+                if (!mappingFoundForInput) {
+                        ValidationAndBindingResult vr = Mapping::view2Model (&dto, inputName, "", "");
+                        controller->getValidationResults ().add (vr);
 
-                if (!vr.valid) {
-                        BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
-                        hasErrors = true;
+                        if (!vr.valid) {
+                                BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
+                                hasErrors = true;
+                        }
                 }
         }
 
@@ -696,19 +701,11 @@ void App::doRefresh (RefreshEvent *event)
                 IView *view = pair.first;
                 GtkView::InputMap inputMap;
 
-                if (event->modelRange.empty ()) {
-                        /*
-                         * If model range is empty, then we have to fall back to the default behavior, which
-                         * would iterate over all the inputs and try to find models coresponding to those
-                         * inputs.
-                         */
-                        inputMap = view->getInputs (event->modelRange, true);
-                }
-                else {
+                if (!event->modelRange.empty ()) {
                         // 1. From mappings
-                        MappingMap mappings = page->getMappingsByModelRange (event->modelRange);
+                        MappingMultiMap mappings = page->getMappingsByModelRange (event->modelRange);
 
-                        for (MappingMap::value_type &elem : mappings) {
+                        for (MappingMultiMap::value_type &elem : mappings) {
                                 GtkView::InputMap tmp = view->getInputs (elem.second->getInput (), true);
                                 assert (tmp.size () == 1);
                                 GtkWidget *input = tmp.begin ()->second;
@@ -724,13 +721,18 @@ void App::doRefresh (RefreshEvent *event)
 
                                 elem.second->model2View (&dto);
                         }
-
-                        // 2. From inputs
-                        GtkView::InputMap tmp = view->getInputs (event->modelRange, true);
-                        std::copy (tmp.begin (), tmp.end (), std::inserter (inputMap, inputMap.end ()));
                 }
 
-                MappingMap const &mappings = page->getMappingsByInput ();
+                /*
+                 * 2. From inputs
+                 * If model range is empty, then we have to fall back to the default behavior, which
+                 * would iterate over all the inputs and try to find models coresponding to those
+                 * inputs.
+                 */
+                GtkView::InputMap tmp = view->getInputs (event->modelRange, true);
+                std::copy (tmp.begin (), tmp.end (), std::inserter (inputMap, inputMap.end ()));
+
+                MappingMultiMap const &mappings = page->getMappingsByInput ();
 
                 for (auto elem : inputMap) {
                         std::string inputName = elem.first;
@@ -748,9 +750,10 @@ void App::doRefresh (RefreshEvent *event)
                         ViewElementDTO elementDTO {G_OBJECT (elem.second)};
                         dto.viewElement = &elementDTO;
 
-                        MappingMap::const_iterator i;
+                        MappingMultiMap::const_iterator i;
+                        auto eq = mappings.equal_range (inputName);
 
-                        if ((i = mappings.find (inputName)) != mappings.end ()) {
+                        for (i = eq.first; i != eq.second; ++i) {
                                 IMapping *mapping = i->second;
                                 mapping->model2View (&dto);
                                 continue;

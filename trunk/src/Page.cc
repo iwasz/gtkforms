@@ -20,7 +20,7 @@ using namespace std;
 Page::~Page ()
 {
         delete mappingsByInputCache;
-        delete mappingsByModelCache;
+//        delete mappingsByModelCache;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -139,16 +139,16 @@ ostream &operator<< (ostream &o, Page const &p)
 
 /*--------------------------------------------------------------------------*/
 
-MappingMap const &Page::getMappingsByInput () const
+MappingMultiMap const &Page::getMappingsByInput () const
 {
         if (mappingsByInputCache) {
                 return *mappingsByInputCache;
         }
 
-        mappingsByInputCache = new MappingMap;
+        mappingsByInputCache = new MappingMultiMap;
 
         for (IMapping *mapping : mappings) {
-                mappingsByInputCache->operator[] (mapping->getInput()) = mapping;
+                mappingsByInputCache->insert (std::make_pair (mapping->getInput(), mapping));
         }
 
         return *mappingsByInputCache;
@@ -156,13 +156,13 @@ MappingMap const &Page::getMappingsByInput () const
 
 /*--------------------------------------------------------------------------*/
 
-MappingMap Page::getMappingsByModelRange (std::string const &modelRange) const
+MappingMultiMap Page::getMappingsByModelRange (std::string const &modelRange) const
 {
-        MappingMap ret;
+        MappingMultiMap ret;
 
         for (IMapping *mapping : mappings) {
                 if (RegexHelper::modelNameMatches (mapping->getModel (), modelRange)) {
-                        ret[mapping->getModel ()] = mapping;
+                        ret.insert (std::make_pair (mapping->getModel (), mapping));
                 }
         }
 
