@@ -153,7 +153,7 @@ field of complex model object, only this one value should be converted and the o
 
 Form is a virtual beeing in GtkForms, because elements of a form (called inputs) may be laid out everywhere
 on the window, making virtually entire vindow a form. GtkForms distingushig inputs and other GtkWindgets by
-name. **Every widget whise name starts with an exclamation mark is an input**.  
+name. **Every widget whose name starts with an exclamation mark is an input**.  
 
 To submit a form you must invoke special function : ``$app->submit (...)```. You may do it specifying 
 a callback of some button, or you may do it programmaticaly in your custom ``IView`` implementation (I mean
@@ -163,7 +163,7 @@ concrete class derived from ``IView``. Example of a callback may look like this:
 
 Arguments of this call have the following meaning:
 
-1. ``'loginView'`` is a name of a view from which data will be get. It may be view which contains the button shich was used
+1. ``'loginView'`` is a name of a view from which data will be get. It may be view which contains the button which was used
    to submit a form, or some other view available in current ``Page``. If current page does not contain view with given 
    name, an exception will be thrown.
 #. ``''`` second argument in above example, which is an empty string is called a *dataRange*. It tells the library which
