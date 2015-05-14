@@ -18,7 +18,7 @@ class Context;
 
 /**
  * View (a top level windows, or some inner GtkWidget) created from GtkBuilder. Thise views are
- * loaded (i.e. memory is alloceted) in GtkAbstractView::show, and unloaded (memory is freed) in GtkAbstractView::hide.
+ * loaded (i.e. memory is alloceted) in GtkAbstractView::show, and unloaded (memory is freed) in GtkAbstractView::hide (loadUi/destroyUi?).
  */
 class GtkAbstractView : public IView {
 public:

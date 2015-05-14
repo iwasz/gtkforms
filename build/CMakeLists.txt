@@ -17,14 +17,14 @@ SET (BUILD_CATALOG             OFF CACHE BOOL "")
 SET (CMAKE_VERBOSE_MAKEFILE 0) 
 
 #TODO -Wall
-SET(CMAKE_C_FLAGS_DEBUG "-O0 -g -ggdb -gstabs+" CACHE INTERNAL "c debug compiler flags")
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb -g -gstabs+ -std=c++11" CACHE INTERNAL "cxx debug compiler flags")
+#SET(CMAKE_C_FLAGS_DEBUG "-O0 -g -ggdb -gstabs+" CACHE INTERNAL "c debug compiler flags")
+SET(CMAKE_CXX_FLAGS_DEBUG "-std=c++11" CACHE INTERNAL "cxx debug compiler flags")
 
-SET(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_DEBUG} CACHE INTERNAL "c compiler flags")
-SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG} CACHE INTERNAL "cxx compiler flags")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wdeprecated-register" CACHE INTERNAL "c compiler flags")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wdeprecated-register" CACHE INTERNAL "cxx compiler flags")
 
-SET(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "c release compiler flags")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -std=c++11 -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "cxx release compiler flags")
+SET(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "c release compiler flags")
+SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -std=c++11 -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "cxx release compiler flags")
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK "-pthread")
 ADD_DEFINITIONS (-DREFLECTION_ENABLED)
