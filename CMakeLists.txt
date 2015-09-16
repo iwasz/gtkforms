@@ -14,14 +14,10 @@ SET (BUILD_SUBMISSION          OFF CACHE BOOL "")
 SET (BUILD_CALCULATOR          OFF CACHE BOOL "")
 SET (BUILD_CATALOG             OFF CACHE BOOL "")
 
-SET (CMAKE_VERBOSE_MAKEFILE 0) 
+SET (CMAKE_VERBOSE_MAKEFILE 0)
 
 #TODO -Wall
-#SET(CMAKE_C_FLAGS_DEBUG "-O0 -g -ggdb -gstabs+" CACHE INTERNAL "c debug compiler flags")
-SET(CMAKE_CXX_FLAGS_DEBUG "-std=c++11" CACHE INTERNAL "cxx debug compiler flags")
-
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wdeprecated-register" CACHE INTERNAL "c compiler flags")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wdeprecated-register" CACHE INTERNAL "cxx compiler flags")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" CACHE INTERNAL "cxx compiler flags")
 
 SET(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "c release compiler flags")
 SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -std=c++11 -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "cxx release compiler flags")
@@ -30,14 +26,14 @@ ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK "-pthread")
 ADD_DEFINITIONS (-DREFLECTION_ENABLED)
 
 INSTALL (
-    DIRECTORY "${PROJECT_SOURCE_DIR}/../src/"
-    DESTINATION "include/${CMAKE_PROJECT_NAME}" 
+    DIRECTORY "${PROJECT_SOURCE_DIR}/src/"
+    DESTINATION "include/${CMAKE_PROJECT_NAME}"
     FILES_MATCHING PATTERN "*.h"
     PATTERN "*.svn*" EXCLUDE
     PATTERN "*test*" EXCLUDE)
 
 INSTALL (
-    DIRECTORY "${PROJECT_SOURCE_DIR}/pc/"
+    DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/pc/"
     DESTINATION "lib/pkgconfig"
     FILES_MATCHING PATTERN "*.pc"
     PATTERN "*.svn*" EXCLUDE)
@@ -51,9 +47,17 @@ pkg_check_modules (GTK REQUIRED "gtk+-3.0")
 INCLUDE_DIRECTORIES (${GTK_INCLUDE_DIRS})
 link_directories(${GTK_LIBRARY_DIRS})
 
-pkg_check_modules (TILIAE REQUIRED "tiliae")
+pkg_check_modules (TILIAE "tiliae")
+
+if (NOT TILIAE_FOUND)
+        message ("Tiliae not installed, using local copy.")
+        SET (TILIAE_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/../tiliae/src/")
+        SET (TILIAE_LIBRARY_DIRS "${PROJECT_SOURCE_DIR}/../tiliae/build/")
+        message (${TILIAE_INCLUDE_DIRS})
+        message (${TILIAE_LIBRARY_DIRS})
+endif ()
+
 INCLUDE_DIRECTORIES (${TILIAE_INCLUDE_DIRS})
-message (${TILIAE_INCLUDE_DIRS})
 link_directories(${TILIAE_LIBRARY_DIRS})
 
 ENABLE_TESTING ()
@@ -63,24 +67,24 @@ ENABLE_TESTING ()
 ## --------------------------------------------------------
 
 IF (BUILD_LIB)
-    INCLUDE_DIRECTORIES (../src)      
-    
-    AUX_SOURCE_DIRECTORY (../src LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/controller LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/view LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/mapping LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/signalAdapter LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (../src/validator LIB_SOURCES)    
-    AUX_SOURCE_DIRECTORY (../src/decorator LIB_SOURCES)    
+    INCLUDE_DIRECTORIES (src)
+
+    AUX_SOURCE_DIRECTORY (src LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (src/controller LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (src/view LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (src/mapping LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (src/signalAdapter LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (src/validator LIB_SOURCES)
+    AUX_SOURCE_DIRECTORY (src/decorator LIB_SOURCES)
     add_library (${CMAKE_PROJECT_NAME} SHARED ${LIB_SOURCES})
-    
+
     INSTALL (
     TARGETS ${CMAKE_PROJECT_NAME}
-    DESTINATION lib 
+    DESTINATION lib
     PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE)    
+    WORLD_READ WORLD_EXECUTE)
 ENDIF()
 
 ## --------------------------------------------------------
@@ -88,8 +92,8 @@ ENDIF()
 ## --------------------------------------------------------
 
 IF(BUILD_TEST)
-    AUX_SOURCE_DIRECTORY (../src/test TEST_SOURCES)
-         
+    AUX_SOURCE_DIRECTORY (src/test TEST_SOURCES)
+
     add_executable (test_forms ${TEST_SOURCES})
     TARGET_LINK_LIBRARIES (test_forms ${GTK_LIBRARIES})
     TARGET_LINK_LIBRARIES (test_forms ${TILIAE_LIBRARIES})
@@ -104,7 +108,7 @@ ENDIF()
 IF(BUILD_NAVIGATION)
     ADD_DEFINITIONS (-DREFLECTION_ENABLED)
 
-    AUX_SOURCE_DIRECTORY (../demo/navigation NAVIGATION_SOURCES)    
+    AUX_SOURCE_DIRECTORY (demo/navigation NAVIGATION_SOURCES)
     add_executable (navigation ${NAVIGATION_SOURCES})
     TARGET_LINK_LIBRARIES (navigation ${GTK_LIBRARIES})
     TARGET_LINK_LIBRARIES (navigation ${TILIAE_LIBRARIES})
@@ -117,7 +121,7 @@ ENDIF()
 IF(BUILD_SUBMISSION)
     ADD_DEFINITIONS (-DREFLECTION_ENABLED)
 
-    AUX_SOURCE_DIRECTORY (../demo/submission SUBMISSION_SOURCES)    
+    AUX_SOURCE_DIRECTORY (demo/submission SUBMISSION_SOURCES)
     add_executable (submission ${SUBMISSION_SOURCES})
     TARGET_LINK_LIBRARIES (submission ${GTK_LIBRARIES})
     TARGET_LINK_LIBRARIES (submission ${TILIAE_LIBRARIES})
@@ -129,7 +133,7 @@ IF(BUILD_SUBMISSION)
 ENDIF()
 
 IF(BUILD_CALCULATOR)
-    AUX_SOURCE_DIRECTORY (../demo/calculator DEMO_SOURCES)    
+    AUX_SOURCE_DIRECTORY (demo/calculator DEMO_SOURCES)
     add_executable (calculator ${DEMO_SOURCES})
     TARGET_LINK_LIBRARIES (calculator ${GTK_LIBRARIES})
     TARGET_LINK_LIBRARIES (calculator ${XML_LIBRARIES})
@@ -139,10 +143,10 @@ ENDIF()
 
 IF(BUILD_CATALOG)
     SET(DEMO_SOURCES)
-    AUX_SOURCE_DIRECTORY (../demo/catalog DEMO_SOURCES)    
-    AUX_SOURCE_DIRECTORY (../demo/catalog/model DEMO_SOURCES)    
-    AUX_SOURCE_DIRECTORY (../demo/catalog/controller DEMO_SOURCES)    
-    AUX_SOURCE_DIRECTORY (../demo/catalog/dao DEMO_SOURCES)    
+    AUX_SOURCE_DIRECTORY (demo/catalog DEMO_SOURCES)
+    AUX_SOURCE_DIRECTORY (demo/catalog/model DEMO_SOURCES)
+    AUX_SOURCE_DIRECTORY (demo/catalog/controller DEMO_SOURCES)
+    AUX_SOURCE_DIRECTORY (demo/catalog/dao DEMO_SOURCES)
     add_executable (catalog ${DEMO_SOURCES})
     TARGET_LINK_LIBRARIES (catalog ${GTK_LIBRARIES})
     TARGET_LINK_LIBRARIES (catalog ${XML_LIBRARIES})

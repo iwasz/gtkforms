@@ -42,19 +42,20 @@ void Mapping::model2View (MappingDTO *dto)
         std::string finalModelName;
         finalPropertyAndModel (&finalProperty, &finalModelName, dto);
 
-#if 0
-        std::cerr << "++++ finalProperty : " << finalProperty << ",   finalModelName : " << finalModelName << std::endl;
-#endif
-
         Core::Variant v = getFromModel (dto->app->getBeanWrapper (), dto->m2vModelObject, finalModelName);
 
         if (v.isNone ()) {
+                if (dto->app->getConfig ()->logMappings) {
+                        BOOST_LOG (lg) << "Mapping::model2View \033[31m[" << finalModelName << "]\033[0m not found.";
+                }
+
                 return;
         }
 
-#if 0
-        BOOST_LOG (lg) << "Mapping::model->view : " << finalModelName << "(" << v << ")" << " -> " << input << "." << finalProperty;
-#endif
+        if (dto->app->getConfig ()->logMappings) {
+                BOOST_LOG (lg) << "Mapping::model2View : " << finalModelName << "(" << v << ")" << " -> " << input << "." << finalProperty;
+        }
+
         setToView (dto->viewElement, finalProperty, v);
 }
 

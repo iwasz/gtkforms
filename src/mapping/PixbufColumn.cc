@@ -6,7 +6,7 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include "ConstantToPixbufMapping.h"
+#include "PixbufColumn.h"
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include "RawData.h"
@@ -15,7 +15,7 @@
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
 
-void ConstantToPixbufMapping::setToView (ViewElementDTO *viewObject, std::string const &, Core::Variant valueToSet)
+void PixbufColumn::setToView (ViewElementDTO *viewObject, std::string const &, Core::Variant valueToSet)
 {
         ColumnElementDTO *colElem = static_cast <ColumnElementDTO *> (viewObject);
 
@@ -24,7 +24,7 @@ void ConstantToPixbufMapping::setToView (ViewElementDTO *viewObject, std::string
         }
 
         GtkListStore *list = GTK_LIST_STORE (colElem->inputWidget);
-        int index = vcast <int> (valueToSet);
+        std::string index = lcast <std::string> (valueToSet);
 
         AssociationMap::const_iterator it;
         if ((it = dict.find (index)) == dict.end ()) {

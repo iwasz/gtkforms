@@ -707,6 +707,11 @@ void App::doRefresh (RefreshEvent *event)
 
                         for (MappingMultiMap::value_type &elem : mappings) {
                                 GtkView::InputMap tmp = view->getInputs (elem.second->getInput (), true);
+
+                                if (impl->config->logMappings) {
+                                    BOOST_LOG (lg) << "Range \033[32m[" << elem.second->getInput () << "]\033[0m";
+                                }
+
                                 assert (tmp.size () == 1);
                                 GtkWidget *input = tmp.begin ()->second;
 
@@ -737,9 +742,9 @@ void App::doRefresh (RefreshEvent *event)
                 for (auto elem : inputMap) {
                         std::string inputName = elem.first;
 
-#if 0
-                        std::cerr << "++" << inputName << std::endl;
-#endif
+                        if (impl->config->logMappings) {
+                                BOOST_LOG (lg) << "All \033[32m[" << inputName << "]\033[0m";
+                        }
 
                         MappingDTO dto;
                         dto.app = this;
@@ -755,8 +760,12 @@ void App::doRefresh (RefreshEvent *event)
 
                         for (i = eq.first; i != eq.second; ++i) {
                                 IMapping *mapping = i->second;
+
+                                if (impl->config->logMappings) {
+                                        BOOST_LOG (lg) << "Maping found. Input : [" << mapping->getInput () << "], model : [" << mapping->getModel () << "]";
+                                }
+
                                 mapping->model2View (&dto);
-                                continue;
                         }
 
                         // Default.
@@ -900,6 +909,13 @@ gboolean guiThread (gpointer userData)
         else {
                 return G_SOURCE_CONTINUE;
         }
+}
+
+/*---------------------------------------------------------------------------*/
+
+Config const *App::getConfig () const
+{
+    return impl->config;
 }
 
 } // namespace GtkForms

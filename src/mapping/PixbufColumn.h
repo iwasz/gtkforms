@@ -10,22 +10,19 @@
 #define CONSTANTA_RAWTOPIXBUF_H_
 
 #include <GtkForms.h>
-#include <map>
 #include "Column.h"
+#include "AssociationMap.h"
 
 namespace GtkForms {
-
-typedef std::map <int, std::string> AssociationMap;
-col_ (AssociationMap)
 
 /**
  *
  */
-class ConstantToPixbufMapping : public Column {
+class PixbufColumn : public Column {
 public:
         ctr__ (void)
         bse_ ("Column")
-        virtual ~ConstantToPixbufMapping () {}
+        virtual ~PixbufColumn () {}
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto) { return ValidationAndBindingResult {}; /* Not implemented and won't be */ }
 
 protected:
@@ -36,7 +33,7 @@ private:
 
         AssociationMap prr_ (dict);
 
-        end_ (ConstantToPixbufMapping)
+        end_ (PixbufColumn)
 };
 
 } // end namespace

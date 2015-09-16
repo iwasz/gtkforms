@@ -6,7 +6,7 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include "RawToPixbufMapping.h"
+#include "PixbufMapping.h"
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include "RawData.h"
@@ -17,7 +17,7 @@
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
 
-void RawToPixbufMapping::setToView (ViewElementDTO *viewObject, std::string const &, Core::Variant valueToSet)
+void PixbufMapping::setToView (ViewElementDTO *viewObject, std::string const &, Core::Variant valueToSet)
 {
         if (!GTK_IS_IMAGE (viewObject->inputWidget)) {
                 throw Core::Exception ("RawToPixbufMapping::setToView : Could not conver inputWidget to to GtkImage.");
@@ -29,20 +29,41 @@ void RawToPixbufMapping::setToView (ViewElementDTO *viewObject, std::string cons
                 return;
         }
 
-        RawData *data = vcast <RawData *> (valueToSet);
+        GdkPixbuf *pixbuf = nullptr;
+        GInputStream *stream = nullptr;
 
-        if (data->empty ()) {
-                gtk_image_clear (image);
-                return;
+        if (ccast <RawData *> (valueToSet)) {
+                RawData *data = vcast <RawData *> (valueToSet);
+
+                if (data->empty ()) {
+                        gtk_image_clear (image);
+                        return;
+                }
+
+                stream = g_memory_input_stream_new_from_data (data->data (), data->size (), NULL);
+                GError *e = nullptr;
+                pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, &e);
+
+                if (!pixbuf) {
+                        BOOST_LOG (lg) << data->size ();
+                        throw Core::Exception ("RawToPixbufMapping::model2View : failed to create GtkPixbuf from RawData. Message : [" + std::string (e->message) + "]");
+                }
         }
+        else {
+                std::string index = lcast <std::string> (valueToSet);
+                AssociationMap::const_iterator it;
+                if ((it = dict.find (index)) == dict.end ()) {
+                        BOOST_LOG (lg) << "Index : [" << index << "] has not been found in the PixbufMapping::dict";
+                        return;
+                }
 
-        GInputStream *stream = g_memory_input_stream_new_from_data (data->data (), data->size (), NULL);
-        GError *e = nullptr;
-        GdkPixbuf *pixbuf = gdk_pixbuf_new_from_stream (stream, NULL, &e);
+                GError *e = nullptr;
+                pixbuf = gdk_pixbuf_new_from_file (it->second.c_str (), &e);
+                BOOST_LOG (lg) << "++++++  " << it->second.c_str ();
 
-        if (!pixbuf) {
-                BOOST_LOG (lg) << data->size ();
-                throw Core::Exception ("RawToPixbufMapping::model2View : failed to create GtkPixbuf from RawData. Message : [" + std::string (e->message) + "]");
+                if (!pixbuf) {
+                        throw Core::Exception ("ConstantToPixbufMapping::model2View : failed to create GtkPixbuf from RawData. Message : [" + std::string (e->message) + "]");
+                }
         }
 
         int oWidth = gdk_pixbuf_get_width (pixbuf);
@@ -51,7 +72,9 @@ void RawToPixbufMapping::setToView (ViewElementDTO *viewObject, std::string cons
         int mHeight = maxHeight;
 
         if ((mWidth < 0 && mHeight < 0) || (mWidth >= 0 && oWidth <= mWidth && mHeight >= 0 && oHeight <= mHeight)) {
+                BOOST_LOG (lg) << "----- @#$%^&*()";
                 gtk_image_set_from_pixbuf (image, pixbuf);
+                g_object_unref (pixbuf);
                 return;
         }
 

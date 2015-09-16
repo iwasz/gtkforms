@@ -10,3 +10,5 @@ build/libgtkforms.so
 build/pc/gtkforms.pc
 
 *~
+CMakeLists.txt.user
+build/gtkforms.cbp

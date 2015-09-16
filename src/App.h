@@ -15,6 +15,7 @@
 
 #include "controller/RefreshEvent.h"
 #include "ReflectionMacros.h"
+#include "Config.h"
 
 namespace GtkForms {
 
@@ -108,6 +109,7 @@ public:
 
         std::string getDefaultProperty (std::string const &widgetType) const;
         IUnit *getCurrentUnit ();
+        Config const *getConfig () const;
 
 private:
 

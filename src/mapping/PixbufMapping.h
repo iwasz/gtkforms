@@ -11,18 +11,19 @@
 #include <GtkForms.h>
 #include "Mapping.h"
 #include <vector>
+#include "AssociationMap.h"
 
 namespace GtkForms {
 
 /**
  *
  */
-class RawToPixbufMapping : public Mapping {
+class PixbufMapping : public Mapping {
 public:
         ctr__ (void)
         bse_ ("Mapping")
-        RawToPixbufMapping () : maxWidth {-1}, maxHeight {-1} {}
-        virtual ~RawToPixbufMapping () {}
+        PixbufMapping () : maxWidth {-1}, maxHeight {-1} {}
+        virtual ~PixbufMapping () {}
 
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto) { /* Not implemented and won't be */ return ValidationAndBindingResult{}; }
 
@@ -34,7 +35,8 @@ private:
 
         int prp_ (maxWidth);
         int prp_ (maxHeight);
-        end_ (RawToPixbufMapping)
+        AssociationMap prr_ (dict);
+        end_ (PixbufMapping)
 };
 
 } // end namespace
