@@ -20,7 +20,7 @@ class App;
 
 class Mapping : public IMapping {
 public:
-        ctr__ (void)
+        REFLECTION_CONSTRUCTOR_ (void)
         Mapping () : m2vEditor {nullptr}, v2mEditor {nullptr} {}
         virtual ~Mapping () {}
 
@@ -47,17 +47,17 @@ protected:
 
 private:
 
-        std::string prp_ (input);
-        std::string prp_ (property);
-        std::string prp_ (model);
-        Editor::IEditor *prp_ (m2vEditor);
-        Editor::IEditor *prp_ (v2mEditor);
+        std::string REFLECTION_FIELD_VALUE_INPLACE (input);
+        std::string REFLECTION_FIELD_VALUE_INPLACE (property);
+        std::string REFLECTION_FIELD_VALUE_INPLACE (model);
+        Editor::IEditor *REFLECTION_FIELD_VALUE_INPLACE (m2vEditor);
+        Editor::IEditor *REFLECTION_FIELD_VALUE_INPLACE (v2mEditor);
 
-        end_ (Mapping)
+        REFLECTION_END (Mapping)
 };
 
 typedef std::vector <IMapping *> MappingVector;
-col_ (MappingVector)
+REFLECTION_COLLECTION (MappingVector)
 
 typedef std::unordered_map <std::string, IMapping *> MappingMap;
 typedef std::unordered_multimap <std::string, IMapping *> MappingMultiMap;

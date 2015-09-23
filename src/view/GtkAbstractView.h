@@ -22,7 +22,7 @@ class Context;
  */
 class GtkAbstractView : public IView {
 public:
-        abt__
+        REFLECTION_CLASS
 
         GtkAbstractView ();
         virtual ~GtkAbstractView ();
@@ -61,18 +61,18 @@ public:
 
 private:
 
-        mth_ (contId) void contId (std::string const &id) { name = id; }
+        REFLECTION_METHOD (contId) void contId (std::string const &id) { name = id; }
 
 private:
 
-        std::string prr_ (name);
-        std::string prr_ (ui);
-        UiFile *prp_ (uiFile);
+        std::string REFLECTION_FIELD_REFERENCE_INPLACE (name);
+        std::string REFLECTION_FIELD_REFERENCE_INPLACE (ui);
+        UiFile *REFLECTION_FIELD_VALUE_INPLACE (uiFile);
 
         class Impl;
         Impl *impl = 0;
 
-        end_ (GtkAbstractView)
+        REFLECTION_END (GtkAbstractView)
 };
 
 } // namespace GtkForms

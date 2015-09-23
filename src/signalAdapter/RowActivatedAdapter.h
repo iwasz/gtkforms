@@ -22,8 +22,8 @@ namespace GtkForms {
  */
 class RowActivatedAdapter : public AbstractSignalAdapter {
 public:
-        ctr__ (void)
-        bse_ ("AbstractSignalAdapter")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("AbstractSignalAdapter")
 
         RowActivatedAdapter () : modelColumn (NO_MODEL_COLUMN) {}
         virtual ~RowActivatedAdapter () {}
@@ -35,8 +35,8 @@ public:
 
 private:
 
-        int prp_ (modelColumn);
-        end_ (RowActivatedAdapter)
+        int REFLECTION_FIELD_VALUE_INPLACE (modelColumn);
+        REFLECTION_END (RowActivatedAdapter)
 };
 
 } /* namespace GtkForms */

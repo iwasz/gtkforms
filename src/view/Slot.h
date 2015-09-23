@@ -20,7 +20,7 @@ namespace GtkForms {
  */
 class Slot {
 public:
-        ctr__ (void)
+        REFLECTION_CONSTRUCTOR_ (void)
         Slot () : tile (nullptr) {}
 
         std::string getName () const { return name; }
@@ -28,14 +28,14 @@ public:
 
 private:
 
-        std::string prr_ (name);
-        GtkTile *prp_ (tile);
+        std::string REFLECTION_FIELD_REFERENCE_INPLACE (name);
+        GtkTile *REFLECTION_FIELD_VALUE_INPLACE (tile);
 
-        end_ (Slot)
+        REFLECTION_END (Slot)
 };
 
 typedef std::vector <Slot *> SlotVector;
-col_ (SlotVector)
+REFLECTION_COLLECTION (SlotVector)
 
 } /* namespace GtkForms */
 #endif /* TILE_H_ */

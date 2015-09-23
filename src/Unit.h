@@ -23,7 +23,7 @@ namespace GtkForms {
  */
 class Unit : public IUnit {
 public:
-        ctr__ (void)
+        REFLECTION_CONSTRUCTOR_ (void)
 
         virtual ~Unit () {}
 
@@ -40,8 +40,8 @@ public:
 
 private:
 
-        ControllerMap prr_ (controllers);
-        end_ (Unit)
+        ControllerMap REFLECTION_FIELD_REFERENCE_INPLACE (controllers);
+        REFLECTION_END (Unit)
 };
 
 std::ostream &operator<< (std::ostream &o, IUnit const &u);

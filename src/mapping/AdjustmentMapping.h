@@ -22,8 +22,8 @@ namespace GtkForms {
  */
 class AdjustmentMapping : public Mapping {
 public:
-        ctr__ (void)
-        bse_ ("Mapping")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("Mapping")
         virtual ~AdjustmentMapping () {}
 
 protected:
@@ -32,7 +32,7 @@ protected:
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
         virtual Core::Variant getFromView (ViewElementDTO *viewObject, std::string const &finalProperty);
 
-        end_ (AdjustmentMapping)
+        REFLECTION_END (AdjustmentMapping)
 };
 
 } /* namespace GtkForms */

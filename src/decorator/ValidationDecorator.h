@@ -15,10 +15,10 @@ namespace GtkForms {
 
 class ValidationDecorator : public IPageDecorator {
 public:
-        ctr__ (void)
+        REFLECTION_CONSTRUCTOR_ (void)
         virtual ~ValidationDecorator () {}
         virtual void run (Page *page, Context *ctx);
-        end_ (ValidationDecorator)
+        REFLECTION_END (ValidationDecorator)
 };
 
 } /* namespace GtkForms */

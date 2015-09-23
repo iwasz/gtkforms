@@ -25,7 +25,7 @@ public:
 };
 
 typedef std::vector <IPageDecorator *> PageDecoratorVector;
-col_ (PageDecoratorVector)
+REFLECTION_COLLECTION (PageDecoratorVector)
 
 } /* namespace GtkForms */
 

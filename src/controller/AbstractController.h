@@ -16,7 +16,7 @@ namespace GtkForms {
 
 class AbstractController : public IController {
 public:
-        abt__
+        REFLECTION_CLASS
         virtual ~AbstractController () {}
 
         App *getApp () { return app; }
@@ -52,14 +52,14 @@ private:
 
 private:
 
-        ValidatorVector prr_ (validators);
-        SignalAdapterVector prr_ (signalAdapters);
-        int prp_ (loopDelayMs);
+        ValidatorVector REFLECTION_FIELD_REFERENCE_INPLACE (validators);
+        SignalAdapterVector REFLECTION_FIELD_REFERENCE_INPLACE (signalAdapters);
+        int REFLECTION_FIELD_VALUE_INPLACE (loopDelayMs);
         int lastMs = 0;
         Core::VariantMap flash;
         ValidationAndBindingResultContainer validationResults;
 
-        end_ (AbstractController)
+        REFLECTION_END (AbstractController)
 };
 
 } // namespace GtkForms

@@ -22,7 +22,7 @@ namespace GtkForms {
 
 class Page : public Core::Object {
 public:
-        ctr__ (void)
+        REFLECTION_CONSTRUCTOR_ (void)
 
         virtual ~Page ();
 
@@ -49,7 +49,7 @@ public:
 
 protected:
 
-        mth_ (contId) void contId (std::string const &id) { name = id; }
+        REFLECTION_METHOD (contId) void contId (std::string const &id) { name = id; }
         typedef std::map <std::string, GtkBin *> SlotWidgetMap;
 
         /**
@@ -61,14 +61,14 @@ protected:
 
 private:
 
-        GtkView *prp_ (view);
-        std::string prr_ (name);
-        SlotVector prr_ (slots);
-        MappingVector prr_ (mappings);
+        GtkView *REFLECTION_FIELD_VALUE_INPLACE (view);
+        std::string REFLECTION_FIELD_REFERENCE_INPLACE (name);
+        SlotVector REFLECTION_FIELD_REFERENCE_INPLACE (slots);
+        MappingVector REFLECTION_FIELD_REFERENCE_INPLACE (mappings);
         mutable MappingMultiMap *mappingsByInputCache = 0;
 //        mutable MappingMap *mappingsByModelCache = 0;
-        PageDecoratorVector prr_ (decorators);
-        end_ (Page)
+        PageDecoratorVector REFLECTION_FIELD_REFERENCE_INPLACE (decorators);
+        REFLECTION_END (Page)
 };
 
 typedef std::map <std::string, Page *> PageMap;

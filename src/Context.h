@@ -39,31 +39,31 @@ protected:
 
 class AllFlashAccessor : public AbstractAccessor {
 public:
-        abt__
+        REFLECTION_CLASS
         AllFlashAccessor (Core::VariantMap *s, Core::VariantMap *u) : AbstractAccessor (s, u) {}
         virtual ~AllFlashAccessor () {}
 
-        mth_ (get) Core::Variant get (const std::string &name);
-        mth_ (set) void set (const std::string &name, Core::Variant v);
+        REFLECTION_METHOD (get) Core::Variant get (const std::string &name);
+        REFLECTION_METHOD (set) void set (const std::string &name, Core::Variant v);
 
         void setCurrentUnit (Unit *u) { currentUnit = u; }
 
 private:
 
         Unit *currentUnit = nullptr;
-        end_ (AllFlashAccessor)
+        REFLECTION_END (AllFlashAccessor)
 };
 
 class SingleFlashAccessor : public AbstractAccessor {
 public:
-        abt__
+        REFLECTION_CLASS
         SingleFlashAccessor (Core::VariantMap *s, Core::VariantMap *u) : AbstractAccessor (s, u) {}
         virtual ~SingleFlashAccessor () {}
 
-        mth_ (get) Core::Variant get (const std::string &name);
-        mth_ (set) void set (const std::string &name, Core::Variant v);
+        REFLECTION_METHOD (get) Core::Variant get (const std::string &name);
+        REFLECTION_METHOD (set) void set (const std::string &name, Core::Variant v);
 
-        end_ (SingleFlashAccessor)
+        REFLECTION_END (SingleFlashAccessor)
 };
 
 /**

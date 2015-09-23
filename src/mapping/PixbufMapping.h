@@ -20,8 +20,8 @@ namespace GtkForms {
  */
 class PixbufMapping : public Mapping {
 public:
-        ctr__ (void)
-        bse_ ("Mapping")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("Mapping")
         PixbufMapping () : maxWidth {-1}, maxHeight {-1} {}
         virtual ~PixbufMapping () {}
 
@@ -33,10 +33,10 @@ protected:
 
 private:
 
-        int prp_ (maxWidth);
-        int prp_ (maxHeight);
-        AssociationMap prr_ (dict);
-        end_ (PixbufMapping)
+        int REFLECTION_FIELD_VALUE_INPLACE (maxWidth);
+        int REFLECTION_FIELD_VALUE_INPLACE (maxHeight);
+        AssociationMap REFLECTION_FIELD_REFERENCE_INPLACE (dict);
+        REFLECTION_END (PixbufMapping)
 };
 
 } // end namespace

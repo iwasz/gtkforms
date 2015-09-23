@@ -6,7 +6,7 @@
 #define ASSOCIATIONMAP
 
 typedef std::map <std::string, std::string> AssociationMap;
-col_ (AssociationMap)
+REFLECTION_COLLECTION (AssociationMap)
 
 #endif // ASSOCIATIONMAP
 

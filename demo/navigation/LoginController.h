@@ -15,8 +15,8 @@
 
 class LoginController : public GtkForms::AbstractController {
 public:
-        ctr__ (void)
-        bse_ ("AbstractController")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("AbstractController")
 
         virtual ~LoginController () {}
 
@@ -33,7 +33,7 @@ private:
 
         LoginService *loginService = 0;
 
-        end_ (LoginController)
+        REFLECTION_END (LoginController)
 };
 
 #endif /* LOGINCONTROLLER_H_ */

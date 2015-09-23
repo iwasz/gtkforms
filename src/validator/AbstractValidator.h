@@ -16,7 +16,7 @@ namespace GtkForms {
 
 class AbstractValidator : public IValidator {
 public:
-        abt__
+        REFLECTION_CLASS
         virtual ~AbstractValidator () {}
         virtual std::string getModel () const { return model; }
 
@@ -33,9 +33,9 @@ protected:
 
 private:
 
-        std::string prp_ (model);
-        Core::VariantMap prr_ (params);
-        end_ (AbstractValidator)
+        std::string REFLECTION_FIELD_VALUE_INPLACE (model);
+        Core::VariantMap REFLECTION_FIELD_REFERENCE_INPLACE (params);
+        REFLECTION_END (AbstractValidator)
 };
 
 } /* namespace GtkForms */

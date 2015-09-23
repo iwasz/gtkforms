@@ -26,8 +26,8 @@ class Context;
  */
 class GtkView : public GtkAbstractView {
 public:
-        ctr__ (void)
-        bse_ ("GtkAbstractView")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("GtkAbstractView")
 
         GtkView ();
         virtual ~GtkView ();
@@ -40,7 +40,7 @@ private:
         class Impl;
         Impl *impl;
 
-        end_ (GtkView)
+        REFLECTION_END (GtkView)
 };
 
 } // namespace GtkForms

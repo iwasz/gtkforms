@@ -15,8 +15,8 @@ namespace GtkForms {
 
 class DummyController : public AbstractController {
 public:
-        ctr__ (void)
-        bse_ ("AbstractController")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("AbstractController")
 
         virtual ~DummyController () {}
 
@@ -26,8 +26,8 @@ public:
 
 private:
 
-        std::string prr_ (viewCommand);
-        end_ (DummyController)
+        std::string REFLECTION_FIELD_REFERENCE_INPLACE (viewCommand);
+        REFLECTION_END (DummyController)
 };
 
 } /* namespace GtkForms */

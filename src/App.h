@@ -31,7 +31,7 @@ class RefreshEvent;
  */
 class App {
 public:
-        abt__
+        REFLECTION_CLASS
 
         App (std::string const &configurationFile);
         ~App ();
@@ -41,7 +41,7 @@ public:
          * show? navigate? Ta funkcja będzie używana w wielu miejscach aby przejść
          * na jakiś widok
          */
-        mth_ (start) void start (std::string const &unitName);
+        REFLECTION_METHOD (start) void start (std::string const &unitName);
 
         /**
          * Merge another unit with unit that currently is active. It means that currently active unit
@@ -58,7 +58,7 @@ public:
          * Quits entire application regardless of controller nesting level. Programmer
          * (user of the library) invokes this to end the app.
          */
-        mth_ (quit) void quit ();
+        REFLECTION_METHOD (quit) void quit ();
 
         /*
          * There is always exactly one active unit which reacts to user requests (in fact its controllers do this). If we want to
@@ -71,20 +71,20 @@ public:
          * app->back () inside one of child controllers will result in returning to previous root controller.
          * back and forward methods operate only on root controllers.
          */
-        mth_ (back) void back ();
+        REFLECTION_METHOD (back) void back ();
 
         /**
          * Users can request a submit using this action. It not perform any actions, only
          * sends an SubmitEvent to be processed in the next main loop iteration. doSubmit
          * performs all the work.
          */
-        mth_ (submit) void submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName);
+        REFLECTION_METHOD (submit) void submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName);
 
         /**
          * Handles quit request from GUI user (i.e. when he clicks widow manager's close button). Can be invoked
          * programmaticaly by the programmer as well, for example as a handler of "quit" menu action.
          */
-        mth_ (userQuitRequest) void userQuitRequest ();
+        REFLECTION_METHOD (userQuitRequest) void userQuitRequest ();
 
         /**
          * Do the opposite of submit i.e. converts data from model suitable to be presented on the
@@ -158,7 +158,7 @@ private:
         struct Impl;
         Impl *impl;
 
-        end_ (App)
+        REFLECTION_END (App)
 };
 
 } // namespace GtkForms

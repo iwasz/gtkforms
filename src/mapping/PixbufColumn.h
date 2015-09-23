@@ -20,8 +20,8 @@ namespace GtkForms {
  */
 class PixbufColumn : public Column {
 public:
-        ctr__ (void)
-        bse_ ("Column")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("Column")
         virtual ~PixbufColumn () {}
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto) { return ValidationAndBindingResult {}; /* Not implemented and won't be */ }
 
@@ -31,9 +31,9 @@ protected:
 
 private:
 
-        AssociationMap prr_ (dict);
+        AssociationMap REFLECTION_FIELD_REFERENCE_INPLACE (dict);
 
-        end_ (PixbufColumn)
+        REFLECTION_END (PixbufColumn)
 };
 
 } // end namespace

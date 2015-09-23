@@ -115,7 +115,7 @@ typedef std::set <IController *> ControllerSet;
  * Map of pointers to controllers.
  */
 typedef std::map <std::string, IController *> ControllerMap;
-col_ (ControllerMap)
+REFLECTION_COLLECTION (ControllerMap)
 
 } // namespace GtkForms
 

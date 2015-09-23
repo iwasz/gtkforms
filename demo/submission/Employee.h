@@ -15,16 +15,16 @@
 #include <ostream>
 
 struct Employee {
-        ctr__ (void)
-        std::string prp_ (firstname)
-        std::string prp_ (lastname)
-        std::string prp_ (city)
-        std::string prp_ (imagePath)
-        end_ (Employee)
+        REFLECTION_CONSTRUCTOR_ (void)
+        std::string REFLECTION_FIELD_VALUE_INPLACE (firstname)
+        std::string REFLECTION_FIELD_VALUE_INPLACE (lastname)
+        std::string REFLECTION_FIELD_VALUE_INPLACE (city)
+        std::string REFLECTION_FIELD_VALUE_INPLACE (imagePath)
+        REFLECTION_END (Employee)
 };
 
 typedef std::vector <Employee *> EmployeeVector;
-col_ (EmployeeVector)
+REFLECTION_COLLECTION (EmployeeVector)
 
 std::ostream &operator<< (std::ostream &o, Employee const &);
 

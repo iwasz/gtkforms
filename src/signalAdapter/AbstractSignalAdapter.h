@@ -18,7 +18,7 @@ namespace GtkForms {
 
 class AbstractSignalAdapter : public ISignalAdapter {
 public:
-        abt__
+        REFLECTION_CLASS
         virtual ~AbstractSignalAdapter () {}
 
         virtual std::string getSignal () const { return signal; }
@@ -27,14 +27,14 @@ public:
 
 private:
 
-        std::string prp_ (signal);
-        std::string prp_ (gObjectName);
-        std::string prp_ (widgetId);
-        end_ (AbstractSignalAdapter)
+        std::string REFLECTION_FIELD_VALUE_INPLACE (signal);
+        std::string REFLECTION_FIELD_VALUE_INPLACE (gObjectName);
+        std::string REFLECTION_FIELD_VALUE_INPLACE (widgetId);
+        REFLECTION_END (AbstractSignalAdapter)
 };
 
 typedef std::vector <ISignalAdapter *> SignalAdapterVector;
-col_ (SignalAdapterVector)
+REFLECTION_COLLECTION (SignalAdapterVector)
 
 } /* namespace GtkForms */
 #endif /* ABSTRACTSIGNALADAPTER_H_ */

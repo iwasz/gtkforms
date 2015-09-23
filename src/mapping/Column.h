@@ -23,19 +23,19 @@ struct ColumnElementDTO : public ViewElementDTO {
 };
 
 struct Column : public Mapping {
-        ctr__ (void)
-        bse_ ("Mapping")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("Mapping")
         virtual ~Column () {}
 
 protected:
 
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
-        end_ (Column)
+        REFLECTION_END (Column)
 };
 
 typedef std::vector <Column *> ColumnVector;
-col_ (ColumnVector)
+REFLECTION_COLLECTION (ColumnVector)
 
 } /* namespace GtkForms */
 #endif /* COLUMN_H_ */

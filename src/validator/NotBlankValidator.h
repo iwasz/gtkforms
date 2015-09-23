@@ -15,11 +15,11 @@ namespace GtkForms {
 
 class NotBlankValidator : public AbstractValidator {
 public:
-        ctr__ (void)
-        bse_ ("AbstractValidator")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("AbstractValidator")
         virtual ~NotBlankValidator () {}
         virtual ValidationAndBindingResult validate (Context &ctx) const;
-        end_ (NotBlankValidator)
+        REFLECTION_END (NotBlankValidator)
 };
 
 } /* namespace GtkForms */

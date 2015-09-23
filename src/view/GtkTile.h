@@ -23,16 +23,16 @@ class Context;
  */
 class GtkTile : public GtkAbstractView {
 public:
-        ctr__ (void)
-        bse_ ("GtkAbstractView")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("GtkAbstractView")
 
         virtual ~GtkTile () {}
 
-        end_ (GtkTile)
+        REFLECTION_END (GtkTile)
 };
 
 typedef std::map <std::string, GtkTile *> GtkTileMap;
-col_ (GtkTileMap)
+REFLECTION_COLLECTION (GtkTileMap)
 
 } /* namespace GtkForms */
 #endif /* GTKTILE_H_ */

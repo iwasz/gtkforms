@@ -15,8 +15,8 @@
 
 class LoginController : public GtkForms::AbstractController {
 public:
-        ctr__ (void)
-        bse_ ("AbstractController")
+        REFLECTION_CONSTRUCTOR_ (void)
+        REFLECTION_BASE_CLASS ("AbstractController")
 
         virtual ~LoginController () {}
 
@@ -24,13 +24,13 @@ public:
         std::string onSubmit ();
         std::string end ();
 
-        mth_ (buttonClicked) void buttonClicked (unsigned int column, Core::Variant selectedObject);
+        REFLECTION_METHOD (buttonClicked) void buttonClicked (unsigned int column, Core::Variant selectedObject);
 
 private:
 
         EmployeeVector employees;
 
-        end_ (LoginController)
+        REFLECTION_END (LoginController)
 };
 
 #endif /* LOGINCONTROLLER_H_ */

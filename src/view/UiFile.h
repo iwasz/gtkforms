@@ -21,7 +21,7 @@ class App;
  */
 class UiFile {
 public:
-        ctr__ (void)
+        REFLECTION_CONSTRUCTOR_ (void)
 
         UiFile ();
         ~UiFile ();
@@ -47,12 +47,12 @@ private:
 
 private:
 
-        std::string prr_ (file);
+        std::string REFLECTION_FIELD_REFERENCE_INPLACE (file);
 
         class Impl;
         Impl *impl = 0;
 
-        end_ (UiFile)
+        REFLECTION_END (UiFile)
 };
 
 } /* namespace GtkForms */

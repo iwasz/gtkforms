@@ -13,12 +13,12 @@
 #include <ReflectionMacros.h>
 
 struct LoginForm {
-        ctr__ (void)
-        std::string prp_ (login);
-        std::string prp_ (password);
-        bool prp_ (encrypt);
-        double prp_ (number);
-        end_ (LoginForm)
+        REFLECTION_CONSTRUCTOR_ (void)
+        std::string REFLECTION_FIELD_VALUE_INPLACE (login);
+        std::string REFLECTION_FIELD_VALUE_INPLACE (password);
+        bool REFLECTION_FIELD_VALUE_INPLACE (encrypt);
+        double REFLECTION_FIELD_VALUE_INPLACE (number);
+        REFLECTION_END (LoginForm)
 };
 
 #endif /* LOGINFORM_H_ */

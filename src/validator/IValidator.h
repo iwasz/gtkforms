@@ -31,7 +31,7 @@ public:
  *
  */
 typedef std::vector <IValidator *> ValidatorVector;
-col_ (ValidatorVector)
+REFLECTION_COLLECTION (ValidatorVector)
 
 } /* namespace GtkForms */
 

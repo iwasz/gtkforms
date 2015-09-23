@@ -52,7 +52,7 @@ public:
 };
 
 typedef std::map <std::string, IView *> ViewMap;
-col_ (ViewMap)
+REFLECTION_COLLECTION (ViewMap)
 
 typedef std::set <IView *> ViewSet;
 

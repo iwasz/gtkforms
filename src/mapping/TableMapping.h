@@ -30,7 +30,7 @@ namespace GtkForms {
  */
 class TableMapping : public IMapping {
 public:
-        ctr__ (void)
+        REFLECTION_CONSTRUCTOR_ (void)
         virtual ~TableMapping () {}
 
         std::string getInput () const { return input; }
@@ -41,12 +41,12 @@ public:
 
 private:
 
-        std::string prp_ (input);
-        std::string prp_ (model);
-        ColumnVector prr_ (columns);
+        std::string REFLECTION_FIELD_VALUE_INPLACE (input);
+        std::string REFLECTION_FIELD_VALUE_INPLACE (model);
+        ColumnVector REFLECTION_FIELD_REFERENCE_INPLACE (columns);
         Core::VariantVector modelColumnCopy;
 
-        end_ (TableMapping)
+        REFLECTION_END (TableMapping)
 };
 
 } /* namespace GtkForms */
