@@ -12,7 +12,6 @@
 #include "App.h"
 #include "Context.h"
 #include "Page.h"
-#include "ReflectionMacros.h"
 #include "controller/Controller.h"
 #include "view/View.h"
 #include "signalAdapter/SignalAdapter.h"
