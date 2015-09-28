@@ -10,13 +10,13 @@
 #define ABSTRACTSIGNALADAPTER_H_
 
 #include "Logging.h"
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 #include "ISignalAdapter.h"
 #include <string>
 
 namespace GtkForms {
 
-class AbstractSignalAdapter : public ISignalAdapter {
+class __tiliae_reflect__ AbstractSignalAdapter : public ISignalAdapter {
 public:
         REFLECTION_CLASS
         virtual ~AbstractSignalAdapter () {}

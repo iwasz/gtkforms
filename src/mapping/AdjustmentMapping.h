@@ -10,7 +10,7 @@
 #define ADJUSTMENT_TABLEMAPPING_H_
 
 #include "Mapping.h"
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 #include "Column.h"
 
 namespace GtkForms {
@@ -20,7 +20,7 @@ namespace GtkForms {
  * First thing this mapper tries is to cast MappingDTO::inputWidget (widget from the value is to be retreived)
  * to some concrete type which uses GtkAdjustment (such as GtkScale or GtkSpinButton).
  */
-class AdjustmentMapping : public Mapping {
+class __tiliae_reflect__ AdjustmentMapping : public Mapping {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         REFLECTION_BASE_CLASS ("Mapping")

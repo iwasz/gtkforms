@@ -12,13 +12,14 @@
 #include <GtkForms.h>
 #include "Column.h"
 #include "AssociationMap.h"
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 
 /**
  *
  */
-class PixbufColumn : public Column {
+class __tiliae_reflect__ PixbufColumn : public Column {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         REFLECTION_BASE_CLASS ("Column")

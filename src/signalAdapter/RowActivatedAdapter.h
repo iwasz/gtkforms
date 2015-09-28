@@ -10,6 +10,7 @@
 #define ROWACTIVATEDADAPTER_H_
 
 #include "AbstractSignalAdapter.h"
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 
@@ -20,7 +21,7 @@ namespace GtkForms {
  * 2 : index of column cicked (starting from 0).
  * 3 : whole model.
  */
-class RowActivatedAdapter : public AbstractSignalAdapter {
+class __tiliae_reflect__ RowActivatedAdapter : public AbstractSignalAdapter {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         REFLECTION_BASE_CLASS ("AbstractSignalAdapter")

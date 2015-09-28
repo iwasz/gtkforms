@@ -13,7 +13,7 @@
 
 namespace GtkForms {
 
-class DummyController : public AbstractController {
+class __tiliae_reflect__ DummyController : public AbstractController {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         REFLECTION_BASE_CLASS ("AbstractController")

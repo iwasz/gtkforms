@@ -8,7 +8,7 @@ build/cmake_install.cmake
 build/install_manifest.txt
 build/libgtkforms.so
 build/pc/gtkforms.pc
-
 *~
 CMakeLists.txt.user
 build/gtkforms.cbp
+build

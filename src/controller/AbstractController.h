@@ -10,11 +10,11 @@
 #define ABSTRACTCONTROLLER_H_
 
 #include "IController.h"
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 
-class AbstractController : public IController {
+class __tiliae_reflect__ AbstractController : public IController {
 public:
         REFLECTION_CLASS
         virtual ~AbstractController () {}

@@ -11,14 +11,14 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "IMapping.h"
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 #include <Tiliae.h>
 #include "RawData.h"
 
 namespace GtkForms {
 class App;
 
-class Mapping : public IMapping {
+class __tiliae_reflect__ Mapping : public IMapping {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         Mapping () : m2vEditor {nullptr}, v2mEditor {nullptr} {}

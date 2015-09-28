@@ -1,6 +1,6 @@
 #include <map>
 #include <string>
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 
 #ifndef ASSOCIATIONMAP
 #define ASSOCIATIONMAP

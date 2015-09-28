@@ -67,24 +67,47 @@ ENABLE_TESTING ()
 ## --------------------------------------------------------
 
 IF (BUILD_LIB)
-    INCLUDE_DIRECTORIES (src)
 
-    AUX_SOURCE_DIRECTORY (src LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (src/controller LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (src/view LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (src/mapping LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (src/signalAdapter LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (src/validator LIB_SOURCES)
-    AUX_SOURCE_DIRECTORY (src/decorator LIB_SOURCES)
-    add_library (${CMAKE_PROJECT_NAME} SHARED ${LIB_SOURCES})
+        # +-------------------------------+
+        # | Generate reflection database. |
+        # +-------------------------------+
+        FILE (MAKE_DIRECTORY reflectionDatabase)
+        FIND_PROGRAM (REFLECTION_PARSER NAME "tiliaeparser" HINTS "${PROJECT_SOURCE_DIR}/../tiliae/build/parser")
 
-    INSTALL (
-    TARGETS ${CMAKE_PROJECT_NAME}
-    DESTINATION lib
-    PERMISSIONS
-    OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE)
+        IF (NOT REFLECTION_PARSER)
+                MESSAGE(FATAL_ERROR "reflectionParser not found -- ${REFLECTION_PARSER}")
+        ENDIF()
+
+        MESSAGE (STATUS "Found REFLECTION_PARSER as ${REFLECTION_PARSER}")
+
+        ADD_CUSTOM_COMMAND (OUTPUT reflectionDatabase/ReflectionDatabase.cc
+                COMMAND ${REFLECTION_PARSER} -p compile_commands.json ${CMAKE_SOURCE_DIR}/src/Reflection.cc -o reflectionDatabase/ReflectionDatabase.cc
+                DEPENDS src/Reflection.cc)
+#                WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+        LIST (APPEND LIB_SOURCES reflectionDatabase/ReflectionDatabase.cc)
+
+        SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+        INCLUDE_DIRECTORIES (src)
+        AUX_SOURCE_DIRECTORY (src LIB_SOURCES)
+        AUX_SOURCE_DIRECTORY (src/controller LIB_SOURCES)
+        AUX_SOURCE_DIRECTORY (src/view LIB_SOURCES)
+        AUX_SOURCE_DIRECTORY (src/mapping LIB_SOURCES)
+        AUX_SOURCE_DIRECTORY (src/signalAdapter LIB_SOURCES)
+        AUX_SOURCE_DIRECTORY (src/validator LIB_SOURCES)
+        AUX_SOURCE_DIRECTORY (src/decorator LIB_SOURCES)
+        add_library (${CMAKE_PROJECT_NAME} SHARED ${LIB_SOURCES})
+
+        SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+        INSTALL (
+        TARGETS ${CMAKE_PROJECT_NAME}
+        DESTINATION lib
+        PERMISSIONS
+        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        GROUP_READ GROUP_EXECUTE
+        WORLD_READ WORLD_EXECUTE)
 ENDIF()
 
 ## --------------------------------------------------------

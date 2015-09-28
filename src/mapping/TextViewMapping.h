@@ -9,13 +9,13 @@
 #ifndef TEXT_VIEW_MAPPING_H_
 #define TEXT_VIEW_MAPPING_H_
 
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 #include "Column.h"
 #include "Mapping.h"
 
 namespace GtkForms {
 
-class TextViewMapping : public Mapping {
+class __tiliae_reflect__ TextViewMapping : public Mapping {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         REFLECTION_BASE_CLASS ("Mapping")

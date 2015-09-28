@@ -10,11 +10,11 @@
 #define ABSTRACTVALIDATOR_H_
 
 #include "IValidator.h"
-#include <GtkForms.h>
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 
-class AbstractValidator : public IValidator {
+class __tiliae_reflect__ AbstractValidator : public IValidator {
 public:
         REFLECTION_CLASS
         virtual ~AbstractValidator () {}

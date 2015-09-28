@@ -9,10 +9,10 @@
 #ifndef IVALIDATOR_H_
 #define IVALIDATOR_H_
 
-#include <Tiliae.h>
+#include <core/Object.h>
 #include <string>
-#include "ReflectionMacros.h"
 #include "ValidationAndBindingResult.h"
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 class Context;
@@ -20,7 +20,7 @@ class Context;
 /**
  *
  */
-class IValidator : public Core::Object {
+class __tiliae_reflect__ IValidator : public Core::Object {
 public:
         virtual ~IValidator () {}
         virtual ValidationAndBindingResult validate (Context &ctx) const = 0;

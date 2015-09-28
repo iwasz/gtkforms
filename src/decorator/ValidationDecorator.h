@@ -9,11 +9,11 @@
 #define VALIDATIONDECORATOR_H_
 
 #include "IPageDecorator.h"
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 
-class ValidationDecorator : public IPageDecorator {
+class __tiliae_reflect__ ValidationDecorator : public IPageDecorator {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         virtual ~ValidationDecorator () {}

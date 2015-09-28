@@ -13,12 +13,13 @@
 #include <gtk/gtk.h>
 #include "MappingDTO.h"
 #include "ValidationAndBindingResult.h"
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 class App;
 class Context;
 
-class IMapping : public Core::Object {
+class __tiliae_reflect__ IMapping : public Core::Object {
 public:
         virtual ~IMapping () {}
 

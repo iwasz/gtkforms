@@ -10,7 +10,7 @@
 #define GTK_ABSTRACT_VIEW_H_
 
 #include "IView.h"
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 #include "UiFile.h"
 
 namespace GtkForms {

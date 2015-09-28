@@ -10,7 +10,7 @@
 #define TABLEMAPPING_H_
 
 #include "IMapping.h"
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 #include "Column.h"
 
 namespace GtkForms {
@@ -28,7 +28,7 @@ namespace GtkForms {
  * should have name beginnig with "!". This is done that way for consistency, because only *widgets* are
  * inputs even though we are changing GtkListStore here (which is another form of model).
  */
-class TableMapping : public IMapping {
+class __tiliae_reflect__ TableMapping : public IMapping {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         virtual ~TableMapping () {}

@@ -10,10 +10,11 @@
 #define NOTBLANKVALIDATOR_H_
 
 #include "AbstractValidator.h"
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 
-class NotBlankValidator : public AbstractValidator {
+class __tiliae_reflect__ NotBlankValidator : public AbstractValidator {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         REFLECTION_BASE_CLASS ("AbstractValidator")

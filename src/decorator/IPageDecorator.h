@@ -9,7 +9,7 @@
 #define IPAGEDECORATOR_H_
 
 #include <Tiliae.h>
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 class Context;
@@ -18,7 +18,7 @@ class Page;
 /**
  * Some custom actions to be performed on a page/view.
  */
-class IPageDecorator : public Core::Object {
+class __tiliae_reflect__ IPageDecorator : public Core::Object {
 public:
         virtual ~IPageDecorator () {}
         virtual void run (Page *page, Context *ctx) = 0;

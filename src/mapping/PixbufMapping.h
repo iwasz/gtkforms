@@ -12,13 +12,14 @@
 #include "Mapping.h"
 #include <vector>
 #include "AssociationMap.h"
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 
 /**
  *
  */
-class PixbufMapping : public Mapping {
+class __tiliae_reflect__ PixbufMapping : public Mapping {
 public:
         REFLECTION_CONSTRUCTOR_ (void)
         REFLECTION_BASE_CLASS ("Mapping")

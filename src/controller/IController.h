@@ -13,8 +13,8 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <Tiliae.h>
-#include "ReflectionMacros.h"
+#include <core/Object.h>
+#include <ReflectionParserAnnotation.h>
 #include "signalAdapter/AbstractSignalAdapter.h"
 #include "validator/IValidator.h"
 
@@ -30,7 +30,7 @@ class App;
  * where controller created first is called a "root controller" and the rest is called "child
  * controllers".
  */
-struct IController : public Core::Object {
+struct __tiliae_reflect__ IController : public Core::Object {
 
         /**
          * Method which gets called one time on controller start. It may construct a model,

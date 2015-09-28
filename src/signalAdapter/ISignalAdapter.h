@@ -11,14 +11,15 @@
 
 #include <gtk/gtk.h>
 #include <vector>
-#include <Tiliae.h>
+#include <core/Object.h>
+#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 
 /**
  *
  */
-struct ISignalAdapter : public Core::Object {
+struct __tiliae_reflect__ ISignalAdapter : public Core::Object {
         virtual ~ISignalAdapter () {}
         virtual std::string getSignal () const = 0;
         virtual std::string getGObjectName () const = 0;
