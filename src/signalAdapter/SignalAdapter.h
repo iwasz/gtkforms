@@ -10,5 +10,6 @@
 #define SIGNALADAPTER_H_
 
 #include "ISignalAdapter.h"
+#include "RowActivatedAdapter.h"
 
 #endif /* SIGNALADAPTER_H_ */

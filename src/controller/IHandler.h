@@ -14,7 +14,7 @@
 namespace GtkForms {
 class App;
 
-class IHandler : public Core::Object {
+class __tiliae_reflect__ IHandler : public Core::Object {
 public:
         virtual ~IHandler () {}
         virtual void run (App *app) = 0;

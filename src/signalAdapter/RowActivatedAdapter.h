@@ -23,8 +23,6 @@ namespace GtkForms {
  */
 class __tiliae_reflect__ RowActivatedAdapter : public AbstractSignalAdapter {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
-        REFLECTION_BASE_CLASS ("AbstractSignalAdapter")
 
         RowActivatedAdapter () : modelColumn (NO_MODEL_COLUMN) {}
         virtual ~RowActivatedAdapter () {}
@@ -34,10 +32,7 @@ public:
 
         const int NO_MODEL_COLUMN = -2;
 
-private:
-
-        int REFLECTION_FIELD_VALUE_INPLACE (modelColumn);
-        REFLECTION_END (RowActivatedAdapter)
+        int modelColumn;
 };
 
 } /* namespace GtkForms */

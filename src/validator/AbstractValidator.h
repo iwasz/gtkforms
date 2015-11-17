@@ -31,11 +31,10 @@ protected:
                 return vr;
         }
 
-private:
+public:
 
-        std::string REFLECTION_FIELD_VALUE_INPLACE (model);
-        Core::VariantMap REFLECTION_FIELD_REFERENCE_INPLACE (params);
-        REFLECTION_END (AbstractValidator)
+        std::string model;
+        Core::VariantMap params;
 };
 
 } /* namespace GtkForms */

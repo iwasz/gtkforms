@@ -15,8 +15,6 @@ namespace GtkForms {
 
 class __tiliae_reflect__ DummyController : public AbstractController {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
-        REFLECTION_BASE_CLASS ("AbstractController")
 
         virtual ~DummyController () {}
 
@@ -24,10 +22,9 @@ public:
         std::string onSubmit () { return ""; }
         std::string end () { return ""; }
 
-private:
+public:
 
-        std::string REFLECTION_FIELD_REFERENCE_INPLACE (viewCommand);
-        REFLECTION_END (DummyController)
+        std::string viewCommand;
 };
 
 } /* namespace GtkForms */

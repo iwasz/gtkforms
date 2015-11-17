@@ -17,8 +17,6 @@ namespace GtkForms {
 
 class __tiliae_reflect__ TextViewMapping : public Mapping {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
-        REFLECTION_BASE_CLASS ("Mapping")
         virtual ~TextViewMapping () {}
 
 protected:
@@ -26,8 +24,6 @@ protected:
         virtual std::string getDefaultProperty (App *app, std::string const &widgetClass) const { return "text"; }
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
         virtual Core::Variant getFromView (ViewElementDTO *viewObject, std::string const &finalProperty);
-
-        REFLECTION_END (TextViewMapping)
 };
 
 } /* namespace GtkForms */

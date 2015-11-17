@@ -12,3 +12,5 @@ build/pc/gtkforms.pc
 CMakeLists.txt.user
 build/gtkforms.cbp
 build
+doc/_build
+src/Reflection_output.cc.h

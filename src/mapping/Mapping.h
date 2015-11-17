@@ -20,7 +20,6 @@ class App;
 
 class __tiliae_reflect__ Mapping : public IMapping {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
         Mapping () : m2vEditor {nullptr}, v2mEditor {nullptr} {}
         virtual ~Mapping () {}
 
@@ -28,8 +27,8 @@ public:
         virtual std::string getProperty () const { return property; }
         virtual std::string getModel () const { return model; }
 
-        virtual ValidationAndBindingResult view2Model (MappingDTO *dto);
-        virtual void model2View (MappingDTO *dto);
+        virtual ValidationAndBindingResult view2Model (MappingDTO *dto) __tiliae_no_reflect__;
+        virtual void model2View (MappingDTO *dto) __tiliae_no_reflect__;
 
         static ValidationAndBindingResult view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor = nullptr);
         static void model2View (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor = nullptr);
@@ -45,19 +44,16 @@ protected:
 
         virtual std::string getDefaultProperty (App *app, std::string const &widgetClass) const;
 
-private:
+public:
 
-        std::string REFLECTION_FIELD_VALUE_INPLACE (input);
-        std::string REFLECTION_FIELD_VALUE_INPLACE (property);
-        std::string REFLECTION_FIELD_VALUE_INPLACE (model);
-        Editor::IEditor *REFLECTION_FIELD_VALUE_INPLACE (m2vEditor);
-        Editor::IEditor *REFLECTION_FIELD_VALUE_INPLACE (v2mEditor);
-
-        REFLECTION_END (Mapping)
+        std::string input;
+        std::string property;
+        std::string model;
+        Editor::IEditor *m2vEditor;
+        Editor::IEditor *v2mEditor;
 };
 
-typedef std::vector <IMapping *> MappingVector;
-REFLECTION_COLLECTION (MappingVector)
+typedef __tiliae_reflect__ std::vector <IMapping *> MappingVector;
 
 typedef std::unordered_map <std::string, IMapping *> MappingMap;
 typedef std::unordered_multimap <std::string, IMapping *> MappingMultiMap;

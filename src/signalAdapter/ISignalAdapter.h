@@ -12,6 +12,7 @@
 #include <gtk/gtk.h>
 #include <vector>
 #include <core/Object.h>
+#include <core/Typedefs.h>
 #include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {

@@ -23,19 +23,15 @@ struct ColumnElementDTO : public ViewElementDTO {
 };
 
 struct __tiliae_reflect__ Column : public Mapping {
-        REFLECTION_CONSTRUCTOR_ (void)
-        REFLECTION_BASE_CLASS ("Mapping")
         virtual ~Column () {}
 
 protected:
 
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
-        REFLECTION_END (Column)
 };
 
-typedef std::vector <Column *> ColumnVector;
-REFLECTION_COLLECTION (ColumnVector)
+typedef __tiliae_reflect__ std::vector <Column *> ColumnVector;
 
 } /* namespace GtkForms */
 #endif /* COLUMN_H_ */

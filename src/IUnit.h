@@ -30,7 +30,7 @@ struct UnitOperationResult {
  * units. Imagine for example units that are conditionally enabled and could
  * provide debig stuff or sth.
  */
-class IUnit : public Core::Object {
+class __tiliae_reflect__ IUnit : public Core::Object {
 public:
         virtual ~IUnit () {}
 
@@ -48,10 +48,10 @@ public:
          */
         virtual UnitOperationResult join (IUnit *unit) = 0;
         virtual UnitOperationResult split (IUnit *unit) = 0;
-        virtual IController *getController (std::string const &controllerName) = 0;
-        virtual ControllerMap &getControllers () = 0;
-        virtual ControllerMap const &getControllers () const = 0;
-        virtual SignalAdapterVector getSignalAdapters () = 0;
+        virtual IController *getController (std::string const &controllerName) __tiliae_no_reflect__ = 0;
+        virtual ControllerMap &getControllers () __tiliae_no_reflect__ = 0;
+        virtual ControllerMap const &getControllers () const __tiliae_no_reflect__ = 0;
+        virtual SignalAdapterVector getSignalAdapters () __tiliae_no_reflect__ = 0;
 };
 
 } // namespace GtkForms

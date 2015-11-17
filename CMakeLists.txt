@@ -1,7 +1,9 @@
 # Wymagaj tej wersji - dopiero w niej jest nowe makro FindPkgConfig
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6.0 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0 FATAL_ERROR)
 
-project (gtkforms)
+PROJECT (gtkforms)
+INCLUDE (../tiliae/tiliae.cmake)
+SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -17,13 +19,13 @@ SET (BUILD_CATALOG             OFF CACHE BOOL "")
 SET (CMAKE_VERBOSE_MAKEFILE 0)
 
 #TODO -Wall
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" CACHE INTERNAL "cxx compiler flags")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall" CACHE INTERNAL "cxx compiler flags")
 
-SET(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "c release compiler flags")
-SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -std=c++11 -Wall -fvisibility=hidden -DTILIAE_DLL" CACHE INTERNAL "cxx release compiler flags")
+SET(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -Wall -DTILIAE_DLL" CACHE INTERNAL "c release compiler flags")
+SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -DTILIAE_DLL" CACHE INTERNAL "cxx release compiler flags")
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK "-pthread")
-ADD_DEFINITIONS (-DREFLECTION_ENABLED)
+ADD_DEFINITIONS (-DWITH_PARSER)
 
 INSTALL (
     DIRECTORY "${PROJECT_SOURCE_DIR}/src/"
@@ -38,9 +40,9 @@ INSTALL (
     FILES_MATCHING PATTERN "*.pc"
     PATTERN "*.svn*" EXCLUDE)
 
-SET (Boost_ADDITIONAL_VERSIONS "1.41" "1.41.0")
-find_package (Boost 1.41.0)
-include_directories (${Boost_INCLUDE_DIRS})
+find_package (Boost REQUIRED COMPONENTS system prg_exec_monitor unit_test_framework)
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories (${Boost_LIBRARY_DIRS})
 
 include (FindPkgConfig)
 pkg_check_modules (GTK REQUIRED "gtk+-3.0")
@@ -68,26 +70,9 @@ ENABLE_TESTING ()
 
 IF (BUILD_LIB)
 
-        # +-------------------------------+
-        # | Generate reflection database. |
-        # +-------------------------------+
-        FILE (MAKE_DIRECTORY reflectionDatabase)
-        FIND_PROGRAM (REFLECTION_PARSER NAME "tiliaeparser" HINTS "${PROJECT_SOURCE_DIR}/../tiliae/build/parser")
-
-        IF (NOT REFLECTION_PARSER)
-                MESSAGE(FATAL_ERROR "reflectionParser not found -- ${REFLECTION_PARSER}")
-        ENDIF()
-
-        MESSAGE (STATUS "Found REFLECTION_PARSER as ${REFLECTION_PARSER}")
-
-        ADD_CUSTOM_COMMAND (OUTPUT reflectionDatabase/ReflectionDatabase.cc
-                COMMAND ${REFLECTION_PARSER} -p compile_commands.json ${CMAKE_SOURCE_DIR}/src/Reflection.cc -o reflectionDatabase/ReflectionDatabase.cc
-                DEPENDS src/Reflection.cc)
-#                WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-
-        LIST (APPEND LIB_SOURCES reflectionDatabase/ReflectionDatabase.cc)
-
-        SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+        TILIAE_PARSE ("${PROJECT_SOURCE_DIR}/../tiliae/build/parser/tiliaeparser" "gtkforms" "src/Reflection_input.cc" "src/Reflection_output.cc.h")
+        LIST (APPEND LIB_SOURCES "src/Reflection_input.cc")
+        LIST (APPEND LIB_SOURCES "src/Reflection_output.cc.h")
 
         INCLUDE_DIRECTORIES (src)
         AUX_SOURCE_DIRECTORY (src LIB_SOURCES)
@@ -98,8 +83,6 @@ IF (BUILD_LIB)
         AUX_SOURCE_DIRECTORY (src/validator LIB_SOURCES)
         AUX_SOURCE_DIRECTORY (src/decorator LIB_SOURCES)
         add_library (${CMAKE_PROJECT_NAME} SHARED ${LIB_SOURCES})
-
-        SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
         INSTALL (
         TARGETS ${CMAKE_PROJECT_NAME}
@@ -129,8 +112,6 @@ ENDIF()
 ## --------------------------------------------------------
 
 IF(BUILD_NAVIGATION)
-    ADD_DEFINITIONS (-DREFLECTION_ENABLED)
-
     AUX_SOURCE_DIRECTORY (demo/navigation NAVIGATION_SOURCES)
     add_executable (navigation ${NAVIGATION_SOURCES})
     TARGET_LINK_LIBRARIES (navigation ${GTK_LIBRARIES})
@@ -142,8 +123,6 @@ IF(BUILD_NAVIGATION)
 ENDIF()
 
 IF(BUILD_SUBMISSION)
-    ADD_DEFINITIONS (-DREFLECTION_ENABLED)
-
     AUX_SOURCE_DIRECTORY (demo/submission SUBMISSION_SOURCES)
     add_executable (submission ${SUBMISSION_SOURCES})
     TARGET_LINK_LIBRARIES (submission ${GTK_LIBRARIES})

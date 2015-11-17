@@ -91,8 +91,8 @@ struct __tiliae_reflect__ IController : public Core::Object {
         virtual int getLoopDelayMs () const = 0;
         virtual int &getLastMs () = 0;
 
-        virtual ValidationAndBindingResultContainer const &getValidationResults () const = 0;
-        virtual ValidationAndBindingResultContainer &getValidationResults () = 0;
+        virtual ValidationAndBindingResultContainer const &getValidationResults () const __tiliae_no_reflect__ = 0;
+        virtual ValidationAndBindingResultContainer &getValidationResults () __tiliae_no_reflect__ = 0;
 
 protected:
 
@@ -114,8 +114,7 @@ typedef std::set <IController *> ControllerSet;
 /**
  * Map of pointers to controllers.
  */
-typedef std::map <std::string, IController *> ControllerMap;
-REFLECTION_COLLECTION (ControllerMap)
+typedef __tiliae_reflect__ std::map <std::string, IController *> ControllerMap;
 
 } // namespace GtkForms
 

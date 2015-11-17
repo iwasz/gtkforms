@@ -11,7 +11,7 @@
 
 #include "controller/IController.h"
 #include "IUnit.h"
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 #include "signalAdapter/AbstractSignalAdapter.h"
 
 namespace GtkForms {
@@ -21,10 +21,8 @@ namespace GtkForms {
  * active at a time, but two or more units can be merged to form a bigger unit (it retains
  * all the controllers of all units in such case).
  */
-class Unit : public IUnit {
+class __tiliae_reflect__ Unit : public IUnit {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
-
         virtual ~Unit () {}
 
         UnitOperationResult start (IUnit *unit);
@@ -33,15 +31,14 @@ public:
 
         IController *getController (std::string const &controllerName);
 
-        ControllerMap &getControllers () { return controllers; }
-        ControllerMap const &getControllers () const { return controllers; }
+        ControllerMap &getControllers () __tiliae_no_reflect__ { return controllers; }
+        ControllerMap const &getControllers () const __tiliae_no_reflect__ { return controllers; }
 
-        SignalAdapterVector getSignalAdapters ();
+        SignalAdapterVector getSignalAdapters () __tiliae_no_reflect__;
 
-private:
+// private:
 
-        ControllerMap REFLECTION_FIELD_REFERENCE_INPLACE (controllers);
-        REFLECTION_END (Unit)
+        ControllerMap controllers;
 };
 
 std::ostream &operator<< (std::ostream &o, IUnit const &u);

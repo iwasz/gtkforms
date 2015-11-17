@@ -20,10 +20,8 @@
 
 namespace GtkForms {
 
-class Page : public Core::Object {
+class __tiliae_reflect__ Page : public Core::Object {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
-
         virtual ~Page ();
 
         GtkView *getView () { return view; }
@@ -47,9 +45,12 @@ public:
 
         friend std::ostream &operator<< (std::ostream &o, Page const &u);
 
+public:
+
+        void contId (std::string const &id) { name = id; }
+
 protected:
 
-        REFLECTION_METHOD (contId) void contId (std::string const &id) { name = id; }
         typedef std::map <std::string, GtkBin *> SlotWidgetMap;
 
         /**
@@ -59,16 +60,14 @@ protected:
         virtual SlotWidgetMap getSlotWidgets ();
         virtual void addToMapOrThrow (GObject *obj, Slot *slot, SlotWidgetMap *slotWidgets);
 
-private:
+public:
 
-        GtkView *REFLECTION_FIELD_VALUE_INPLACE (view);
-        std::string REFLECTION_FIELD_REFERENCE_INPLACE (name);
-        SlotVector REFLECTION_FIELD_REFERENCE_INPLACE (slots);
-        MappingVector REFLECTION_FIELD_REFERENCE_INPLACE (mappings);
+        GtkView *view;
+        std::string name;
+        SlotVector slots;
+        MappingVector mappings;
         mutable MappingMultiMap *mappingsByInputCache = 0;
-//        mutable MappingMap *mappingsByModelCache = 0;
-        PageDecoratorVector REFLECTION_FIELD_REFERENCE_INPLACE (decorators);
-        REFLECTION_END (Page)
+        PageDecoratorVector decorators;
 };
 
 typedef std::map <std::string, Page *> PageMap;

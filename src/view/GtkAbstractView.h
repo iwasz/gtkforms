@@ -20,9 +20,8 @@ class Context;
  * View (a top level windows, or some inner GtkWidget) created from GtkBuilder. Thise views are
  * loaded (i.e. memory is alloceted) in GtkAbstractView::show, and unloaded (memory is freed) in GtkAbstractView::hide (loadUi/destroyUi?).
  */
-class GtkAbstractView : public IView {
+class __tiliae_reflect__  GtkAbstractView : public IView {
 public:
-        REFLECTION_CLASS
 
         GtkAbstractView ();
         virtual ~GtkAbstractView ();
@@ -47,32 +46,30 @@ public:
         /**
          * Gets the main object (GTK+ GObject) from the ui file.
          */
-        virtual GObject *getUi ();
+        virtual GObject *getUi () __tiliae_no_reflect__;
         virtual bool isLoaded () const;
 
         /**
          * Get arbitrary object from UI.
          */
         virtual GObject *getUiOrThrow (std::string const &name);
-        virtual GObject *getUi (std::string const &name);
+        virtual GObject *getUi (std::string const &name) __tiliae_no_reflect__;
 
         InputMap getInputs (std::string const &dataRange, bool outputs = false);
         void printStructure ();
 
+//private:
+
+        void contId (std::string const &id) { name = id; }
+
+        std::string name;
+        std::string ui;
+        UiFile *uiFile;
+
 private:
-
-        REFLECTION_METHOD (contId) void contId (std::string const &id) { name = id; }
-
-private:
-
-        std::string REFLECTION_FIELD_REFERENCE_INPLACE (name);
-        std::string REFLECTION_FIELD_REFERENCE_INPLACE (ui);
-        UiFile *REFLECTION_FIELD_VALUE_INPLACE (uiFile);
 
         class Impl;
         Impl *impl = 0;
-
-        REFLECTION_END (GtkAbstractView)
 };
 
 } // namespace GtkForms

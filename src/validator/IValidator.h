@@ -30,8 +30,7 @@ public:
 /**
  *
  */
-typedef std::vector <IValidator *> ValidatorVector;
-REFLECTION_COLLECTION (ValidatorVector)
+typedef __tiliae_reflect__ std::vector <IValidator *> ValidatorVector;
 
 } /* namespace GtkForms */
 

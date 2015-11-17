@@ -10,7 +10,8 @@
 #define GTK_FORMS_UIFILE_H_
 
 #include <gtk/gtk.h>
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
+#include <string>
 
 namespace GtkForms {
 class Context;
@@ -21,7 +22,6 @@ class App;
  */
 class UiFile {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
 
         UiFile ();
         ~UiFile ();
@@ -41,18 +41,16 @@ public:
         std::string getFile () const { return file; }
         void setFile (std::string const &f) { file = f; }
 
+        std::string file;
+
 private:
 
         void connectSignals (App *app);
 
 private:
 
-        std::string REFLECTION_FIELD_REFERENCE_INPLACE (file);
-
         class Impl;
         Impl *impl = 0;
-
-        REFLECTION_END (UiFile)
 };
 
 } /* namespace GtkForms */

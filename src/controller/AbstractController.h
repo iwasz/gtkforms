@@ -16,7 +16,7 @@ namespace GtkForms {
 
 class __tiliae_reflect__ AbstractController : public IController {
 public:
-        REFLECTION_CLASS
+
         virtual ~AbstractController () {}
 
         App *getApp () { return app; }
@@ -38,8 +38,8 @@ public:
         int getLoopDelayMs () const { return loopDelayMs; }
         int &getLastMs () { return lastMs; }
 
-        ValidationAndBindingResultContainer const &getValidationResults () const { return validationResults; }
-        ValidationAndBindingResultContainer &getValidationResults () { return validationResults; }
+        ValidationAndBindingResultContainer const &getValidationResults () const __tiliae_no_reflect__ { return validationResults; }
+        ValidationAndBindingResultContainer &getValidationResults () __tiliae_no_reflect__ { return validationResults; }
 
 protected:
 
@@ -50,16 +50,16 @@ private:
 
         void setApp (App *app) { this->app = app; }
 
-private:
+public:
 
-        ValidatorVector REFLECTION_FIELD_REFERENCE_INPLACE (validators);
-        SignalAdapterVector REFLECTION_FIELD_REFERENCE_INPLACE (signalAdapters);
-        int REFLECTION_FIELD_VALUE_INPLACE (loopDelayMs);
+        ValidatorVector validators;
+        SignalAdapterVector signalAdapters;
+        int loopDelayMs;
+
+private:
         int lastMs = 0;
         Core::VariantMap flash;
         ValidationAndBindingResultContainer validationResults;
-
-        REFLECTION_END (AbstractController)
 };
 
 } // namespace GtkForms

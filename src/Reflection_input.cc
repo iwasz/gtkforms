@@ -1,4 +1,5 @@
 #include "controller/DummyController.h"
+#include "controller/IHandler.h"
 #include "decorator/ValidationDecorator.h"
 #include "mapping/AdjustmentMapping.h"
 #include "mapping/AssociationMap.h"

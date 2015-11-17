@@ -21,8 +21,6 @@ namespace GtkForms {
  */
 class __tiliae_reflect__ PixbufColumn : public Column {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
-        REFLECTION_BASE_CLASS ("Column")
         virtual ~PixbufColumn () {}
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto) { return ValidationAndBindingResult {}; /* Not implemented and won't be */ }
 
@@ -30,11 +28,10 @@ protected:
 
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
-private:
+public:
 
-        AssociationMap REFLECTION_FIELD_REFERENCE_INPLACE (dict);
+        AssociationMap dict;
 
-        REFLECTION_END (PixbufColumn)
 };
 
 } // end namespace

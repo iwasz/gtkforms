@@ -12,13 +12,14 @@
 #include <string>
 #include <map>
 #include <gtk/gtk.h>
-#include "ReflectionMacros.h"
+#include <core/Object.h>
+#include <set>
 
 namespace GtkForms {
 class Context;
 class App;
 
-class IView : public Core::Object {
+class __tiliae_reflect__ IView : public Core::Object {
 public:
         virtual ~IView () {}
         virtual std::string getName () const = 0;
@@ -51,9 +52,7 @@ public:
         virtual bool isLoaded () const = 0;
 };
 
-typedef std::map <std::string, IView *> ViewMap;
-REFLECTION_COLLECTION (ViewMap)
-
+typedef __tiliae_reflect__ std::map <std::string, IView *> ViewMap;
 typedef std::set <IView *> ViewSet;
 
 } // namespace GtkForms

@@ -9,15 +9,14 @@
 #ifndef GTKFORMS_CONTEXT_H_
 #define GTKFORMS_CONTEXT_H_
 
-#include <Tiliae.h>
 #include "controller/IController.h"
 #include "validator/IValidator.h"
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 #include "Unit.h"
 
 namespace GtkForms {
 
-class AbstractAccessor {
+class __tiliae_reflect__ AbstractAccessor {
 public:
 
         AbstractAccessor (Core::VariantMap *s, Core::VariantMap *u) : sessionScope {s}, unitScope {u} {}
@@ -37,33 +36,29 @@ protected:
 
 };
 
-class AllFlashAccessor : public AbstractAccessor {
+class __tiliae_reflect__ AllFlashAccessor : public AbstractAccessor {
 public:
-        REFLECTION_CLASS
-        AllFlashAccessor (Core::VariantMap *s, Core::VariantMap *u) : AbstractAccessor (s, u) {}
+
+        AllFlashAccessor (Core::VariantMap *s, Core::VariantMap *u) __tiliae_no_reflect__ : AbstractAccessor (s, u) {}
         virtual ~AllFlashAccessor () {}
 
-        REFLECTION_METHOD (get) Core::Variant get (const std::string &name);
-        REFLECTION_METHOD (set) void set (const std::string &name, Core::Variant v);
+        Core::Variant get (const std::string &name);
+        void set (const std::string &name, Core::Variant v);
 
         void setCurrentUnit (Unit *u) { currentUnit = u; }
 
 private:
 
         Unit *currentUnit = nullptr;
-        REFLECTION_END (AllFlashAccessor)
 };
 
-class SingleFlashAccessor : public AbstractAccessor {
+class __tiliae_reflect__ SingleFlashAccessor : public AbstractAccessor {
 public:
-        REFLECTION_CLASS
-        SingleFlashAccessor (Core::VariantMap *s, Core::VariantMap *u) : AbstractAccessor (s, u) {}
+        SingleFlashAccessor (Core::VariantMap *s, Core::VariantMap *u) __tiliae_no_reflect__ : AbstractAccessor (s, u) {}
         virtual ~SingleFlashAccessor () {}
 
-        REFLECTION_METHOD (get) Core::Variant get (const std::string &name);
-        REFLECTION_METHOD (set) void set (const std::string &name, Core::Variant v);
-
-        REFLECTION_END (SingleFlashAccessor)
+        Core::Variant get (const std::string &name);
+        void set (const std::string &name, Core::Variant v);
 };
 
 /**

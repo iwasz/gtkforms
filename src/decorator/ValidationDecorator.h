@@ -15,10 +15,8 @@ namespace GtkForms {
 
 class __tiliae_reflect__ ValidationDecorator : public IPageDecorator {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
         virtual ~ValidationDecorator () {}
         virtual void run (Page *page, Context *ctx);
-        REFLECTION_END (ValidationDecorator)
 };
 
 } /* namespace GtkForms */

@@ -24,8 +24,7 @@ public:
         virtual void run (Page *page, Context *ctx) = 0;
 };
 
-typedef std::vector <IPageDecorator *> PageDecoratorVector;
-REFLECTION_COLLECTION (PageDecoratorVector)
+typedef __tiliae_reflect__ std::vector <IPageDecorator *> PageDecoratorVector;
 
 } /* namespace GtkForms */
 

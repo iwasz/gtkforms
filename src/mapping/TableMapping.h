@@ -30,7 +30,6 @@ namespace GtkForms {
  */
 class __tiliae_reflect__ TableMapping : public IMapping {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
         virtual ~TableMapping () {}
 
         std::string getInput () const { return input; }
@@ -39,14 +38,12 @@ public:
         ValidationAndBindingResult view2Model (MappingDTO *dto);
         void model2View (MappingDTO *dto);
 
-private:
+public:
 
-        std::string REFLECTION_FIELD_VALUE_INPLACE (input);
-        std::string REFLECTION_FIELD_VALUE_INPLACE (model);
-        ColumnVector REFLECTION_FIELD_REFERENCE_INPLACE (columns);
+        std::string input;
+        std::string model;
+        ColumnVector columns;
         Core::VariantVector modelColumnCopy;
-
-        REFLECTION_END (TableMapping)
 };
 
 } /* namespace GtkForms */

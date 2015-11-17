@@ -5,8 +5,7 @@
 #ifndef ASSOCIATIONMAP
 #define ASSOCIATIONMAP
 
-typedef std::map <std::string, std::string> AssociationMap;
-REFLECTION_COLLECTION (AssociationMap)
+typedef __tiliae_reflect__ std::map <std::string, std::string> AssociationMap;
 
 #endif // ASSOCIATIONMAP
 

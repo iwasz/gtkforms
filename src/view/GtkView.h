@@ -11,7 +11,7 @@
 
 #include <map>
 #include <string>
-#include "ReflectionMacros.h"
+#include <ReflectionParserAnnotation.h>
 #include "UiFile.h"
 #include "GtkAbstractView.h"
 #include "GtkTile.h"
@@ -24,10 +24,8 @@ class Context;
  * View (a top level windows, or some inner GtkWidget) created from GtkBuilder. Thise views are
  * loaded (i.e. memory is alloceted) in GtkView::show, and unloaded (memory is freed) in GtkView::hide.
  */
-class GtkView : public GtkAbstractView {
+class __tiliae_reflect__ GtkView : public GtkAbstractView {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
-        REFLECTION_BASE_CLASS ("GtkAbstractView")
 
         GtkView ();
         virtual ~GtkView ();
@@ -39,8 +37,6 @@ private:
 
         class Impl;
         Impl *impl;
-
-        REFLECTION_END (GtkView)
 };
 
 } // namespace GtkForms

@@ -21,8 +21,6 @@ namespace GtkForms {
  */
 class __tiliae_reflect__ PixbufMapping : public Mapping {
 public:
-        REFLECTION_CONSTRUCTOR_ (void)
-        REFLECTION_BASE_CLASS ("Mapping")
         PixbufMapping () : maxWidth {-1}, maxHeight {-1} {}
         virtual ~PixbufMapping () {}
 
@@ -32,12 +30,11 @@ protected:
 
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
-private:
+public:
 
-        int REFLECTION_FIELD_VALUE_INPLACE (maxWidth);
-        int REFLECTION_FIELD_VALUE_INPLACE (maxHeight);
-        AssociationMap REFLECTION_FIELD_REFERENCE_INPLACE (dict);
-        REFLECTION_END (PixbufMapping)
+        int maxWidth;
+        int maxHeight;
+        AssociationMap dict;
 };
 
 } // end namespace
