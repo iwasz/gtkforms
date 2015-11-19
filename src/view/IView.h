@@ -46,7 +46,7 @@ public:
          */
         virtual void refresh (Context *ctx) = 0;
 
-        typedef std::map <std::string, GtkWidget *> InputMap;
+        typedef std::multimap <std::string, GtkWidget *> InputMap;
         virtual InputMap getInputs (std::string const &dataRange, bool outputs = false) = 0;
 
         virtual bool isLoaded () const = 0;

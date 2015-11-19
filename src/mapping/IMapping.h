@@ -26,7 +26,7 @@ public:
         /**
          * Name of input widget on the UI.
          */
-        virtual std::string getInput () const = 0;
+        virtual std::string getWidget () const = 0;
 
         /**
          * Name of model property which is mapped to the view.

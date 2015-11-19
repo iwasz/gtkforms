@@ -57,18 +57,18 @@ public:
 
         InputMap getInputs (std::string const &dataRange, bool outputs = false);
         void printStructure ();
-
-//private:
-
         void contId (std::string const &id) { name = id; }
 
         std::string name;
         std::string ui;
-        UiFile *uiFile;
 
 private:
 
-        class Impl;
+        void populateInputMap ();
+
+        UiFile *uiFile;
+
+        struct Impl;
         Impl *impl = 0;
 };
 

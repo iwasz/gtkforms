@@ -16,7 +16,7 @@
 namespace GtkForms {
 class IView;
 class Context;
-class IController;
+struct IController;
 
 struct SubmitEvent : public IEvent {
 

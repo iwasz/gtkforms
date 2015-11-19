@@ -23,15 +23,15 @@ public:
         Mapping () : m2vEditor {nullptr}, v2mEditor {nullptr} {}
         virtual ~Mapping () {}
 
-        virtual std::string getInput () const { return input; }
+        virtual std::string getWidget () const { return widget; }
         virtual std::string getProperty () const { return property; }
         virtual std::string getModel () const { return model; }
 
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto) __tiliae_no_reflect__;
         virtual void model2View (MappingDTO *dto) __tiliae_no_reflect__;
 
-        static ValidationAndBindingResult view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor = nullptr);
-        static void model2View (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor = nullptr);
+        static ValidationAndBindingResult view2Model (MappingDTO *dto, std::string const &widget, std::string const &property, std::string const &model, Editor::IEditor *editor = nullptr);
+        static void model2View (MappingDTO *dto, std::string const &widget, std::string const &property, std::string const &model, Editor::IEditor *editor = nullptr);
 
 protected:
 
@@ -42,11 +42,11 @@ protected:
         virtual Core::Variant getFromView (ViewElementDTO *viewObject, std::string const &finalProperty);
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
-        virtual std::string getDefaultProperty (App *app, std::string const &widgetClass) const;
+        virtual std::string getDefaultProperty (App *app, ViewElementDTO *dto) const;
 
 public:
 
-        std::string input;
+        std::string widget;
         std::string property;
         std::string model;
         Editor::IEditor *m2vEditor;

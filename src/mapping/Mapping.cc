@@ -12,6 +12,7 @@
 #include "Context.h"
 #include "GValueVariant.h"
 #include <cassert>
+#include <gtk/gtk.h>
 
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
@@ -25,7 +26,7 @@ ValidationAndBindingResult Mapping::view2Model (MappingDTO *dto)
         Core::Variant v = getFromView (dto->viewElement, finalProperty);
 
         if (v.isNone ()) {
-                throw Core::Exception ("Mapping::view2Model. Invalid property : [" + finalProperty + "] in input widget : [" + input + "].");
+                throw Core::Exception ("Mapping::view2Model. Invalid property : [" + finalProperty + "] in input widget : [" + widget + "].");
         }
 
 #if 0
@@ -46,14 +47,14 @@ void Mapping::model2View (MappingDTO *dto)
 
         if (v.isNone ()) {
                 if (dto->app->getConfig ()->logMappings) {
-                        BOOST_LOG (lg) << "Mapping::model2View \033[31m[" << finalModelName << "]\033[0m not found.";
+                        BOOST_LOG (lg) << "Mapping::model2View model \033[31m[" << finalModelName << "]\033[0m is empty (isNone () == true).";
                 }
 
                 return;
         }
 
         if (dto->app->getConfig ()->logMappings) {
-                BOOST_LOG (lg) << "Mapping::model2View : " << finalModelName << "(" << v << ")" << " -> " << input << "." << finalProperty;
+                BOOST_LOG (lg) << "Mapping::model2View : " << finalModelName << "(" << v << ")" << " -> " << widget << "." << finalProperty;
         }
 
         setToView (dto->viewElement, finalProperty, v);
@@ -70,22 +71,36 @@ void Mapping::finalPropertyAndModel (std::string *finalProperty, std::string *fi
                 *finalProperty = property;
         }
         else {
-                *finalProperty = getDefaultProperty (dto->app, "");
+                *finalProperty = getDefaultProperty (dto->app, dto->viewElement);
         }
 
         if (!model.empty ()) {
                 *finalModelName = model;
         }
         else {
-                *finalModelName = input;
+                *finalModelName = widget;
         }
 }
 
 /*--------------------------------------------------------------------------*/
 
-std::string Mapping::getDefaultProperty (App *app, std::string const &widgetClass) const
+std::string Mapping::getDefaultProperty (App *app, ViewElementDTO *dto) const
 {
-        return app->getDefaultProperty (widgetClass);
+        GObject *inputWidget = dto->inputWidget;
+
+        // UWAGA! Od szczegółu do ogółu!
+        if (GTK_IS_SWITCH (inputWidget) || GTK_IS_TOGGLE_BUTTON (inputWidget)) {
+                return "active";
+        }
+        else if (GTK_IS_LABEL (inputWidget) || GTK_IS_BUTTON (inputWidget)) {
+                return "label";
+        }
+
+        if (app->getConfig ()->logMappings) {
+                BOOST_LOG (lg) << "Mapping::getDefaultProperty : no default property found. Returning 'text'.";
+        }
+
+        return "text";
 }
 
 /*--------------------------------------------------------------------------*/
@@ -186,7 +201,7 @@ ValidationAndBindingResult Mapping::setToModel (Wrapper::BeanWrapper *wrapper, C
 ValidationAndBindingResult Mapping::view2Model (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
 {
         static Mapping mapping;
-        mapping.input = input;
+        mapping.widget = input;
         mapping.property = property;
         mapping.model = model;
         mapping.v2mEditor = editor;
@@ -199,7 +214,7 @@ ValidationAndBindingResult Mapping::view2Model (MappingDTO *dto, std::string con
 void Mapping::model2View (MappingDTO *dto, std::string const &input, std::string const &property, std::string const &model, Editor::IEditor *editor)
 {
         static Mapping mapping;
-        mapping.input = input;
+        mapping.widget = input;
         mapping.property = property;
         mapping.model = model;
         mapping.v2mEditor = nullptr;

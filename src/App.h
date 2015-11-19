@@ -20,7 +20,7 @@ namespace GtkForms {
 class IUnit;
 class Page;
 class Context;
-class SubmitEvent;
+struct SubmitEvent;
 class RefreshEvent;
 
 /**
@@ -38,7 +38,7 @@ public:
          * show? navigate? Ta funkcja będzie używana w wielu miejscach aby przejść
          * na jakiś widok
          */
-        void start (std::string const &unitName);
+        void startUnit (std::string const &unitName);
 
         /**
          * Merge another unit with unit that currently is active. It means that currently active unit
@@ -104,7 +104,6 @@ public:
         static k202::K202 *getK202 ();
         static Wrapper::BeanWrapper *getBeanWrapper ();
 
-        std::string getDefaultProperty (std::string const &widgetType) const;
         IUnit *getCurrentUnit ();
         Config const *getConfig () const;
 
@@ -145,7 +144,7 @@ private:
         void removePage (std::string const &page);
         void movePage (std::string const &pageA, std::string const &pageB);
 
-        friend class SubmitEvent;
+        friend struct SubmitEvent;
         friend class RefreshEvent;
         friend class QuitEvent;
         friend gboolean guiThread (gpointer user_data);

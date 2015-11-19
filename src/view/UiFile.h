@@ -49,7 +49,7 @@ private:
 
 private:
 
-        class Impl;
+        struct Impl;
         Impl *impl = 0;
 };
 

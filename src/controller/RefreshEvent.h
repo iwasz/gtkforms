@@ -15,7 +15,7 @@
 
 namespace GtkForms {
 class Context;
-class IController;
+struct IController;
 
 class RefreshEvent : public IEvent {
 public:

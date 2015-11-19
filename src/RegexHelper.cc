@@ -15,7 +15,7 @@ namespace GtkForms {
 
 /*--------------------------------------------------------------------------*/
 
-bool RegexHelper::inputNameMatches (std::string const &widgetName, std::string *inputName, std::string const &dataRange, bool outputs)
+bool RegexHelper::inputNameMatches (std::string const &widgetName, std::string const &dataRange)
 {
 #if 0
         BOOST_LOG (lg) << widgetName;
@@ -24,37 +24,16 @@ bool RegexHelper::inputNameMatches (std::string const &widgetName, std::string *
         boost::regex e;
 
         if (dataRange.empty ()) {
-                if (outputs) {
-                        e = boost::regex {"[!>](.*)"};
-                }
-                else {
-                        e = boost::regex {"[!<](.*)"};
-                }
+                return widgetName.empty ();
         }
         else {
                 std::string copy = dataRange;
-                boost::replace_all (copy, ".", "\\.*");
+                boost::replace_all (copy, ".", "\\.");
                 boost::replace_all (copy, "*", ".*");
-
-                if (outputs) {
-                        e = boost::regex {"[!>](" + copy + ")"};
-                }
-                else {
-                        e = boost::regex {"[!<](" + copy + ")"};
-                }
+                e = boost::regex {copy};
         }
 
-        boost::smatch what;
-
-        if (boost::regex_match (widgetName, what, e, boost::match_extra)) {
-                if (what.size () == 2) {
-                        *inputName = what[1];
-                }
-
-                return true;
-        }
-
-        return false;
+        return boost::regex_match (widgetName, e, boost::match_extra);
 }
 
 /****************************************************************************/

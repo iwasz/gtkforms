@@ -21,7 +21,6 @@ public:
 
 protected:
 
-        virtual std::string getDefaultProperty (App *app, std::string const &widgetClass) const { return "text"; }
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
         virtual Core::Variant getFromView (ViewElementDTO *viewObject, std::string const &finalProperty);
 };

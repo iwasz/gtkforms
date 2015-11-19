@@ -14,13 +14,13 @@
 #include "RegexHelper.h"
 
 namespace GtkForms {
-static src::logger_mt& lg = logger::get ();
+static src::logger_mt &lg = logger::get ();
 using namespace std;
 
 Page::~Page ()
 {
         delete mappingsByInputCache;
-//        delete mappingsByModelCache;
+        //        delete mappingsByModelCache;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -47,7 +47,8 @@ GObject *Page::getUiOrThrow (std::string const &name)
         GObject *obj = getUi (name);
 
         if (!obj) {
-                throw Core::Exception ("Page::getUiOrThrow could not find ARBITRARY object in UI (mainView + all tiles). Object name : [" + std::string (name) + "].");
+                throw Core::Exception ("Page::getUiOrThrow could not find ARBITRARY object in UI (mainView + all tiles). Object name : [" + std::string (name)
+                                       + "].");
         }
 
         return obj;
@@ -124,7 +125,7 @@ ostream &operator<< (ostream &o, Page const &p)
 {
         o << "Page [view : [" << p.view->getName () << "], tiles : [";
 
-        for (auto i = p.slots.begin (); i != p.slots.end (); ) {
+        for (auto i = p.slots.begin (); i != p.slots.end ();) {
                 GtkTile *tile = (*i)->getTile ();
                 o << tile->getName ();
 
@@ -148,7 +149,7 @@ MappingMultiMap const &Page::getMappingsByInput () const
         mappingsByInputCache = new MappingMultiMap;
 
         for (IMapping *mapping : mappings) {
-                mappingsByInputCache->insert (std::make_pair (mapping->getInput(), mapping));
+                mappingsByInputCache->insert (std::make_pair (mapping->getWidget (), mapping));
         }
 
         return *mappingsByInputCache;
@@ -179,9 +180,9 @@ MappingMultiMap Page::getMappingsByModelRange (std::string const &modelRange) co
  */
 void Page::reparent (Context *context)
 {
-//        map <string, GtkBin *> slots;
-//        map <string, GtkWidget *> tiles;
-//        SlotVector allTiles;
+        //        map <string, GtkBin *> slots;
+        //        map <string, GtkWidget *> tiles;
+        //        SlotVector allTiles;
 
         /*
          * Możliwości:
@@ -216,7 +217,8 @@ void Page::reparent (Context *context)
          *  loadUi (). Wywołuje loadUi na wsyztskich tilesach i na GtkWindow
          *
          *  GtkTile operacje. Kafelek.
-         *   - loadUi (). załaduj UI. jezeli już załadowane, to nic się nie dzieje. To jest pomyślane jako singleton, który zajmuje pamięć lub zwalnia, ale jest tylko jeden.
+         *   - loadUi (). załaduj UI. jezeli już załadowane, to nic się nie dzieje. To jest pomyślane jako singleton, który zajmuje pamięć lub zwalnia, ale jest
+         tylko jeden.
          *   - getUi ().  pobierz ui.
          *   - show ().
          *   - destroy ()
@@ -259,7 +261,8 @@ void Page::reparent (Context *context)
          * - Te do otworzenia ładujemy do pamięci. Stan #1 : Wszystko co jest potrzebne jest w pamięci, każdy widget jest dostępny.
 
          * - Pobieramy sloty z tych już widocznych i tych załadowanych (do otworzenia).
-         * - jesteśmy w stanie #2, w kŧórym wszystko jest w pamięci, mamy wskaźniki do wszystkich slotów wszystkich widoków i wsakźniki do wszystkich widoków (plugów i nie plugów poprzez GObject *view.getWidget ()).
+         * - jesteśmy w stanie #2, w kŧórym wszystko jest w pamięci, mamy wskaźniki do wszystkich slotów wszystkich widoków i wsakźniki do wszystkich widoków
+         (plugów i nie plugów poprzez GObject *view.getWidget ()).
          *
          * - Plugi zawsze mają jakiegos parenta, więc trzeba je reparentować (zawsze).
          *
@@ -300,12 +303,18 @@ void Page::reparent (Context *context)
                 GtkWidget *oldParent = 0;
                 if ((oldParent = gtk_widget_get_parent (tileWidget))) {
                         gtk_widget_reparent (tileWidget, GTK_WIDGET (slotWidget));
+
+//                        g_object_ref (tileWidget);
+//                        gtk_container_remove (GTK_CONTAINER (oldSlotWidget???), tileWidget);
+//                        gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
+//                        g_object_unref (tileWidget);
                 }
                 else {
                         gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
                 }
 
-                BOOST_LOG (lg) << "Reparented : tile : [" << (void*)gtkTile << "], tileName : [" << gtkTile->getName () << "], tileWidget [" << (void *)tileWidget << "], to slot [" << (void*)slotWidget << "]";
+                BOOST_LOG (lg) << "Reparented : tile : [" << (void *)gtkTile << "], tileName : [" << gtkTile->getName () << "], tileWidget ["
+                               << (void *)tileWidget << "], to slot [" << (void *)slotWidget << "]";
         }
 }
 
@@ -317,7 +326,8 @@ Page::SlotWidgetMap Page::getSlotWidgets ()
 
         for (Slot *slot : slots) {
                 if (slotWidgets.find (slot->getName ()) != slotWidgets.end ()) {
-                        throw Core::Exception ("There are either two Tiles with the same slot-name : [" + slot->getName () + "], or two widgets with this same name.");
+                        throw Core::Exception ("There are either two Tiles with the same slot-name : [" + slot->getName ()
+                                               + "], or two widgets with this same name.");
                 }
 
                 // Throws if not found.

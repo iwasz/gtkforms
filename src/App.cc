@@ -421,7 +421,7 @@ void App::movePage (std::string const &s, std::string const &pageBName)
 
 /*--------------------------------------------------------------------------*/
 
-void App::start (std::string const &unitName)
+void App::startUnit (std::string const &unitName)
 {
         impl->unitToStart = unitName;
 }
@@ -584,9 +584,6 @@ void App::doSubmit (SubmitEvent *event)
 
         for (auto elem : inputMap) {
                 std::string inputName = elem.first;
-                std::string property = getDefaultProperty ("");
-                std::string modelName = inputName;
-
                 MappingDTO dto;
                 dto.app = this;
                 dto.m2vModelObject = Core::Variant (&impl->context.getSingleFlashAccessor ());
@@ -664,14 +661,6 @@ void App::doSubmit (SubmitEvent *event)
 
 /*--------------------------------------------------------------------------*/
 
-std::string App::getDefaultProperty (std::string const &widgetType) const
-{
-        // TODO get this from some configuration / map.
-        return "text";
-}
-
-/*--------------------------------------------------------------------------*/
-
 void App::doRefresh (RefreshEvent *event)
 {
 #if 0
@@ -706,10 +695,10 @@ void App::doRefresh (RefreshEvent *event)
                         MappingMultiMap mappings = page->getMappingsByModelRange (event->modelRange);
 
                         for (MappingMultiMap::value_type &elem : mappings) {
-                                GtkView::InputMap tmp = view->getInputs (elem.second->getInput (), true);
+                                GtkView::InputMap tmp = view->getInputs (elem.second->getWidget (), true);
 
                                 if (impl->config->logMappings) {
-                                    BOOST_LOG (lg) << "Range \033[32m[" << elem.second->getInput () << "]\033[0m";
+                                    BOOST_LOG (lg) << "Range \033[32m[" << elem.second->getWidget () << "]\033[0m";
                                 }
 
                                 assert (tmp.size () == 1);
@@ -758,18 +747,22 @@ void App::doRefresh (RefreshEvent *event)
                         MappingMultiMap::const_iterator i;
                         auto eq = mappings.equal_range (inputName);
 
+                        bool customMappingWasRun = false;
                         for (i = eq.first; i != eq.second; ++i) {
                                 IMapping *mapping = i->second;
 
                                 if (impl->config->logMappings) {
-                                        BOOST_LOG (lg) << "Maping found. Input : [" << mapping->getInput () << "], model : [" << mapping->getModel () << "]";
+                                        BOOST_LOG (lg) << "Maping found. Input : [" << mapping->getWidget () << "], model : [" << mapping->getModel () << "]";
                                 }
 
                                 mapping->model2View (&dto);
+                                customMappingWasRun = true;
                         }
 
                         // Default.
-                        Mapping::model2View (&dto, inputName, "", "");
+                        if (!customMappingWasRun) {
+                                Mapping::model2View (&dto, inputName, "", "");
+                        }
                 }
 
                 view->refresh (&impl->context);

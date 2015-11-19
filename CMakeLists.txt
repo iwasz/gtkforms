@@ -70,9 +70,9 @@ ENABLE_TESTING ()
 
 IF (BUILD_LIB)
 
-        TILIAE_PARSE ("${PROJECT_SOURCE_DIR}/../tiliae/build/parser/tiliaeparser" "gtkforms" "src/Reflection_input.cc" "src/Reflection_output.cc.h")
+        TILIAE_PARSE ("${PROJECT_SOURCE_DIR}/../tiliae/build/parser/tiliaeparser" "gtkforms" "src/Reflection_input.cc" "src/Reflection_output_gtkforms.cc.h")
         LIST (APPEND LIB_SOURCES "src/Reflection_input.cc")
-        LIST (APPEND LIB_SOURCES "src/Reflection_output.cc.h")
+        LIST (APPEND LIB_SOURCES "src/Reflection_output_gtkforms.cc.h")
 
         INCLUDE_DIRECTORIES (src)
         AUX_SOURCE_DIRECTORY (src LIB_SOURCES)

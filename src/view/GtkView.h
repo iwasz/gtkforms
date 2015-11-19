@@ -35,7 +35,7 @@ public:
 
 private:
 
-        class Impl;
+        struct Impl;
         Impl *impl;
 };
 
