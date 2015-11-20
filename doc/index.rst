@@ -50,6 +50,12 @@ TODO do przemyślenia
 TODO zrobione
 =============
 
+Plany
+=====
+controller
+* add (lista po przewcinkach), replace (lista), remove (this), remove (lista)
+
+
 What it is
 ==========
 
