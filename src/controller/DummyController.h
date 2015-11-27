@@ -18,13 +18,13 @@ public:
 
         virtual ~DummyController () {}
 
-        std::string start () { return viewCommand; }
-        std::string onSubmit () { return ""; }
-        std::string end () { return ""; }
+        std::string onStart () { return view; }
+        void onSubmit () {}
+        void onStop () {}
 
 public:
 
-        std::string viewCommand;
+        std::string view;
 };
 
 } /* namespace GtkForms */

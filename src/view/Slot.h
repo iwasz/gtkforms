@@ -5,7 +5,7 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
-
+#if 0
 #ifndef GTK_FORMS_SLOT_H_
 #define GTK_FORMS_SLOT_H_
 
@@ -34,3 +34,4 @@ typedef __tiliae_reflect__ std::vector <Slot *> SlotVector;
 
 } /* namespace GtkForms */
 #endif /* TILE_H_ */
+#endif

@@ -1,5 +1,6 @@
 #include "controller/DummyController.h"
 #include "controller/IHandler.h"
+#include "controller/HierarchicalAccessor.h"
 #include "decorator/ValidationDecorator.h"
 #include "mapping/AdjustmentMapping.h"
 #include "mapping/AssociationMap.h"

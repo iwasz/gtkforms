@@ -9,28 +9,24 @@
 #include <algorithm>
 #include <memory>
 #include "App.h"
-#include "Unit.h"
-#include "Page.h"
 #include "Context.h"
 #include "controller/SubmitEvent.h"
 #include "controller/RefreshEvent.h"
 #include "controller/QuitEvent.h"
-#include "controller/IController.h"
-#include "view/GtkTileManager.h"
 #include <boost/regex.hpp>
 #include "controller/RefreshEvent.h"
-#include "view/Slot.h"
 #include "Logging.h"
 #include "Config.h"
 #include <time.h>
 #include "controller/DefaultQuitHandler.h"
+#include "view/GtkView.h"
 
 namespace GtkForms {
 using namespace Container;
 using namespace Wrapper;
 using namespace Core;
 
-static src::logger_mt& lg = logger::get();
+static src::logger_mt &lg = logger::get ();
 
 gboolean guiThread (gpointer user_data);
 
@@ -39,26 +35,21 @@ gboolean guiThread (gpointer user_data);
  */
 struct App::Impl {
 
-        Unit *getUnit (std::string );
-        std::pair <IView *, Page *> getActiveViewOrThrow (std::string const &viewName);
+        struct ControllerOperation {
+                /// true : open, false : close.
+                enum { OPEN, CLOSE } type;
+                AbstractController *requestor;
+                std::string controllerName;
+        };
 
-        std::string unitToStart;
-        Core::StringSet unitsToJoin;
-        Core::StringSet unitsToSplit;
-
-        Core::StringSet pagesToHide;
-        Core::StringSet pagesToShow;
+        typedef std::vector<ControllerOperation> ControllerOperationVector;
+        ControllerOperationVector controllerOperations;
+        AbstractController *rootController = nullptr;
 
         EventStack events;
 
-        // Current unit.
-        Unit unit;
-        // Current pages.
-        PageMap pages;
-
-        Ptr <BeanFactoryContainer> container;
-        Context context {getBeanWrapper()};
-        GtkTileManager tileManager;
+        Ptr<BeanFactoryContainer> container;
+        Context context{ getBeanWrapper () };
         Config *config = nullptr;
         bool controllersIdling = true;
 
@@ -68,146 +59,176 @@ struct App::Impl {
         bool quitRequested = false;
         DefaultQuitHandler defaultQuitHandler;
 
-        typedef std::stack <std::string> UnitNameStack;
-        UnitNameStack previousUnits;
+        //        TODO w forrest jest potrzbene cofanie
+        //        typedef std::stack<std::string> UnitNameStack;
+        //        UnitNameStack previousUnits;
 };
 
 /*--------------------------------------------------------------------------*/
 
-App::App (std::string const &configurationFile)
+App::App (std::string const &configurationFile, std::string const &initialControllerName)
 {
         impl = new Impl;
         createContainer (configurationFile);
-        g_idle_add (guiThread, static_cast <gpointer> (this));
+        g_idle_add (guiThread, static_cast<gpointer> (this));
         impl->context.setToSessionScope ("app", Core::Variant (this));
-        impl->context.setCurrentUnit (&impl->unit);
+        impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::OPEN, nullptr, initialControllerName });
 }
 
 /*--------------------------------------------------------------------------*/
 
-App::~App ()
+App::~App () { delete impl; }
+
+/*--------------------------------------------------------------------------*/
+
+void App::run ()
 {
-        delete impl;
+        unsigned int currentMs = impl->getCurrentMs ();
+        if (impl->lastMs + impl->config->loopDelayMs <= currentMs) {
+                impl->lastMs = currentMs;
+                manageControllers ();
+
+                if (impl->controllersIdling && impl->rootController) {
+                        impl->rootController->performIdle (currentMs);
+                }
+        }
+        else {
+                usleep (((impl->lastMs + impl->config->loopDelayMs) - currentMs) * 1000);
+        }
 }
 
 /*--------------------------------------------------------------------------*/
 
-Core::StringSet App::manageUnits ()
+void App::manageControllers ()
 {
-        UnitOperationResult uoResult;
-        bool mainUnitModified = false;
+        /*---------------------------------------------------------------------------*/
 
-        if (!impl->unitToStart.empty ()) {
-                IUnit *unit = getUnit (impl->unitToStart);
-                uoResult += impl->unit.start (unit);
-                impl->previousUnits.push (impl->unitToStart);
-                BOOST_LOG (lg) << "Unit to be started : name : [" << impl->unitToStart << "], unit itself : [" << *unit << "]";
-                mainUnitModified = true;
+        // Kontrolery do zamknięcia
+        for (App::Impl::ControllerOperation const &operation : impl->controllerOperations) {
+                if (operation.type == App::Impl::ControllerOperation::OPEN) {
+                        continue;
+                }
+
+                // Find the controller that is to be closed.
+                AbstractController *controller = nullptr;
+
+                if (!operation.controllerName.empty ()) {
+                        controller = impl->rootController->findByName (operation.controllerName);
+                }
+                else {
+                        controller = operation.requestor;
+                }
+
+                AbstractView *view = controller->getView ();
+                // TODO jeśli controller jest singletonem, to tylkol hide.
+                view->destroyUi ();
+                view->setController (nullptr);
+
+                controller->onStop ();
+
+                // Clear some fields.
+                controller->setApp (nullptr);
+                controller->setView (nullptr);
+                controller->clearControllerScope ();
+                //                impl->context.setCurrentController (nullptr);
+
+                // Usuń zadany kontroler z aktualnej struktury drzewiastej
+                if (!controller->getParent ()) {
+                        impl->rootController = nullptr;
+                }
+                else {
+                        AbstractController *parent = controller->getParent ();
+                        ControllerVector &children = parent->getChildren ();
+                        auto i = std::remove (children.begin (), children.end (), controller);
+                        children.erase (i, children.end ());
+                }
         }
 
-        for (std::string const &unitName : impl->unitsToJoin) {
-                IUnit *unit = getUnit (unitName);
-                uoResult += impl->unit.join (unit);
-                BOOST_LOG (lg) << "Unit to be joined : name : [" << unitName << "], unit itself : [" << *unit << "]";
-                mainUnitModified = true;
+        // Kontrolery do otworzenia
+        for (App::Impl::ControllerOperation const &operation : impl->controllerOperations) {
+                if (operation.type == App::Impl::ControllerOperation::CLOSE) {
+                        continue;
+                }
+
+                AbstractController *controller = ocast<AbstractController *> (impl->container->getBean (operation.controllerName));
+
+                if (!controller) {
+                        throw Core::Exception ("Can't find controller with name : [" + operation.controllerName + "] in container.");
+                }
+
+                controller->setApp (this);
+                controller->clearControllerScope ();
+                //                impl->context.setCurrentController (controller);
+
+                if (operation.requestor) {
+                        operation.requestor->getChildren ().push_back (controller);
+                }
+                else {
+                        impl->rootController = controller;
+                }
+
+                controller->setParent (operation.requestor);
+
+                std::string viewName = controller->onStart ();
+                AbstractView *view = loadView (viewName, controller);
+                controller->setView (view);
+                //                view->setController (controller);
         }
 
-        for (std::string const &unitName : impl->unitsToSplit) {
-                IUnit *unit = getUnit (unitName);
-                uoResult += impl->unit.split (unit);
-                BOOST_LOG (lg) << "Unit to be split : name : [" << unitName << "], unit itself : [" << *unit << "]";
-                mainUnitModified = true;
-        }
+        impl->controllerOperations.clear ();
 
-        if (mainUnitModified) {
-                BOOST_LOG (lg) << "Current unit looks like this : [" << impl->unit << "]";
-        }
-
-        impl->unitToStart = "";
-        impl->unitsToJoin.clear ();
-        impl->unitsToSplit.clear ();
-
-        /*
-         * Now that our Unit is up to date, w can deal with form submission and data conversion
-         * events:
-         * - submit
-         * - quit
-         */
         while (!impl->events.empty ()) {
-                std::unique_ptr <IEvent> event = std::move (impl->events.top ());
+                std::unique_ptr<IEvent> event = std::move (impl->events.top ());
                 impl->events.pop ();
                 event->run (this);
         }
-
-        Core::StringSet viewCommands;
-
-        // Here we are dealing with pages and thier views to hide.
-        for (ControllerMap::value_type const &entry : uoResult.removed) {
-                IController *controller = entry.second;
-                controller->setApp (this);
-                impl->context.setCurrentController (controller);
-                std::string command = controller->end ();
-                controller->clearFlashScope ();
-                impl->context.getSessionScope ().erase (entry.first);
-
-                if (!command.empty ()) {
-                        viewCommands.insert (command);
-                }
-        }
-
-        for (ControllerMap::value_type const &entry : uoResult.added) {
-                IController *controller = entry.second;
-                controller->setApp (this);
-                controller->clearFlashScope ();
-                impl->context.setCurrentController (controller);
-                std::string command = controller->start ();
-                impl->context.setToSessionScope (entry.first, Core::Variant (controller));
-
-                if (!command.empty ()) {
-                        viewCommands.insert (command);
-                }
-        }
-
-        return viewCommands;
 }
 
 /*--------------------------------------------------------------------------*/
 
-void App::managePages (Core::StringSet const &viewCommands)
+AbstractView *App::loadView (std::string const &v, AbstractController *controller)
 {
-        boost::regex e1 ("\\+(.*)");
-        boost::regex e2 ("\\-(^[>]*)");
-        boost::regex e3 ("(.*)->(.*)");
-        boost::smatch what;
+        BOOST_LOG (lg) << "App::loadView : [" << v << "]";
 
-        for (std::string viewCommand : viewCommands) {
-                if (boost::regex_match (viewCommand, what, e1, boost::match_extra)) {
-                        if (what.size () == 2) {
-                                addPage (what[1]);
-                        }
-                }
-                else if (boost::regex_match (viewCommand, what, e2, boost::match_extra)) {
-                        if (what.size () == 2) {
-                                removePage (what[1]);
-                        }
-                }
-                else {
-                        boost::smatch what;
+        std::string viewName;
+        std::string slotName;
 
-                        if (boost::regex_match (viewCommand, what, e3, boost::match_extra)) {
+        size_t offset;
+        if ((offset = v.find ("->")) != std::string::npos) {
+                slotName = v.substr (offset + 2);
+        }
+        viewName = v.substr (0, offset);
 
-                                if (what.size () == 3) {
-                                        movePage (what[1], what[2]);
-                                }
-                                else if (what.size () == 2) {
-                                        movePage ("", what[1]);
-                                }
-                        }
-                        else {
-                                throw Core::Exception ("Invalid view command. Use +, - or -> operations.");
-                        }
+        AbstractView *view = ocast<AbstractView *> (impl->container->getBean (viewName));
+        view->setController (controller);
+        // Load UI file, or noop if loaded.
+        view->loadUi (controller->getApp ());
+        //        view->reparent (&impl->context);
+        view->show ();
+        return view;
+}
 
-                }
+/*--------------------------------------------------------------------------*/
+
+void App::open (AbstractController *requestor, Core::StringVector const &childControllerNames)
+{
+        for (std::string const &name : childControllerNames) {
+                impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::OPEN, requestor, name });
+        }
+}
+
+/*--------------------------------------------------------------------------*/
+
+void App::close (AbstractController *requestor, Core::StringVector const &controllerNames)
+{
+        // Close requestor children.
+        for (std::string const &name : controllerNames) {
+                impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::CLOSE, requestor, name });
+        }
+
+        // Close requestor itself.
+        if (controllerNames.empty ()) {
+                impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::CLOSE, requestor });
         }
 }
 
@@ -223,39 +244,6 @@ unsigned int App::Impl::getCurrentMs () const
 
 /*--------------------------------------------------------------------------*/
 
-void App::run ()
-{
-        unsigned int currentMs = impl->getCurrentMs ();
-        if (impl->lastMs + impl->config->loopDelayMs <= currentMs) {
-                impl->lastMs = currentMs;
-                Core::StringSet viewCommands = manageUnits ();
-                managePages (viewCommands);
-
-                if (impl->controllersIdling) {
-                        ControllerMap &controllers = impl->unit.getControllers ();
-
-                        for (ControllerMap::value_type const &entry : controllers) {
-                                 IController *controller = entry.second;
-
-                                 if (controller->getLoopDelayMs () < 0) {
-                                         continue;
-                                 }
-
-                                 if (controller->getLastMs () + controller->getLoopDelayMs () <= currentMs) {
-                                         controller->getLastMs () = currentMs;
-                                         impl->context.setCurrentController (controller);
-                                         controller->onIdle ();
-                                 }
-                        }
-                }
-        }
-        else {
-                usleep (((impl->lastMs + impl->config->loopDelayMs) - currentMs) * 1000);
-        }
-}
-
-/*--------------------------------------------------------------------------*/
-
 /**
  * TODO wywalić gdzieś.
  */
@@ -263,255 +251,174 @@ void guiLoadTheme (const char *directory, const char *theme_name, GObject *tople
 {
         GtkCssProvider *css_provider;
         GError *error = NULL;
-        char buf[strlen(directory) + strlen(theme_name) + 32];
+        char buf[strlen (directory) + strlen (theme_name) + 32];
         /* Gtk theme is a directory containing gtk-3.0/gtkrc file */
-        snprintf(buf, sizeof(buf), "%s/%s/gtk-3.0/gtk.css", directory, theme_name);
-        css_provider = gtk_css_provider_new();
-        gtk_css_provider_load_from_file(css_provider, g_file_new_for_path(buf), &error);
+        snprintf (buf, sizeof (buf), "%s/%s/gtk-3.0/gtk.css", directory, theme_name);
+        css_provider = gtk_css_provider_new ();
+        gtk_css_provider_load_from_file (css_provider, g_file_new_for_path (buf), &error);
 
         if (error) {
-                g_warning("%s\n", error->message);
+                g_warning ("%s\n", error->message);
                 return;
         }
 
-        GdkDisplay *display = gdk_display_get_default();
-        GdkScreen *screen = gdk_display_get_default_screen(display);
+        GdkDisplay *display = gdk_display_get_default ();
+        GdkScreen *screen = gdk_display_get_default_screen (display);
 
-        gtk_style_context_add_provider_for_screen(screen,
-                        GTK_STYLE_PROVIDER(css_provider),
-                        GTK_STYLE_PROVIDER_PRIORITY_USER);
+        gtk_style_context_add_provider_for_screen (screen, GTK_STYLE_PROVIDER (css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
         g_object_unref (css_provider);
 }
 
 /*--------------------------------------------------------------------------*/
 
-void App::addPage (std::string const &pageName)
-{
-        BOOST_LOG (lg) << "+" << pageName;
+// void App::removePage (std::string const &pageName)
+//{
+//        BOOST_LOG (lg) << "-" << pageName;
 
-        if (impl->pages.find (pageName) != impl->pages.end ()) {
-                // TODO What should happen here? Nothing? Exception? Another instance of view?
-                throw Core::Exception ("Illegal attempt to open multiple instances of page : [" + pageName + "]");
-        }
+//        if (impl->pages.find (pageName) != impl->pages.end ()) {
+//                throw Core::Exception ("Illegal attempt to close page : [" + pageName + "] which is not active.");
+//        }
 
-        // Load from container, or return if already loaded.
-        Page *page = getPage (pageName);
-        impl->pages[pageName] = page;
-
-        // Load UI file, or noop if loaded.
-        page->loadUi (this);
-
-        GtkView *mainView = page->getView ();
-
-        if (!mainView) {
-                throw Core::Exception ("view property of object Page is NULL.");
-        }
-
-        page->reparent (&impl->context);
-        // TODO jakoś przenieść!
-//        guiLoadTheme ("/home/iwasz/.themes/", "BioMorph", G_OBJECT (mainView));
-        page->show ();
-}
+//        // Load from container, or return if already loaded.
+//        Page *page = getPage (pageName);
+//        impl->pages.erase (pageName);
+//        page->destroyUi ();
+//}
 
 /*--------------------------------------------------------------------------*/
 
-void App::removePage (std::string const &pageName)
-{
-        BOOST_LOG (lg) << "-" << pageName;
+// void App::movePage (std::string const &s, std::string const &pageBName)
+//{
+//        std::string pageAName = s;
 
-        if (impl->pages.find (pageName) != impl->pages.end ()) {
-                throw Core::Exception ("Illegal attempt to close page : [" + pageName + "] which is not active.");
-        }
+//        // Define which page we are moving from and to.
+//        if (pageAName.empty () && impl->pages.size () > 1) {
+//                throw Core::Exception ("-> operation failed. If 'from' page is empty, only one active page can be present. Provide 'from' page name.");
+//        }
 
-        // Load from container, or return if already loaded.
-        Page *page = getPage (pageName);
-        impl->pages.erase (pageName);
-        page->destroyUi ();
-}
+//        if (pageAName.empty () && impl->pages.size () > 0) {
+//                pageAName = impl->pages.begin ()->first;
+//        }
 
-/*--------------------------------------------------------------------------*/
+//        if (pageAName.empty ()) {
+//                addPage (pageBName);
+//                return;
+//        }
 
-void App::movePage (std::string const &s, std::string const &pageBName)
-{
-        std::string pageAName = s;
+//        BOOST_LOG (lg) << pageAName << "->" << pageBName;
 
-        // Define which page we are moving from and to.
-        if (pageAName.empty () && impl->pages.size () > 1) {
-                throw Core::Exception ("-> operation failed. If 'from' page is empty, only one active page can be present. Provide 'from' page name.");
-        }
+//        // Load from container, or return if already loaded.
+//        Page *pageA = getPage (pageAName);
+//        Page *pageB = getPage (pageBName);
 
-        if (pageAName.empty () && impl->pages.size () > 0) {
-                pageAName = impl->pages.begin ()->first;
-        }
+//        if (impl->pages.find (pageBName) != impl->pages.end ()) {
+//                throw Core::Exception ("Illegal attempt to open multiple instances of page : [" + pageBName + "]");
+//        }
 
-        if (pageAName.empty ()) {
-                addPage (pageBName);
-                return;
-        }
+//        impl->pages[pageBName] = pageB;
 
-        BOOST_LOG (lg) << pageAName << "->" << pageBName;
+//        if (impl->pages.find (pageAName) == impl->pages.end ()) {
+//                throw Core::Exception ("Page [" + pageAName + "] is not loaded curently, so it cannot be moved to page [" + pageBName + "].");
+//        }
 
-        // Load from container, or return if already loaded.
-        Page *pageA = getPage (pageAName);
-        Page *pageB = getPage (pageBName);
+//        impl->pages.erase (pageAName);
 
-        if (impl->pages.find (pageBName) != impl->pages.end ()) {
-                throw Core::Exception ("Illegal attempt to open multiple instances of page : [" + pageBName + "]");
-        }
+//        // Make sure  the entire pageB is loaded (i.e. all its elements that is : its view and its tiles.
+//        pageB->loadUi (this);
 
-        impl->pages[pageBName] = pageB;
+//        SlotVector const &slotsA = pageA->getSlots ();
+//        SlotVector const &slotsB = pageB->getSlots ();
 
-        if (impl->pages.find (pageAName) == impl->pages.end ()) {
-                throw Core::Exception ("Page [" + pageAName + "] is not loaded curently, so it cannot be moved to page [" + pageBName + "].");
-        }
+//        // Find out common views.
+//        GtkView *mainViewA = pageA->getView ();
+//        GtkView *mainViewB = pageB->getView ();
 
-        impl->pages.erase (pageAName);
+//        if (!mainViewB) {
+//                throw Core::Exception ("view property of object Page is NULL.");
+//        }
 
-        // Make sure  the entire pageB is loaded (i.e. all its elements that is : its view and its tiles.
-        pageB->loadUi (this);
+//        pageB->reparent (&impl->context);
 
-        SlotVector const &slotsA = pageA->getSlots ();
-        SlotVector const &slotsB = pageB->getSlots ();
+//        /*
+//         * W ogóle, to GtkBuilder ZAWSZE zwroci tą samą instancję obiektu (po ID).
+//         * Nawet kiedy ten obiekt zniszczymy, to będzie zwracał wskaźnik to tego zniszczonego. Jedyny
+//         * sposób, żeby zniszczyć i stworzyć obiekt na nowo, to zniszczyć i stworzyć cały GtkBuilder, ale
+//         * wtedy zniszczymy też i inne obiekty!. Czyli to by dobrze działo, gdyby każde okno było w osobnym
+//         * pliku, ale to by trzeba było jakoś sprytnie wymusić, na przykład żeby GtkView i GtkTile miały
+//         * propery ui, gdzie by się podawało nazwę pliku. I wtedy nawet gdyby ktoś robił tak jak my wszystko
+//         * w jednym pliku (wszystkie okna), to taki XML ładował by się tyle razy ile zdefiniowano GtkView i
+//         * GtkTie.
+//         */
 
-        // Find out common views.
-        GtkView *mainViewA = pageA->getView ();
-        GtkView *mainViewB = pageB->getView ();
+//        // Find out tiles that are not needed anymore.
+//        for (Slot *slotA : slotsA) {
+//                GtkTile *tileA = slotA->getTile ();
 
-        if (!mainViewB) {
-                throw Core::Exception ("view property of object Page is NULL.");
-        }
+//                bool tileAPresentInPageB = false;
+//                for (Slot *slotB : slotsB) {
+//                        GtkTile *tileB = slotB->getTile ();
+//                        if (tileB == tileA) {
+//                                tileAPresentInPageB = true;
+//                                break;
+//                        }
+//                }
 
-        pageB->reparent (&impl->context);
+//                if (!tileAPresentInPageB) {
+//                        tileA->destroyUi ();
+//                }
+//        }
 
-/*
- * W ogóle, to GtkBuilder ZAWSZE zwroci tą samą instancję obiektu (po ID).
- * Nawet kiedy ten obiekt zniszczymy, to będzie zwracał wskaźnik to tego zniszczonego. Jedyny
- * sposób, żeby zniszczyć i stworzyć obiekt na nowo, to zniszczyć i stworzyć cały GtkBuilder, ale
- * wtedy zniszczymy też i inne obiekty!. Czyli to by dobrze działo, gdyby każde okno było w osobnym
- * pliku, ale to by trzeba było jakoś sprytnie wymusić, na przykład żeby GtkView i GtkTile miały
- * propery ui, gdzie by się podawało nazwę pliku. I wtedy nawet gdyby ktoś robił tak jak my wszystko
- * w jednym pliku (wszystkie okna), to taki XML ładował by się tyle razy ile zdefiniowano GtkView i
- * GtkTie.
- */
-
-        // Find out tiles that are not needed anymore.
-        for (Slot *slotA : slotsA) {
-                GtkTile *tileA = slotA->getTile ();
-
-                bool tileAPresentInPageB = false;
-                for (Slot *slotB : slotsB) {
-                        GtkTile *tileB = slotB->getTile ();
-                        if (tileB == tileA) {
-                                tileAPresentInPageB = true;
-                                break;
-                        }
-                }
-
-                if (!tileAPresentInPageB) {
-                        tileA->destroyUi ();
-                }
-        }
-
-        if (mainViewA != mainViewB) {
-                mainViewA->destroyUi();
-                mainViewB->show();
-        }
-}
+//        if (mainViewA != mainViewB) {
+//                mainViewA->destroyUi ();
+//                mainViewB->show ();
+//        }
+//}
 
 /*--------------------------------------------------------------------------*/
 
-void App::startUnit (std::string const &unitName)
-{
-        impl->unitToStart = unitName;
-}
+// std::pair<IView *, Page *> App::Impl::getActiveViewOrThrow (std::string const &viewName)
+//{
+//        IView *view = 0;
+//        Page *page = 0;
+
+//        for (auto elem : pages) {
+//                page = elem.second;
+//                view = page->getView ();
+
+//                if (view->getName () == viewName) {
+//                        break;
+//                }
+
+//                SlotVector const &slots = page->getSlots ();
+//                for (Slot *slot : slots) {
+//                        GtkTile *tile = slot->getTile ();
+
+//                        if (tile->getName () == viewName) {
+//                                view = tile;
+//                                break;
+//                        }
+//                }
+//        }
+
+//        // Throw an error if no such view was found
+//        if (!view) {
+//                std::ostringstream o;
+//                o << "You requested submit from view which is not currently loaded. Available pages and their views are :\n";
+
+//                for (auto elem : pages) {
+//                        o << elem.second << "\n";
+//                }
+
+//                throw Core::Exception (o.str ());
+//        }
+
+//        return std::make_pair (view, page);
+//}
 
 /*--------------------------------------------------------------------------*/
 
-void App::back ()
-{
-        if (impl->previousUnits.size () >= 2) {
-                impl->previousUnits.pop ();
-        }
-
-        impl->unitToStart = impl->previousUnits.top ();
-}
-
-/*--------------------------------------------------------------------------*/
-
-void App::join (std::string const &unitName)
-{
-        impl->unitsToJoin.insert (unitName);
-}
-
-/*--------------------------------------------------------------------------*/
-
-void App::split (std::string const &unitName)
-{
-        impl->unitsToSplit.insert (unitName);
-}
-
-/*--------------------------------------------------------------------------*/
-
-std::pair <IView *, Page *> App::Impl::getActiveViewOrThrow (std::string const &viewName)
-{
-        IView *view = 0;
-        Page *page = 0;
-
-        for (auto elem : pages) {
-                page = elem.second;
-                view = page->getView ();
-
-                if (view->getName () == viewName) {
-                        break;
-                }
-
-                SlotVector const &slots = page->getSlots ();
-                for (Slot *slot : slots) {
-                        GtkTile *tile = slot->getTile ();
-
-                        if (tile->getName () == viewName) {
-                                view = tile;
-                                break;
-                        }
-                }
-        }
-
-        // Throw an error if no such view was found
-        if (!view) {
-                std::ostringstream o;
-                o << "You requested submit from view which is not currently loaded. Available pages and their views are :\n";
-
-                for (auto elem : pages) {
-                        o << elem.second << "\n";
-                }
-
-                throw Core::Exception (o.str ());
-        }
-
-        return std::make_pair (view, page);
-}
-
-/*--------------------------------------------------------------------------*/
-
-void App::submit (std::string const &viewName, std::string const &inputRange, std::string const &controllerName)
-{
-        std::unique_ptr <SubmitEvent> event {new SubmitEvent};
-        event->viewName = viewName;
-        event->inputRange = inputRange;
-        event->controllerName = controllerName;
-        impl->events.push (std::move (event));
-}
-
-/*--------------------------------------------------------------------------*/
-
-void App::refresh (std::string const &viewName, std::string const &modelRange)
-{
-        std::unique_ptr <RefreshEvent> event {new RefreshEvent};
-        event->viewName = viewName;
-        event->modelRange = modelRange;
-        impl->events.push (std::move (event));
-}
+void App::pushEvent (std::unique_ptr<IEvent> e) { impl->events.push (std::move (e)); }
 
 /*--------------------------------------------------------------------------*/
 
@@ -543,54 +450,37 @@ void App::userQuitRequest ()
  */
 void App::doSubmit (SubmitEvent *event)
 {
-        BOOST_LOG (lg) << "SubmitEvent::run. viewName : [" << event->viewName << "], dataRange : [" << event->inputRange << "], controllerName : [" << event->controllerName << "].";
+        BOOST_LOG (lg) << "SubmitEvent::run. dataRange : [" << event->inputRange << "], controllerName : [" << event->controllerName << "].";
 
-        /*
-         * Potrzebne dane:
-         * - Z jakiego widoku ściągamy dane (bo może byćwięcej niż jeden widok w Page..
-         *
-         * - jakie dane. Konwertuje dane z formularza do modelu. Konweruje całość, lub tylko część. Decyzja jest podejmowana
-         * na podstawie jakichś dodatiowych parametrów. Np jezeli guzik OK ma calback $submit() (bez parametrów),
-         * to konwerujemy całość. Jeżeli ma tak : $submit ('form'), to konwertowane jest kazde pole które zaczyna
-         * się od "form." bo mogą być węcej niż 1 obiektów formularza). Jeżeli damyh $submit ('form.login'), to
-         * tylko login. Moznaby się pokusić jeszcze o listę typu : $submit (['form.a', 'form.b']).
-         *
-         * Na przykłąad domyślnie jeśli mamy GtkContainer o nazwie loginFormm, a w nim pola o nazwach form.login i form.password,
-         * a na końcu (w tym samym kontenerze) guzik z podpiętą akcją $app->submit () (czy podobnie), to
-         *
-         * - Jakiemu kontrolerowi wuwołąć onSubmit : nazwa kontrolera brana z GtkContainer.
-         */
-        IController *controller = impl->unit.getController (event->controllerName);
+        AbstractController *controller = impl->rootController->findByName (event->controllerName);
 
         if (!controller) {
-                throw Core::Exception ("You requested submit to a controller which is not currently loaded. Controller name : [" + event->controllerName + "].");
+                throw Core::Exception ("You requested submit to a controller which is not currently loaded. Controller name : [" + event->controllerName
+                                       + "].");
         }
 
-        controller->clearFlashScope ();
         controller->getValidationResults ().clear ();
-        impl->context.setCurrentController (controller);
+        //        impl->context.setCurrentController (controller);
 
-        std::pair <IView *, Page *> ret = impl->getActiveViewOrThrow (event->viewName);
-        IView *v = ret.first;
-        Page *page = ret.second;
-        MappingMultiMap const &mappings = page->getMappingsByInput ();
+        AbstractView *view = controller->getView ();
+        MappingMultiMap const &mappings = view->getMappingsByInput ();
 
 #if 0
-        v->printStructure ();
+        view->printStructure ();
 #endif
 
-        GtkView::InputMap inputMap = v->getInputs (event->inputRange);
+        GtkView::InputMap inputMap = view->getInputs (event->inputRange);
         bool hasErrors = false;
 
         for (auto elem : inputMap) {
                 std::string inputName = elem.first;
                 MappingDTO dto;
                 dto.app = this;
-                dto.m2vModelObject = Core::Variant (&impl->context.getSingleFlashAccessor ());
-                dto.v2mModelObject = Core::Variant (&impl->context.getSingleFlashAccessor ());
+                dto.m2vModelObject = Core::Variant (controller->getModelAccessor ());
+                dto.v2mModelObject = Core::Variant (controller->getModelAccessor ());
                 dto.dataRange = event->inputRange;
 
-                ViewElementDTO elementDTO {G_OBJECT (elem.second)};
+                ViewElementDTO elementDTO{ G_OBJECT (elem.second) };
                 dto.viewElement = &elementDTO;
 
                 MappingMultiMap::const_iterator i;
@@ -646,16 +536,16 @@ void App::doSubmit (SubmitEvent *event)
         }
 
         impl->context.setValidationResults (&controller->getValidationResults ());
+
         // Fire decorators.
-        PageDecoratorVector &decorators = page->getDecorators ();
+        PageDecoratorVector &decorators = view->getDecorators ();
 
         for (IPageDecorator *decorator : decorators) {
-                decorator->run (page, &impl->context);
+                decorator->run (view, &impl->context);
         }
 
         if (!hasErrors) {
-                std::string nextPage = controller->onSubmit ();
-                impl->pagesToShow.insert (nextPage);
+                controller->onSubmit ();
         }
 }
 
@@ -663,146 +553,120 @@ void App::doSubmit (SubmitEvent *event)
 
 void App::doRefresh (RefreshEvent *event)
 {
-#if 0
-        BOOST_LOG (lg) << "RefreshEvent::doRefresh. viewName : [" << event->viewName << "], dataRange : [" << event->modelRange << "].";
-#endif
+        //        impl->context.setCurrentController (event->controller);
 
-        impl->context.setCurrentController (nullptr);
-        typedef std::pair <IView *, Page *> ViewPagePair;
-        typedef std::vector <ViewPagePair> ViewPagePairVector;
+        AbstractView *view = event->controller->getView ();
+        GtkView::InputMap inputMap;
 
-        ViewPagePairVector viewsToRefresh;
+        if (!event->modelRange.empty ()) {
+                // 1. From mappings
+                MappingMultiMap mappings = view->getMappingsByModelRange (event->modelRange);
 
-        if (!event->viewName.empty ()) {
-                ViewPagePair ret = impl->getActiveViewOrThrow (event->viewName);
-                viewsToRefresh.push_back (ret);
-        }
-        else {
-               for (PageMap::value_type const &elem : impl->pages) {
-                       Page *page = elem.second;
-                       ViewPagePair pair {page->getView (), page};
-                       viewsToRefresh.push_back (pair);
-               }
-        }
-
-        for (ViewPagePair &pair : viewsToRefresh) {
-                Page *page = pair.second;
-                IView *view = pair.first;
-                GtkView::InputMap inputMap;
-
-                if (!event->modelRange.empty ()) {
-                        // 1. From mappings
-                        MappingMultiMap mappings = page->getMappingsByModelRange (event->modelRange);
-
-                        for (MappingMultiMap::value_type &elem : mappings) {
-                                GtkView::InputMap tmp = view->getInputs (elem.second->getWidget (), true);
-
-                                if (impl->config->logMappings) {
-                                    BOOST_LOG (lg) << "Range \033[32m[" << elem.second->getWidget () << "]\033[0m";
-                                }
-
-                                assert (tmp.size () == 1);
-                                GtkWidget *input = tmp.begin ()->second;
-
-                                MappingDTO dto;
-                                dto.app = this;
-                                dto.m2vModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
-                                dto.v2mModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
-                                dto.dataRange = event->modelRange;
-
-                                ViewElementDTO elementDTO {G_OBJECT (input)};
-                                dto.viewElement = &elementDTO;
-
-                                elem.second->model2View (&dto);
-                        }
-                }
-
-                /*
-                 * 2. From inputs
-                 * If model range is empty, then we have to fall back to the default behavior, which
-                 * would iterate over all the inputs and try to find models coresponding to those
-                 * inputs.
-                 */
-                GtkView::InputMap tmp = view->getInputs (event->modelRange, true);
-                std::copy (tmp.begin (), tmp.end (), std::inserter (inputMap, inputMap.end ()));
-
-                MappingMultiMap const &mappings = page->getMappingsByInput ();
-
-                for (auto elem : inputMap) {
-                        std::string inputName = elem.first;
+                for (MappingMultiMap::value_type &elem : mappings) {
+                        GtkView::InputMap tmp = view->getInputs (elem.second->getWidget (), true);
 
                         if (impl->config->logMappings) {
-                                BOOST_LOG (lg) << "All \033[32m[" << inputName << "]\033[0m";
+                                BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << elem.second->getWidget () << "]\033[0m (refresh range event).";
                         }
+
+                        assert (tmp.size () == 1);
+                        GtkWidget *input = tmp.begin ()->second;
 
                         MappingDTO dto;
                         dto.app = this;
-                        dto.m2vModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
-                        dto.v2mModelObject = Core::Variant (&impl->context.getAllFlashAccessor ());
+                        dto.m2vModelObject = Core::Variant (event->controller->getModelAccessor ());
+                        dto.v2mModelObject = Core::Variant (event->controller->getModelAccessor ());
                         dto.dataRange = event->modelRange;
 
-                        ViewElementDTO elementDTO {G_OBJECT (elem.second)};
+                        ViewElementDTO elementDTO{ G_OBJECT (input) };
                         dto.viewElement = &elementDTO;
 
-                        MappingMultiMap::const_iterator i;
-                        auto eq = mappings.equal_range (inputName);
+                        elem.second->model2View (&dto);
+                }
+        }
 
-                        bool customMappingWasRun = false;
-                        for (i = eq.first; i != eq.second; ++i) {
-                                IMapping *mapping = i->second;
+        /*
+         * 2. From inputs
+         * If model range is empty, then we have to fall back to the default behavior, which
+         * would iterate over all the inputs and try to find models coresponding to those
+         * inputs.
+         */
+        GtkView::InputMap tmp = view->getInputs (event->modelRange, true);
+        std::copy (tmp.begin (), tmp.end (), std::inserter (inputMap, inputMap.end ()));
 
-                                if (impl->config->logMappings) {
-                                        BOOST_LOG (lg) << "Maping found. Input : [" << mapping->getWidget () << "], model : [" << mapping->getModel () << "]";
-                                }
+        MappingMultiMap const &mappings = view->getMappingsByInput ();
 
-                                mapping->model2View (&dto);
-                                customMappingWasRun = true;
-                        }
+        for (auto elem : inputMap) {
+                std::string inputName = elem.first;
 
-                        // Default.
-                        if (!customMappingWasRun) {
-                                Mapping::model2View (&dto, inputName, "", "");
-                        }
+                if (impl->config->logMappings) {
+                        BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << inputName << "]\033[0m (refresh all event)";
                 }
 
-                view->refresh (&impl->context);
+                MappingDTO dto;
+                dto.app = this;
+                dto.m2vModelObject = Core::Variant (event->controller->getModelAccessor ());
+                dto.v2mModelObject = Core::Variant (event->controller->getModelAccessor ());
+                dto.dataRange = event->modelRange;
+
+                ViewElementDTO elementDTO{ G_OBJECT (elem.second) };
+                dto.viewElement = &elementDTO;
+
+                MappingMultiMap::const_iterator i;
+                auto eq = mappings.equal_range (inputName);
+
+                bool customMappingWasRun = false;
+                for (i = eq.first; i != eq.second; ++i) {
+                        IMapping *mapping = i->second;
+
+                        if (impl->config->logMappings) {
+                                BOOST_LOG (lg) << "Maping found. Input : [" << mapping->getWidget () << "], model : [" << mapping->getModel () << "]";
+                        }
+
+                        mapping->model2View (&dto);
+                        customMappingWasRun = true;
+                }
+
+                // Default.
+                if (!customMappingWasRun) {
+                        Mapping::model2View (&dto, inputName, "", "");
+                }
         }
+
+        view->refresh (&impl->context);
 }
 
 /*--------------------------------------------------------------------------*/
 
 void App::createContainer (std::string const &configFile)
 {
-        Ptr <MetaContainer> metaContainer = CompactMetaService::parseFile (configFile);
+        Ptr<MetaContainer> metaContainer = CompactMetaService::parseFile (configFile);
         impl->container = ContainerFactory::create (metaContainer, true);
 
-//                impl->container->addConversion (typeid (Geometry::Point), Geometry::stringToPointVariant);
-//                impl->container->addConversion (typeid (Geometry::Point3), Geometry::stringToPoint3Variant);
-//                impl->container->addConversion (typeid (Geometry::LineString), Geometry::stringToLineStringVariant);
-//                impl->container->addConversion (typeid (Model::HAlign), Model::stringToHAlign);
-//                impl->container->addConversion (typeid (Model::VAlign), Model::stringToVAlign);
-//                impl->container->addConversion (typeid (Model::HGravity), Model::stringToHGravity);
-//                impl->container->addConversion (typeid (Model::VGravity), Model::stringToVGravity);
-//                impl->container->addConversion (typeid (Model::LinearGroup::Type), Model::stringToLinearGroupType);
+        //                impl->container->addConversion (typeid (Geometry::Point), Geometry::stringToPointVariant);
+        //                impl->container->addConversion (typeid (Geometry::Point3), Geometry::stringToPoint3Variant);
+        //                impl->container->addConversion (typeid (Geometry::LineString), Geometry::stringToLineStringVariant);
+        //                impl->container->addConversion (typeid (Model::HAlign), Model::stringToHAlign);
+        //                impl->container->addConversion (typeid (Model::VAlign), Model::stringToVAlign);
+        //                impl->container->addConversion (typeid (Model::HGravity), Model::stringToHGravity);
+        //                impl->container->addConversion (typeid (Model::VGravity), Model::stringToVGravity);
+        //                impl->container->addConversion (typeid (Model::LinearGroup::Type), Model::stringToLinearGroupType);
 
-//        impl->container->addSingleton (i->first.c_str (), i->second);
+        //        impl->container->addSingleton (i->first.c_str (), i->second);
 
         ContainerFactory::init (impl->container.get (), metaContainer.get ());
-        impl->config = vcast <Config *> (impl->container->getBean ("config"));
+        impl->config = vcast<Config *> (impl->container->getBean ("config"));
 }
 
 /*--------------------------------------------------------------------------*/
 
-Context &App::getContext ()
-{
-        return impl->context;
-}
+Context &App::getContext () { return impl->context; }
 
 /*--------------------------------------------------------------------------*/
 
 k202::K202 *App::getK202 ()
 {
-        static Ptr <k202::K202> k202 = k202::K202::create ();
+        static Ptr<k202::K202> k202 = k202::K202::create ();
         return k202.get ();
 }
 
@@ -813,7 +677,7 @@ struct BWInitializer {
         BWInitializer ()
         {
                 beanWrapper = new Wrapper::BeanWrapper (true);
-//                beanWrapper->addPlugin (new GObjectWrapperPlugin);
+                //                beanWrapper->addPlugin (new GObjectWrapperPlugin);
                 beanWrapper->addPlugin (new Wrapper::PropertyRWBeanWrapperPlugin ());
                 beanWrapper->addPlugin (new Wrapper::GetPutMethodRWBeanWrapperPlugin ());
                 beanWrapper->addPlugin (new Wrapper::MethodPlugin (Wrapper::MethodPlugin::METHOD));
@@ -822,15 +686,18 @@ struct BWInitializer {
                 typeEditor->setEqType (new Editor::NoopEditor ());
                 typeEditor->setNullType (new Editor::NoopEditor ());
 
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (int), new Editor::StreamEditor <std::string, int> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (double), new Editor::LexicalEditor <std::string, double> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (float), new Editor::LexicalEditor <std::string, float> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (char), new Editor::LexicalEditor <std::string, char> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (bool), new Editor::LexicalEditor <std::string, bool> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned int), new Editor::StreamEditor <std::string, unsigned int> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned char), new Editor::StreamEditor <std::string, unsigned char> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (long), new Editor::StreamEditor <std::string, long> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned long), new Editor::StreamEditor <std::string, unsigned long> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (int), new Editor::StreamEditor<std::string, int> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (double), new Editor::LexicalEditor<std::string, double> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (float), new Editor::LexicalEditor<std::string, float> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (char), new Editor::LexicalEditor<std::string, char> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (bool), new Editor::LexicalEditor<std::string, bool> ()));
+                typeEditor->addType (
+                        Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned int), new Editor::StreamEditor<std::string, unsigned int> ()));
+                typeEditor->addType (
+                        Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned char), new Editor::StreamEditor<std::string, unsigned char> ()));
+                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (long), new Editor::StreamEditor<std::string, long> ()));
+                typeEditor->addType (
+                        Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned long), new Editor::StreamEditor<std::string, unsigned long> ()));
 
                 Editor::ChainEditor *chain = new Editor::ChainEditor (true);
                 chain->addEditor (typeEditor);
@@ -840,15 +707,11 @@ struct BWInitializer {
         }
 
         Wrapper::BeanWrapper *beanWrapper = 0;
-
 };
 
 /*--------------------------------------------------------------------------*/
 
-Wrapper::BeanWrapper *App::getBeanWrapper ()
-{
-        return App::Impl::getBeanWrapper ();
-}
+Wrapper::BeanWrapper *App::getBeanWrapper () { return App::Impl::getBeanWrapper (); }
 
 /*--------------------------------------------------------------------------*/
 
@@ -856,29 +719,6 @@ Wrapper::BeanWrapper *App::Impl::getBeanWrapper ()
 {
         static BWInitializer bwInitializer;
         return bwInitializer.beanWrapper;
-}
-
-/*--------------------------------------------------------------------------*/
-
-IUnit *App::getUnit (std::string const &name)
-{
-        IUnit* unit = ocast <IUnit *> (impl->container->getBean (name));
-        return unit;
-}
-
-/*--------------------------------------------------------------------------*/
-
-Page *App::getPage (std::string const &name)
-{
-        Page* page = ocast <Page *> (impl->container->getBean (name));
-        return page;
-}
-
-/*--------------------------------------------------------------------------*/
-
-IUnit *App::getCurrentUnit ()
-{
-        return &impl->unit;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -893,7 +733,7 @@ void App::quit ()
 
 gboolean guiThread (gpointer userData)
 {
-        App *app = static_cast <App *> (userData);
+        App *app = static_cast<App *> (userData);
         app->run ();
         if (app->impl->quitRequested) {
                 gtk_main_quit ();
@@ -906,9 +746,6 @@ gboolean guiThread (gpointer userData)
 
 /*---------------------------------------------------------------------------*/
 
-Config const *App::getConfig () const
-{
-    return impl->config;
-}
+Config const *App::getConfig () const { return impl->config; }
 
 } // namespace GtkForms

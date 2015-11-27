@@ -12,7 +12,7 @@
 #include "App.h"
 #include "mapping/GValueVariant.h"
 #include "signalAdapter/AbstractSignalAdapter.h"
-#include "IUnit.h"
+#include "controller/AbstractAccessor.h"
 
 namespace GtkForms {
 static src::logger_mt& lg = logger::get ();
@@ -26,12 +26,11 @@ struct ClosureDTO {
         char *gObjectName;
         char const *widgetId;
         char *handler;
-        Context *context;
-        App *app;
+        AbstractAccessor *accessor;
 };
 
 struct ConnectDTO {
-        App *app;
+        AbstractAccessor *accessor;
 };
 
 /*
@@ -54,7 +53,7 @@ void gClosureMarshal (GClosure *closure,
 
 void gclosureUserDataDelete (gpointer data, GClosure *closure);
 
-void handler (const std::string &sourceCode, const Core::VariantVector &paramVector, Context *context);
+void handler (const std::string &sourceCode, const Core::VariantVector &paramVector, AbstractAccessor *accessor);
 
 } // extern "C"
 
@@ -91,7 +90,7 @@ GtkBuilder *UiFile::getBuilder ()
 
 /*--------------------------------------------------------------------------*/
 
-GtkBuilder *UiFile::load (App *app)
+GtkBuilder *UiFile::load (AbstractAccessor *accessor)
 {
         if (impl->loaded) {
                 return impl->builder;
@@ -110,7 +109,7 @@ GtkBuilder *UiFile::load (App *app)
                 throw Core::Exception ("gtk_builder_add_from_file returned an error. Error message is : [" + std::string (err->message) + "]");
         }
 
-        connectSignals (app);
+        connectSignals (accessor);
 
         impl->loaded = true;
         return impl->builder;
@@ -127,9 +126,9 @@ void UiFile::destroy ()
 
 /*--------------------------------------------------------------------------*/
 
-void UiFile::connectSignals (App *app)
+void UiFile::connectSignals (AbstractAccessor *accessor)
 {
-        impl->connectDTO.app = app;
+        impl->connectDTO.accessor = accessor;
         // https://developer.gnome.org/gtk3/stable/GtkBuilder.html#gtk-builder-connect-signals-full
         gtk_builder_connect_signals_full (impl->builder, myConnectFunc, static_cast <gpointer> (&impl->connectDTO));
 
@@ -138,9 +137,9 @@ void UiFile::connectSignals (App *app)
 
 /*--------------------------------------------------------------------------*/
 
-void handler (const std::string &sourceCode, const Core::VariantVector &paramVector, Context *context)
+void handler (const std::string &sourceCode, const Core::VariantVector &paramVector, AbstractAccessor *accessor)
 {
-        Core::Variant domain {&context->getAllFlashAccessor ()};
+        Core::Variant domain {accessor};
         k202::K202 *k202 = App::getK202 ();
 
         Core::Variant result = k202->run (sourceCode, domain, paramVector);
@@ -167,13 +166,8 @@ void myConnectFunc (GtkBuilder *builder,
         closureDTO->handler = g_strdup (tmpString);
 
         ConnectDTO *connectDTO = static_cast <ConnectDTO *> (user_data);
-        closureDTO->context = &connectDTO->app->getContext ();
-
-        if (!connectDTO->app->getCurrentUnit ()) {
-                throw Core::Exception ("myConnectFunc (GtkBuilder *builder...). No active controller has been found.");
-        }
-
-        closureDTO->app = connectDTO->app;
+//        closureDTO->context = &connectDTO->app->getContext ();
+        closureDTO->accessor = connectDTO->accessor;
 
         tmpString = G_OBJECT_TYPE_NAME (object);
         tmpString = ((tmpString) ? (tmpString) : (""));
@@ -219,23 +213,24 @@ void gClosureMarshal (GClosure *closure,
         std::string widgetIdCopy = (dto->widgetId) ? (dto->widgetId) : ("");
 
         ISignalAdapter *signalParametersAdapter = 0;
-        SignalAdapterVector adapters = dto->app->getCurrentUnit ()->getSignalAdapters();
+//         TODO signal dapters!
+//        SignalAdapterVector adapters = dto->app->getCurrentUnit ()->getSignalAdapters();
 
-        for (ISignalAdapter *a : adapters) {
-                if (a->getSignal () == signalNameCopy) {
-                        signalParametersAdapter = a;
+//        for (ISignalAdapter *a : adapters) {
+//                if (a->getSignal () == signalNameCopy) {
+//                        signalParametersAdapter = a;
 
-                        if (a->getGObjectName () == gObjectNameCopy) {
-                                signalParametersAdapter = a;
+//                        if (a->getGObjectName () == gObjectNameCopy) {
+//                                signalParametersAdapter = a;
 
-                                // Full match;
-                                if (a->getWidgetId () == widgetIdCopy) {
-                                        signalParametersAdapter = a;
-                                        break;
-                                }
-                        }
-                }
-        }
+//                                // Full match;
+//                                if (a->getWidgetId () == widgetIdCopy) {
+//                                        signalParametersAdapter = a;
+//                                        break;
+//                                }
+//                        }
+//                }
+//        }
 
         if (signalParametersAdapter) {
                 BOOST_LOG (lg) << "Signal adapter has been found : signal : [" << signalParametersAdapter->getSignal ()
@@ -248,7 +243,7 @@ void gClosureMarshal (GClosure *closure,
 
         typedef void (*HandlerType) (const std::string &,
                                      const Core::VariantVector &,
-                                     Context *);
+                                     AbstractAccessor *);
 
         GCClosure *cc = (GCClosure*) closure;
         HandlerType callback = (HandlerType) (marshal_data ? marshal_data : cc->callback);
@@ -259,7 +254,7 @@ void gClosureMarshal (GClosure *closure,
                 params = signalParametersAdapter->adapt (n_param_values, param_values);
         }
 
-        callback (dto->handler, params, dto->context);
+        callback (dto->handler, params, dto->accessor);
 }
 
 /*--------------------------------------------------------------------------*/

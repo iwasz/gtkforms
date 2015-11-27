@@ -13,9 +13,7 @@
 #include <string>
 #include <ReflectionParserAnnotation.h>
 #include "UiFile.h"
-#include "GtkAbstractView.h"
-#include "GtkTile.h"
-#include "Slot.h"
+#include "AbstractView.h"
 
 namespace GtkForms {
 class Context;
@@ -24,7 +22,7 @@ class Context;
  * View (a top level windows, or some inner GtkWidget) created from GtkBuilder. Thise views are
  * loaded (i.e. memory is alloceted) in GtkView::show, and unloaded (memory is freed) in GtkView::hide.
  */
-class __tiliae_reflect__ GtkView : public GtkAbstractView {
+class __tiliae_reflect__ GtkView : public AbstractView {
 public:
 
         GtkView ();

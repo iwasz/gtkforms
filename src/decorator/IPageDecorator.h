@@ -13,7 +13,7 @@
 
 namespace GtkForms {
 class Context;
-class Page;
+class AbstractView;
 
 /**
  * Some custom actions to be performed on a page/view.
@@ -21,7 +21,7 @@ class Page;
 class __tiliae_reflect__ IPageDecorator : public Core::Object {
 public:
         virtual ~IPageDecorator () {}
-        virtual void run (Page *page, Context *ctx) = 0;
+        virtual void run (AbstractView *view, Context *ctx) = 0;
 };
 
 typedef __tiliae_reflect__ std::vector <IPageDecorator *> PageDecoratorVector;

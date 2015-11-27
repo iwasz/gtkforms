@@ -27,6 +27,10 @@ Nowe rzeczy
         * Nie ma domyślnego mapowania (na przykład dla tabel).
         * Chcemy użyć konwertera.
 
+* Uproszczona struktura widoków - jeden kontroler = jeden widok i jeden scope.
+* Struktura drzewiasta i to tylko w kontrolerze. Od tej struktury zależy struktura widoków i scopów (map na modele).
+* Nie ma setToUnitScope, setToFlashScope, tylko po prostu set/get, które działają hiertarchicznie.
+
 
 TODO
 ====
@@ -35,11 +39,19 @@ TODO
           argumentów.
         * Wyjaśnić z tym _Bool
         * Żeby się pliki output gebnerowałuy za każdymn razem jak siępkompiluje.
-        * Dodać każdy plik w projekcie do źródeł explicite.
         * Jak by się dało anotować prywtne pola, to by było super, ale chyba nie ma opcji. Wobec tego trzeba zorbić
           setery i getery tam gdzie trzeba (QTCreator ma opcję do generowania).
         * Dodać -Wall wszędzie
         * Przekompilować z anotacjami (tiliae) i sprawdzić czy działa.
+        * Zarządzanie pamięcią w przypadku kontrolerów - żeby dało się ładnie tworzyć prototypy i żeby się same kasowały,
+          a jednocześnie, żeby singletony sie nie kasowały - może jakiś sprytny rodzaj wskaźnika.
+        * Żebyu metody open i close mogły być przeciążone (refleksja teraz nie chce działać jak są).
+        * Nazwy wszedzie gdzie jest Input, to zamienić na "widget" lub "input widget".
+        * Żeby można było robić submit z widoków bez podania kontrolera,
+        * Żeby można było robić submit z widoków bez podania w ogóle niczego,
+        * mapa sessionScope powinna być w App moim zdaniem. Analogicznie do controlerScope.
+        * Zrobić komantarz nada klasą Context i wyjaśnić tam po co ona jest. Może zamienić na jakąś bardziej
+          samo-opisującą się nazwę? ViewDTO? Nie wiem, bo nie za bardzo rozumiem po co on jest.
 
 TODO do przemyślenia
 ====================
@@ -49,6 +61,10 @@ TODO do przemyślenia
 
 TODO zrobione
 =============
+
+        * Dodać każdy plik w projekcie do źródeł explicite.
+        * Page na View
+        * Unit na controller poszukać, są te nazwy.
 
 Plany
 =====

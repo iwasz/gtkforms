@@ -15,7 +15,7 @@
 
 namespace GtkForms {
 class Context;
-class App;
+class AbstractAccessor;
 
 /**
  * Single GTK+ *.ui file. GtkBuilder is embedded in this class.
@@ -30,7 +30,7 @@ public:
          * Loads file into memory, and returns it (in form of GtkBuilder). If file is allready loaded,
          * it is immediately returned.
          */
-        GtkBuilder *load (App *app);
+        GtkBuilder *load (AbstractAccessor *accessor);
         GtkBuilder *getBuilder ();
 
         /**
@@ -45,7 +45,7 @@ public:
 
 private:
 
-        void connectSignals (App *app);
+        void connectSignals (AbstractAccessor *accessor);
 
 private:
 

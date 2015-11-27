@@ -14,42 +14,35 @@
 #include <gtk/gtk.h>
 #include "controller/RefreshEvent.h"
 #include "Config.h"
+#include <core/Typedefs.h>
+#include <k202/K202.h>
+#include <beanWrapper/BeanWrapper.h>
+#include "controller/AbstractController.h"
 
 namespace GtkForms {
 
-class IUnit;
-class Page;
 class Context;
 struct SubmitEvent;
 class RefreshEvent;
+class AbstractView;
 
 /**
  * Main object (singleton) of a GtkForms application. It can perofrm operations on main aspects
- * of the app, most notably it manages Units and Pages.
+ * of the app, most notably it manages Controllers and Views.
  */
-class __tiliae_reflect__ App  {
+class __tiliae_reflect__ App {
 public:
-
-        App (std::string const &configurationFile) __tiliae_no_reflect__;
+        App (std::string const &configurationFile, std::string const &initialControllerName) __tiliae_no_reflect__;
         ~App ();
 
-        /*
-         * Uruchamiamy funkcję start z kontrolerem.
-         * show? navigate? Ta funkcja będzie używana w wielu miejscach aby przejść
-         * na jakiś widok
-         */
-        void startUnit (std::string const &unitName);
-
         /**
-         * Merge another unit with unit that currently is active. It means that currently active unit
-         * will not be discarded, but the two will be merged instead.
+         * @brief Starts a controller.
+         * Retrieves an instances of controlers with names specified in childControllerNames, and runs it.
+         * @param requestor Parent of new controllers which requested their creation.
+         * @param childControllerNames
          */
-        void join (std::string const &unitName);
-
-        /**
-         * Units to be substracted from current unit.
-         */
-        void split (std::string const &unitName);
+        void open (AbstractController *requestor, Core::StringVector const &childControllerNames) __tiliae_no_reflect__;
+        void close (AbstractController *requestor, Core::StringVector const &controllerNames = Core::StringVector ()) __tiliae_no_reflect__;
 
         /**
          * Quits entire application regardless of controller nesting level. Programmer
@@ -57,42 +50,24 @@ public:
          */
         void quit ();
 
-        /*
-         * There is always exactly one active unit which reacts to user requests (in fact its controllers do this). If we want to
-         * navigate to other unit by invoking something like app->show ("otherController"), two
-         * scenarios may happen:
-         * - New controller replaces the old one. We can navigate back to the previous one by invoking
-         * app->back ().
-         * - New controller runs alongside with old one making a stack structure. Simply call app->end ()
-         * in child controller to close it and its view and return to the root controller. Issuing
-         * app->back () inside one of child controllers will result in returning to previous root controller.
-         * back and forward methods operate only on root controllers.
-         */
-        void back ();
-
-        /**
-         * Users can request a submit using this action. It not perform any actions, only
-         * sends an SubmitEvent to be processed in the next main loop iteration. doSubmit
-         * performs all the work.
-         */
-        void submit (std::string const &viewName, std::string const &dataRange, std::string const &controllerName);
-
         /**
          * Handles quit request from GUI user (i.e. when he clicks widow manager's close button). Can be invoked
          * programmaticaly by the programmer as well, for example as a handler of "quit" menu action.
          */
         void userQuitRequest ();
 
-        /**
-         * Do the opposite of submit i.e. converts data from model suitable to be presented on the
-         * view, and shows it there.
-         * \param viewName Name of the view to populate with fresh data. If empty, all active views
-         * will be populated.
-         * \param dataRange Specifies which range of data to convert and display. Imagine you have
-         * beefy table with tons of data. It would be pointless to convert all the contents if only
-         * one tiny cell was changed. dataRange allows you to narrow the conversion process.
-         */
-        void refresh (std::string const &viewName, std::string const &dataRange);
+        //        /*
+        //         * There is always exactly one active unit which reacts to user requests (in fact its controllers do this). If we want to
+        //         * navigate to other unit by invoking something like app->show ("otherController"), two
+        //         * scenarios may happen:
+        //         * - New controller replaces the old one. We can navigate back to the previous one by invoking
+        //         * app->back ().
+        //         * - New controller runs alongside with old one making a stack structure. Simply call app->end ()
+        //         * in child controller to close it and its view and return to the root controller. Issuing
+        //         * app->back () inside one of child controllers will result in returning to previous root controller.
+        //         * back and forward methods operate only on root controllers.
+        //         */
+        ////        void back ();
 
         /**
          *
@@ -104,22 +79,9 @@ public:
         static k202::K202 *getK202 ();
         static Wrapper::BeanWrapper *getBeanWrapper ();
 
-        IUnit *getCurrentUnit ();
         Config const *getConfig () const;
 
 private:
-
-        /**
-         * Gets a unit with given name. Hides implementation details, so units can be stored on some static
-         * list or created with new. At this point this is not known.
-         */
-        IUnit *getUnit (std::string const &name);
-
-        /**
-         * Gets a page. Same notes as in case of Units apply.
-         */
-        Page *getPage (std::string const &name);
-
         /**
          * Deals with SubmitEvents.
          */
@@ -135,22 +97,18 @@ private:
          * Method which has to be invoked in your main application loop.
          */
         void run ();
-
-        ///
-        Core::StringSet manageUnits ();
-        void managePages (Core::StringSet const &viewCommands);
-
-        void addPage (std::string const &page);
-        void removePage (std::string const &page);
-        void movePage (std::string const &pageA, std::string const &pageB);
+        void manageControllers ();
+        AbstractView *loadView (std::string const &viewName, AbstractController *controller);
+        void pushEvent (std::unique_ptr<IEvent> e) __tiliae_no_reflect__;
 
         friend struct SubmitEvent;
         friend class RefreshEvent;
         friend class QuitEvent;
+        friend void AbstractController::refresh (std::string const &modelRange);
+        friend void AbstractController::submit (const std::string &dataRange, const std::string &controllerName);
         friend gboolean guiThread (gpointer user_data);
 
 private:
-
         struct Impl;
         Impl *impl;
 };

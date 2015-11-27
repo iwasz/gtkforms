@@ -1,0 +1,612 @@
+/****************************************************************************
+ *                                                                          *
+ *  Author : lukasz.iwaszkiewicz@gmail.com                                  *
+ *  ~~~~~~~~                                                                *
+ *  License : see COPYING file for details.                                 *
+ *  ~~~~~~~~~                                                               *
+ ****************************************************************************/
+
+#include <gtk/gtk.h>
+#include "AbstractView.h"
+#include <Tiliae.h>
+#include "App.h"
+#include "Context.h"
+#include "Logging.h"
+#include "mapping/GValueVariant.h"
+#include "RegexHelper.h"
+
+namespace GtkForms {
+static src::logger_mt &lg = logger::get ();
+
+struct AbstractView::Impl {
+
+        ~Impl () { delete mappingsByInputCache; }
+
+        enum WidgetType { NOT_RELEVANT, INPUT, OUTPUT, BOTH };
+
+        struct InputsSearchDTO {
+                AbstractView::InputMap *inputs = nullptr;
+                AbstractView::InputMap *outputs = nullptr;
+                Config const *config = nullptr;
+        };
+
+        static void onIterateWidget (GtkWidget *widget, gpointer data);
+        static void onPrintWidget (GtkWidget *widget, gpointer data);
+        static WidgetType getWidgetType (std::string const &widgetNameWithPrefix, std::string *widgetName);
+        static bool storeWidget (InputsSearchDTO *dto, std::string const &widghetName, GtkWidget *widget);
+        static void storeWidget (InputsSearchDTO *dto, GtkWidget *widget);
+
+        GtkWidget *widget = nullptr;
+        bool deleteUiFile = false;
+        AbstractView::InputMap inputWidgetsMap;
+        AbstractView::InputMap outputWidgetsMap;
+        Config const *config = nullptr;
+
+        mutable MappingMultiMap *mappingsByInputCache = nullptr;
+        AbstractController *controller = nullptr;
+};
+
+/*--------------------------------------------------------------------------*/
+
+AbstractView::AbstractView () : uiFile{ nullptr } { impl = new Impl; }
+
+/*--------------------------------------------------------------------------*/
+
+AbstractView::~AbstractView ()
+{
+        if (impl->deleteUiFile) {
+                delete uiFile;
+        }
+        delete impl;
+}
+
+/*--------------------------------------------------------------------------*/
+
+void AbstractView::loadUi (App *app)
+{
+        if (!file.empty () && !uiFile) {
+                uiFile = new UiFile;
+                uiFile->setFile (file);
+                impl->deleteUiFile = true;
+        }
+
+        if (!uiFile) {
+                throw Core::Exception ("No UiFile object set inside GtkAbstractView.");
+        }
+
+        if (impl->widget) {
+                return;
+        }
+
+#if 0
+        BOOST_LOG (lg) << " +GtkAbstractView::loadUi : [" << name << "]";
+#endif
+
+        impl->config = app->getConfig ();
+        uiFile->load (impl->controller->getModelAccessor ());
+        impl->widget = GTK_WIDGET (gtk_builder_get_object (uiFile->getBuilder (), name.c_str ()));
+
+        if (!impl->widget) {
+                throw Core::Exception ("No widget with name : [" + name + "] was found in file : [" + uiFile->getFile () + "].");
+        }
+
+        populateInputMap ();
+        gtk_widget_show (impl->widget);
+}
+
+/*--------------------------------------------------------------------------*/
+
+void AbstractView::show () { gtk_widget_show (impl->widget); }
+
+/*--------------------------------------------------------------------------*/
+
+void AbstractView::hide () { gtk_widget_hide (impl->widget); }
+
+/*--------------------------------------------------------------------------*/
+
+void AbstractView::destroyUi ()
+{
+        if (!impl->widget) {
+                return;
+        }
+
+#if 0
+        BOOST_LOG (lg) << " -GtkAbstractView::destroyUi : [" << name << "]";
+#endif
+
+        hide ();
+        gtk_widget_destroy (impl->widget);
+        impl->widget = 0;
+        uiFile->destroy ();
+}
+
+/*--------------------------------------------------------------------------*/
+
+GObject *AbstractView::getUi () { return G_OBJECT (impl->widget); }
+
+/*--------------------------------------------------------------------------*/
+
+bool AbstractView::isLoaded () const { return static_cast<bool> (impl->widget); }
+
+/*--------------------------------------------------------------------------*/
+
+GObject *AbstractView::getUiOrThrow (std::string const &name)
+{
+        GObject *obj = gtk_builder_get_object (uiFile->getBuilder (), name.c_str ());
+
+        if (!obj) {
+                throw Core::Exception ("GtkAbstractView::getGObject could not find an object in UI. Ui file : [" + uiFile->getFile () + "], object name : ["
+                                       + std::string (name) + "].");
+        }
+
+        return obj;
+}
+
+/*--------------------------------------------------------------------------*/
+
+GObject *AbstractView::getUi (std::string const &name) { return gtk_builder_get_object (uiFile->getBuilder (), name.c_str ()); }
+
+/*****************************************************************************/
+
+bool AbstractView::Impl::storeWidget (InputsSearchDTO *dto, std::string const &widgetName, GtkWidget *widget)
+{
+        std::string inputName;
+        bool stored = false;
+
+        Impl::WidgetType t = Impl::getWidgetType (widgetName, &inputName);
+        if (t == Impl::WidgetType::INPUT || t == Impl::WidgetType::BOTH) {
+                dto->inputs->insert (std::make_pair (inputName, widget));
+                stored = true;
+        }
+        else if (t == Impl::WidgetType::OUTPUT || t == Impl::WidgetType::BOTH) {
+                dto->outputs->insert (std::make_pair (inputName, widget));
+                stored = true;
+        }
+
+        return stored;
+}
+
+/*--------------------------------------------------------------------------*/
+
+void AbstractView::Impl::storeWidget (InputsSearchDTO *dto, GtkWidget *widget)
+{
+        if (!GTK_IS_BUILDABLE (widget)) {
+                return;
+        }
+
+        gchar const *widgetName = gtk_widget_get_name (widget);
+        bool stored = false;
+
+        if (widgetName) {
+#if 0
+                BOOST_LOG (lg) << widgetName;
+#endif
+
+                stored = storeWidget (dto, widgetName, GTK_WIDGET (widget));
+        }
+
+        if (!stored && dto->config->useWidgetId) {
+                gchar const *buildableName = gtk_buildable_get_name (GTK_BUILDABLE (widget));
+
+                if (buildableName) {
+#if 0
+                        BOOST_LOG (lg) << buildableName;
+#endif
+                        stored = storeWidget (dto, buildableName, widget);
+                }
+        }
+}
+
+/*--------------------------------------------------------------------------*/
+
+void AbstractView::populateInputMap ()
+{
+        if (!GTK_IS_BUILDABLE (getUi ()) || !GTK_IS_WIDGET (getUi ())) {
+                BOOST_LOG (lg) << "Warn : UI is not of type GtkBuildable. Can not get ID then.";
+                return;
+        }
+
+        Impl::InputsSearchDTO dto;
+        dto.inputs = &impl->inputWidgetsMap;
+        dto.outputs = &impl->outputWidgetsMap;
+        dto.config = impl->config;
+
+        Impl::storeWidget (&dto, GTK_WIDGET (getUi ()));
+
+        if (!GTK_IS_CONTAINER (getUi ())) {
+                return;
+        }
+
+        gtk_container_foreach (GTK_CONTAINER (getUi ()), &AbstractView::Impl::onIterateWidget, &dto);
+}
+
+/*--------------------------------------------------------------------------*/
+
+void AbstractView::Impl::onIterateWidget (GtkWidget *widget, gpointer data)
+{
+        if (!widget || !GTK_IS_BUILDABLE (widget)) {
+                return;
+        }
+
+        InputsSearchDTO *dto = static_cast<InputsSearchDTO *> (data);
+        storeWidget (dto, widget);
+
+        if (GTK_IS_CONTAINER (widget)) {
+                gtk_container_foreach (GTK_CONTAINER (widget), &AbstractView::Impl::onIterateWidget, dto);
+        }
+}
+
+/*--------------------------------------------------------------------------*/
+
+AbstractView::Impl::WidgetType AbstractView::Impl::getWidgetType (std::string const &widgetNameWithPrefix, std::string *widgetName)
+{
+        if (widgetNameWithPrefix.empty ()) {
+                return WidgetType::NOT_RELEVANT;
+        }
+
+        char prefix = widgetNameWithPrefix[0];
+
+        if (prefix == '!') {
+                *widgetName = std::string (widgetNameWithPrefix.c_str () + 1);
+                return WidgetType::BOTH;
+        }
+
+        if (prefix == '>') {
+                *widgetName = std::string (widgetNameWithPrefix.c_str () + 1);
+                return WidgetType::OUTPUT;
+        }
+
+        if (prefix == '<') {
+                *widgetName = std::string (widgetNameWithPrefix.c_str () + 1);
+                return WidgetType::INPUT;
+        }
+
+        *widgetName = widgetNameWithPrefix;
+        return WidgetType::NOT_RELEVANT;
+}
+
+/*****************************************************************************/
+
+AbstractView::InputMap AbstractView::getInputs (std::string const &dataRange, bool outputs)
+{
+        if (!GTK_IS_BUILDABLE (getUi ())) {
+                BOOST_LOG (lg) << "Warn : UI is not of type GtkBuildable. Can not get ID then.";
+                return AbstractView::InputMap{};
+        }
+
+        // Zwróć cały zakres.
+        if (dataRange.empty ()) {
+                if (outputs) {
+                        return impl->outputWidgetsMap;
+                }
+                else {
+                        return impl->inputWidgetsMap;
+                }
+        }
+
+        AbstractView::InputMap resultMap;
+        AbstractView::InputMap const *mapToSearch;
+
+        mapToSearch = (outputs) ? (&impl->outputWidgetsMap) : (&impl->inputWidgetsMap);
+
+        for (AbstractView::InputMap::value_type const &i : *mapToSearch) {
+                std::string const &name = i.first;
+                GtkWidget *widget = i.second;
+
+                if (RegexHelper::inputNameMatches (name, dataRange)) {
+                        resultMap.insert (std::make_pair (name, widget));
+                }
+        }
+
+        return resultMap;
+}
+
+/*--------------------------------------------------------------------------*/
+#if 0
+void GtkAbstractView::Impl::onIterateWidget (GtkWidget *widget, gpointer data)
+{
+        if (!widget || !GTK_IS_BUILDABLE (widget)) {
+                return;
+        }
+
+        InputsSearchDTO *dto = static_cast <InputsSearchDTO *> (data);
+        gchar const *buildableName = gtk_buildable_get_name (GTK_BUILDABLE (widget));
+
+        if (buildableName) {
+                std::string inputName;
+
+                if (RegexHelper::inputNameMatches (buildableName, &inputName, dto->dataRange, dto->outputs)) {
+                        dto->inputs[inputName] = GTK_WIDGET (widget);
+                }
+        }
+
+        if (GTK_IS_CONTAINER (widget)) {
+                gtk_container_foreach (GTK_CONTAINER (widget), &GtkAbstractView::Impl::onIterateWidget, dto);
+        }
+}
+#endif
+
+/*****************************************************************************/
+
+void AbstractView::printStructure ()
+{
+        if (!GTK_IS_BUILDABLE (getUi ())) {
+                BOOST_LOG (lg) << "UI is not of type GtkBuildable. Can not get ID then.";
+        }
+
+        GtkBuildable *mainWidget = GTK_BUILDABLE (getUi ());
+
+        gchar const *buildableName = gtk_buildable_get_name (mainWidget);
+        gchar const *widgetName = gtk_widget_get_name (GTK_WIDGET (mainWidget));
+        BOOST_LOG (lg) << ((widgetName) ? (widgetName) : ("")) << ":" << ((buildableName) ? (buildableName) : (""));
+
+        if (!GTK_IS_CONTAINER (getUi ())) {
+                return;
+        }
+
+        int indent = 1;
+        gtk_container_foreach (GTK_CONTAINER (mainWidget), &AbstractView::Impl::onPrintWidget, &indent);
+}
+
+/*--------------------------------------------------------------------------*/
+
+void AbstractView::Impl::onPrintWidget (GtkWidget *widget, gpointer data)
+{
+        if (!widget || !GTK_IS_BUILDABLE (widget)) {
+                return;
+        }
+
+        int *indent = static_cast<int *> (data);
+        std::string id;
+
+        for (int i = 0; i < *indent; ++i) {
+                id += " ";
+        }
+
+        gchar const *buildableName = gtk_buildable_get_name (GTK_BUILDABLE (widget));
+        gchar const *widgetName = gtk_widget_get_name (GTK_WIDGET (widget));
+        BOOST_LOG (lg) << id << ((widgetName) ? (widgetName) : ("")) << ":" << ((buildableName) ? (buildableName) : (""));
+
+        if (GTK_IS_CONTAINER (widget)) {
+                int newIndent = *indent + 1;
+                gtk_container_foreach (GTK_CONTAINER (widget), &AbstractView::Impl::onPrintWidget, &newIndent);
+        }
+}
+
+/*****************************************************************************/
+
+MappingMultiMap const &AbstractView::getMappingsByInput () const
+{
+        if (impl->mappingsByInputCache) {
+                return *impl->mappingsByInputCache;
+        }
+
+        impl->mappingsByInputCache = new MappingMultiMap;
+
+        for (IMapping *mapping : mappings) {
+                impl->mappingsByInputCache->insert (std::make_pair (mapping->getWidget (), mapping));
+        }
+
+        return *impl->mappingsByInputCache;
+}
+
+/*--------------------------------------------------------------------------*/
+
+MappingMultiMap AbstractView::getMappingsByModelRange (std::string const &modelRange) const
+{
+        MappingMultiMap ret;
+
+        for (IMapping *mapping : mappings) {
+                if (RegexHelper::modelNameMatches (mapping->getModel (), modelRange)) {
+                        ret.insert (std::make_pair (mapping->getModel (), mapping));
+                }
+        }
+
+        return ret;
+}
+
+/*****************************************************************************/
+
+AbstractController *AbstractView::getController () { return impl->controller; }
+
+/*---------------------------------------------------------------------------*/
+
+void AbstractView::setController (AbstractController *c) { impl->controller = c; }
+
+#if 0
+/*
+ * Excerpt from GTK+ documentation : "A GtkBuilder holds a reference to all objects that it has constructed and drops
+ * these references when it is finalized. This finalization can cause the destruction of non-widget objects or widgets
+ * which are not contained in a toplevel window. For toplevel windows constructed by a builder, it is the responsibility
+ * of the user to call gtk_widget_destroy() to get rid of them and all the widgets they contain."
+ *
+ * So GtkWidnows should be destroyed explicitely, the others are reference-counted.
+ */
+void Page::reparent (Context *context)
+{
+        //        map <string, GtkBin *> slots;
+        //        map <string, GtkWidget *> tiles;
+        //        SlotVector allTiles;
+
+        /*
+         * Możliwości:
+         * - Otworzyć nowy widok (A) składający się z kafelków.
+         *  - Ładujemy główny widok.
+         *  - Ładujemy kafelki.
+         *  - Składamy do kupy.
+         *
+         * - Otworzyć jeszcze jeden widok (B) (możliwe że też kafelkowy) nad tym już istniejącym (drugie top-level window).
+         *  - Ładujemy nowy widok, nie ruszamy tego starego.
+         *  - Ładujemy kafelki.
+         *  - Składamy do kupy.
+         *
+         * - Otworzyć nowy kafelek i dokleić go do już istniejącego widoku.
+         *  - Załadować kafelek.
+         *  - Umiescić go na miejscu.
+         *
+         * - Otworzyć widok (C), który ma zamienić widok (A) i (B)
+         *  - Ładujemy główny widok.
+         *  - Ładujemy kafelki (te kóre nie są załadowane).
+         *  - Zamykamy poprzedni główny widok.
+         *  - Składamy do kupy.
+         *
+         * - Page , czyli strona skłąda się tylko:
+         *  - GtkWindow - tylko jedno (standalone).
+         *  - GtkTile - wiele.
+         *  - Z poniższego wynika, że strona musi mieć nazwę, a więc musi być jakaś mapa stron zdefiniowana niestety.
+         * Operacje
+         *  - Page.getName ().  Pobierz nazwę.
+         *  - Page.getView (). Pobierz głowne okno.
+         *  - Page.getTiles (). Pobierz kafelki.
+         *  loadUi (). Wywołuje loadUi na wsyztskich tilesach i na GtkWindow
+         *
+         *  GtkTile operacje. Kafelek.
+         *   - loadUi (). załaduj UI. jezeli już załadowane, to nic się nie dzieje. To jest pomyślane jako singleton, który zajmuje pamięć lub zwalnia, ale jest
+         tylko jeden.
+         *   - getUi ().  pobierz ui.
+         *   - show ().
+         *   - destroy ()
+         *
+         * GtkView/albo GtkWindow. Główne okno
+         *   - loadUi (). załaduj UI.
+         *   - getUi ().  pobierz ui.
+         *   - show ().
+         *   - destroy ()
+         *   - reparent (map <string, GtkTile *>).
+         *
+         *
+         *
+         *  Wartości zwracane z kontrolerów (nazwy widoków ze specalnymi znacznikami):
+         *  +page (otwórz stronę).
+         *  -page (zamknij stronę, ale po załadowaniu srona nie ma nazwy, więc jak ją zamknąć?).
+         *  pageA->pageB, lub po prostu ->page (move, czyli zmień aktualną stronę na nową stronę przenosząc kafelki jeśli się da)
+         *  +pageA,+pageB otwórz dwie strony.
+         *
+         * Tylko operacja -> wymaga wyjaśnienia. Operacja pageA->pageB.
+         * - pageA ma widok głowny (umownie GtkWindow), i pageB też. Ten z A jest NA PEWNO DO ZAMKNIĘCIA, a ten z B do otworzenia (załadować).
+         * - kafelki z A są już załadowane. Trzeba załadować kafelki od widoku B.
+         * - Pula kafelków to teraz jest pula z A i z B - trzeba je dodac do jednej mapy - jeżeli nazwy się powtarzają, to wygrywają te nowsze,
+         *   alternatywnie kafelki muszą mieć unikalne nazwy. Widok docelowy to jest
+         * - Umieszczamy kafelki w slotach.
+         *
+         * Operacja +page.
+         * - Container.getBean (Page.getname ()) Znajdujemy page w tej super-mapie (singleton, załadowany już).
+         * - Page.loadUi (). ładujemy gowny widok i kafelki.
+         * - tiles = Page.getTiles (). Pula kafelków : mapa, albo jakiś obiekt typu mapa.
+         * - mainWindow = Page.getMainWindow . pobieramy główny widok.
+         * - mainWindow.reparent (tiles);
+         * - Page.show (). Pokazujemy wszystko. (lub mainWindow.show ()).
+         *
+         * ----------
+         *
+         * - View ma getWidget (bae arg) - zwraca widget o nazwie takiej jak name (w postaci GObject)
+         * - View ma get slots (map <string, GtkBin *>)
+         * - mamy wszystikie widoki i do zamknięcia i do otworzenia i te już widoczne.
+         * - Te do otworzenia ładujemy do pamięci. Stan #1 : Wszystko co jest potrzebne jest w pamięci, każdy widget jest dostępny.
+
+         * - Pobieramy sloty z tych już widocznych i tych załadowanych (do otworzenia).
+         * - jesteśmy w stanie #2, w kŧórym wszystko jest w pamięci, mamy wskaźniki do wszystkich slotów wszystkich widoków i wsakźniki do wszystkich widoków
+         (plugów i nie plugów poprzez GObject *view.getWidget ()).
+         *
+         * - Plugi zawsze mają jakiegos parenta, więc trzeba je reparentować (zawsze).
+         *
+         */
+
+        SlotWidgetMap slotWidgets = getSlotWidgets ();
+
+        // 2. Reparent.
+        for (Slot *slot : slots) {
+                GtkBin *slotWidget = 0;
+                GtkWidget *tileWidget = 0;
+
+                auto i = slotWidgets.find (slot->getName ());
+
+                if (i != slotWidgets.end ()) {
+                        slotWidget = i->second;
+                }
+                else {
+                        throw Core::Exception ("No such slot [" + slot->getName () + "]");
+                }
+
+                GtkTile *gtkTile = slot->getTile ();
+
+                if (!gtkTile) {
+                        throw Core::Exception ("GtkView::reparent : no tile in slot.");
+                }
+
+                tileWidget = GTK_WIDGET (gtkTile->getUi ());
+
+                // Throw away old child ... ???
+                GtkWidget *oldChild = gtk_bin_get_child (slotWidget);
+
+                if (oldChild) {
+                        gtk_container_remove (GTK_CONTAINER (slotWidget), oldChild);
+                }
+
+                // Add new.
+                GtkWidget *oldParent = 0;
+                if ((oldParent = gtk_widget_get_parent (tileWidget))) {
+                        gtk_widget_reparent (tileWidget, GTK_WIDGET (slotWidget));
+
+//                        g_object_ref (tileWidget);
+//                        gtk_container_remove (GTK_CONTAINER (oldSlotWidget???), tileWidget);
+//                        gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
+//                        g_object_unref (tileWidget);
+                }
+                else {
+                        gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
+                }
+
+                BOOST_LOG (lg) << "Reparented : tile : [" << (void *)gtkTile << "], tileName : [" << gtkTile->getName () << "], tileWidget ["
+                               << (void *)tileWidget << "], to slot [" << (void *)slotWidget << "]";
+        }
+}
+
+/*--------------------------------------------------------------------------*/
+
+Page::SlotWidgetMap Page::getSlotWidgets ()
+{
+        SlotWidgetMap slotWidgets;
+
+        for (Slot *slot : slots) {
+                if (slotWidgets.find (slot->getName ()) != slotWidgets.end ()) {
+                        throw Core::Exception ("There are either two Tiles with the same slot-name : [" + slot->getName ()
+                                               + "], or two widgets with this same name.");
+                }
+
+                // Throws if not found.
+                GObject *obj = view->getUi (slot->getName ());
+
+                if (obj) {
+                        addToMapOrThrow (obj, slot, &slotWidgets);
+                        continue;
+                }
+
+                for (Slot *s : slots) {
+                        GtkTile *tile = s->getTile ();
+                        GObject *obj = tile->getUi (slot->getName ());
+
+                        if (obj) {
+                                addToMapOrThrow (obj, slot, &slotWidgets);
+                                break;
+                        }
+                }
+        }
+
+        return slotWidgets;
+}
+
+/*--------------------------------------------------------------------------*/
+
+void Page::addToMapOrThrow (GObject *obj, Slot *slot, SlotWidgetMap *slotWidgets)
+{
+        if (!GTK_IS_BIN (obj)) {
+                throw Core::Exception ("Slot widgets have to be of type GtkBin. Your slot [" + slot->getName () + "] is not a GtkBin.");
+        }
+
+        BOOST_LOG (lg) << "Found slot : [" << slot->getName () << "]";
+        slotWidgets->operator[] (slot->getName ()) = GTK_BIN (obj);
+}
+#endif
+
+} // namespace GtkForms

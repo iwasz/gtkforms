@@ -16,7 +16,7 @@
 
 namespace GtkForms {
 using namespace std;
-static src::logger_mt& lg = logger::get ();
+static src::logger_mt &lg = logger::get ();
 
 /**
  *
@@ -27,45 +27,44 @@ struct GtkView::Impl {
 
 /****************************************************************************/
 
-GtkView::GtkView ()
-{
-        impl = new Impl;
-}
+GtkView::GtkView () { impl = new Impl; }
 
 /*--------------------------------------------------------------------------*/
 
-GtkView::~GtkView ()
-{
-        delete impl;
-}
+GtkView::~GtkView () { delete impl; }
 
 /*--------------------------------------------------------------------------*/
 
 void GtkView::loadUi (App *app)
 {
-        GtkAbstractView::loadUi (app);
+        AbstractView::loadUi (app);
 
         if (!GTK_IS_WINDOW (getUi ())) {
                 throw Core::Exception ("GtkView::loadUi : failed to cast ui object to GtkWindow.");
         }
 
-
-        g_signal_connect (GTK_WINDOW (getUi ()), "destroy", G_CALLBACK (&GtkView::Impl::onUserClickedQuit), app);
+        g_signal_connect (GTK_WINDOW (getUi ()), "destroy", G_CALLBACK (&GtkView::Impl::onUserClickedQuit), this);
 }
 
 /*--------------------------------------------------------------------------*/
 
-void GtkView::show ()
-{
-        gtk_widget_show (GTK_WIDGET (getUi ()));
-}
+void GtkView::show () { gtk_widget_show (GTK_WIDGET (getUi ())); }
 
 /*--------------------------------------------------------------------------*/
 
 void GtkView::Impl::onUserClickedQuit (GtkWidget *object, gpointer userData)
 {
-        App *app = static_cast <App *> (userData);
-        app->userQuitRequest ();
+        GtkView *view = static_cast<GtkView *> (userData);
+        AbstractController *controller = view->getController ();
+        App *app = controller->getApp ();
+
+        // Close this controller
+        if (controller) {
+                app->close (controller);
+        }
+        else {
+                app->userQuitRequest ();
+        }
 }
 
 } // namespace GtkForms

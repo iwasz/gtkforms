@@ -14,7 +14,8 @@ namespace GtkForms {
 
 ValidationAndBindingResult NotBlankValidator::validate (Context &ctx) const
 {
-        Core::Variant v = ctx.get (getModel ());
+        // TODO zaimplementować
+        Core::Variant v/* = ctx.get (getModel ())*/;
 
         if (v.isNone () || v.isNull ()) {
                 return createResult (false);

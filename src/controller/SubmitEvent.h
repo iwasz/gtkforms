@@ -14,16 +14,15 @@
 #include "mapping/Mapping.h"
 
 namespace GtkForms {
-class IView;
 class Context;
-struct IController;
+class AbstractController;
 
 struct SubmitEvent : public IEvent {
 
         virtual ~SubmitEvent (){}
         void run (App *app);
 
-        std::string viewName;
+        AbstractController *controller = nullptr;
         std::string controllerName;
         std::string inputRange;
 };
