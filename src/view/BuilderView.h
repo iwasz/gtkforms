@@ -29,7 +29,22 @@ public:
 
 public:
 
+        /**
+         * @brief Name of an GtkBuilder ui file to load.
+         */
         std::string file;
+        /**
+         * @brief ID of objects to load among the main one (name).
+         * Useful for loading things sych as ListStore, Adjustment etc. Has no effect when
+         * loadWholeFile was set to true, beacuse whole contents of a file will be loaded then.
+         */
+        std::string alsoLoad;
+
+        /**
+         * @brief Load the whole contents of an ui file to the memory. Useful if you have one
+         * file per window.
+         */
+        bool loadWholeFile;
 
 private:
 

@@ -7,6 +7,7 @@
  ****************************************************************************/
 
 #include <gtk/gtk.h>
+#include <boost/algorithm/string/split.hpp>
 #include "Logging.h"
 #include "App.h"
 #include "BuilderView.h"
@@ -59,7 +60,7 @@ struct BuilderView::Impl {
 
 /*****************************************************************************/
 
-BuilderView::BuilderView () { impl = new Impl; }
+BuilderView::BuilderView () : loadWholeFile (false) { impl = new Impl; }
 
 /*****************************************************************************/
 
@@ -69,7 +70,7 @@ BuilderView::~BuilderView () { delete impl; }
 
 void BuilderView::loadUi (App *app)
 {
-        BOOST_LOG (lg) << "BuilderView::loadUi : \033[95m[" << name << "]\033[0m";
+        BOOST_LOG (lg) << "BuilderView::loadUi : \033[35m[" << name << "]\033[0m";
         clearInternalState ();
         setConfig (app->getConfig ());
 
@@ -84,10 +85,30 @@ void BuilderView::loadUi (App *app)
         GError *err = NULL;
 
         impl->builder = gtk_builder_new ();
-        gchar nameCopy[name.size () + 1];
-        strcpy (nameCopy, name.c_str ());
-        gchar *objectIds[2] = { nameCopy, 0 };
-        gtk_builder_add_objects_from_file (impl->builder, file.c_str (), objectIds, &err);
+
+        if (loadWholeFile) {
+                gtk_builder_add_from_file (impl->builder, file.c_str (), &err);
+        }
+        else {
+                Core::StringVector alsoLoadList;
+                if (!alsoLoad.empty ()) {
+                        boost::split (alsoLoadList, alsoLoad, boost::is_any_of (", "), boost::token_compress_on);
+
+                }
+
+//                gchar nameCopy[name.size () + 1];
+//                strcpy (nameCopy, name.c_str ());
+                gchar *objectIds[alsoLoadList.size () + 2];
+
+                for (int i = 0; i < alsoLoadList.size (); ++i) {
+                        objectIds[i] = const_cast <char *> (alsoLoadList[i].c_str ());
+                }
+
+                objectIds[alsoLoadList.size ()] = const_cast <char *> (name.c_str ());
+                objectIds[alsoLoadList.size () + 1] = 0;
+
+                gtk_builder_add_objects_from_file (impl->builder, file.c_str (), objectIds, &err);
+        }
 
         if (err) {
                 throw Core::Exception ("gtk_builder_add_from_file returned an error. Error message is : [" + std::string (err->message) + "]");
@@ -133,7 +154,7 @@ void BuilderView::Impl::onUserClickedQuit (GtkWidget *object, gpointer userData)
 
 void BuilderView::destroyUi ()
 {
-        BOOST_LOG (lg) << "BuilderView::destroyUi : \033[95m[" << name << "]\033[0m";
+        BOOST_LOG (lg) << "BuilderView::destroyUi : \033[35m[" << name << "]\033[0m";
         clearInternalState ();
 
         if (!impl->widget) {
