@@ -9,6 +9,6 @@
 #ifndef GTK_FOMS_VIEW_H_
 #define GTK_FOMS_VIEW_H_
 
-#include "GtkView.h"
+#include "BuilderView.h"
 
 #endif /* VIEW_H_ */

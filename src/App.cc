@@ -19,7 +19,7 @@
 #include "Config.h"
 #include <time.h>
 #include "controller/DefaultQuitHandler.h"
-#include "view/GtkView.h"
+#include "view/AbstractView.h"
 
 namespace GtkForms {
 using namespace Container;
@@ -188,8 +188,6 @@ void App::manageControllers ()
 
 AbstractView *App::loadView (std::string const &v, AbstractController *controller)
 {
-        BOOST_LOG (lg) << "App::loadView : [" << v << "]";
-
         std::string viewName;
         std::string slotName;
 
@@ -204,7 +202,6 @@ AbstractView *App::loadView (std::string const &v, AbstractController *controlle
         // Load UI file, or noop if loaded.
         view->loadUi (controller->getApp ());
         //        view->reparent (&impl->context);
-        view->show ();
         return view;
 }
 
@@ -452,7 +449,14 @@ void App::doSubmit (SubmitEvent *event)
 {
         BOOST_LOG (lg) << "SubmitEvent::run. dataRange : [" << event->inputRange << "], controllerName : [" << event->controllerName << "].";
 
-        AbstractController *controller = impl->rootController->findByName (event->controllerName);
+        AbstractController *controller = nullptr;
+
+        if (event->controllerName.empty ()) {
+                controller = event->controller;
+        }
+        else {
+                controller = impl->rootController->findByName (event->controllerName);
+        }
 
         if (!controller) {
                 throw Core::Exception ("You requested submit to a controller which is not currently loaded. Controller name : [" + event->controllerName
@@ -469,7 +473,7 @@ void App::doSubmit (SubmitEvent *event)
         view->printStructure ();
 #endif
 
-        GtkView::InputMap inputMap = view->getInputs (event->inputRange);
+        AbstractView::InputMap inputMap = view->getInputs (event->inputRange);
         bool hasErrors = false;
 
         for (auto elem : inputMap) {
@@ -556,14 +560,14 @@ void App::doRefresh (RefreshEvent *event)
         //        impl->context.setCurrentController (event->controller);
 
         AbstractView *view = event->controller->getView ();
-        GtkView::InputMap inputMap;
+        AbstractView::InputMap inputMap;
 
         if (!event->modelRange.empty ()) {
                 // 1. From mappings
                 MappingMultiMap mappings = view->getMappingsByModelRange (event->modelRange);
 
                 for (MappingMultiMap::value_type &elem : mappings) {
-                        GtkView::InputMap tmp = view->getInputs (elem.second->getWidget (), true);
+                        AbstractView::InputMap tmp = view->getInputs (elem.second->getWidget (), true);
 
                         if (impl->config->logMappings) {
                                 BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << elem.second->getWidget () << "]\033[0m (refresh range event).";
@@ -591,7 +595,7 @@ void App::doRefresh (RefreshEvent *event)
          * would iterate over all the inputs and try to find models coresponding to those
          * inputs.
          */
-        GtkView::InputMap tmp = view->getInputs (event->modelRange, true);
+        AbstractView::InputMap tmp = view->getInputs (event->modelRange, true);
         std::copy (tmp.begin (), tmp.end (), std::inserter (inputMap, inputMap.end ()));
 
         MappingMultiMap const &mappings = view->getMappingsByInput ();

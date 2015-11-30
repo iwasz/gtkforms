@@ -10,7 +10,6 @@
 #include "App.h"
 #include "Logging.h"
 #include "Context.h"
-#include "view/GtkView.h"
 #include "Controller.h"
 
 namespace GtkForms {

@@ -36,8 +36,6 @@ struct AbstractView::Impl {
         static bool storeWidget (InputsSearchDTO *dto, std::string const &widghetName, GtkWidget *widget);
         static void storeWidget (InputsSearchDTO *dto, GtkWidget *widget);
 
-        GtkWidget *widget = nullptr;
-        bool deleteUiFile = false;
         AbstractView::InputMap inputWidgetsMap;
         AbstractView::InputMap outputWidgetsMap;
         Config const *config = nullptr;
@@ -48,103 +46,32 @@ struct AbstractView::Impl {
 
 /*--------------------------------------------------------------------------*/
 
-AbstractView::AbstractView () : uiFile{ nullptr } { impl = new Impl; }
+AbstractView::AbstractView () { impl = new Impl; }
 
 /*--------------------------------------------------------------------------*/
 
-AbstractView::~AbstractView ()
-{
-        if (impl->deleteUiFile) {
-                delete uiFile;
-        }
-        delete impl;
-}
+AbstractView::~AbstractView () { delete impl; }
 
 /*--------------------------------------------------------------------------*/
 
-void AbstractView::loadUi (App *app)
-{
-        if (!file.empty () && !uiFile) {
-                uiFile = new UiFile;
-                uiFile->setFile (file);
-                impl->deleteUiFile = true;
-        }
-
-        if (!uiFile) {
-                throw Core::Exception ("No UiFile object set inside GtkAbstractView.");
-        }
-
-        if (impl->widget) {
-                return;
-        }
-
-#if 0
-        BOOST_LOG (lg) << " +GtkAbstractView::loadUi : [" << name << "]";
-#endif
-
-        impl->config = app->getConfig ();
-        uiFile->load (impl->controller->getModelAccessor ());
-        impl->widget = GTK_WIDGET (gtk_builder_get_object (uiFile->getBuilder (), name.c_str ()));
-
-        if (!impl->widget) {
-                throw Core::Exception ("No widget with name : [" + name + "] was found in file : [" + uiFile->getFile () + "].");
-        }
-
-        populateInputMap ();
-        gtk_widget_show (impl->widget);
-}
+void AbstractView::show () { gtk_widget_show_all (GTK_WIDGET (getUi ())); }
 
 /*--------------------------------------------------------------------------*/
 
-void AbstractView::show () { gtk_widget_show (impl->widget); }
-
-/*--------------------------------------------------------------------------*/
-
-void AbstractView::hide () { gtk_widget_hide (impl->widget); }
-
-/*--------------------------------------------------------------------------*/
-
-void AbstractView::destroyUi ()
-{
-        if (!impl->widget) {
-                return;
-        }
-
-#if 0
-        BOOST_LOG (lg) << " -GtkAbstractView::destroyUi : [" << name << "]";
-#endif
-
-        hide ();
-        gtk_widget_destroy (impl->widget);
-        impl->widget = 0;
-        uiFile->destroy ();
-}
-
-/*--------------------------------------------------------------------------*/
-
-GObject *AbstractView::getUi () { return G_OBJECT (impl->widget); }
-
-/*--------------------------------------------------------------------------*/
-
-bool AbstractView::isLoaded () const { return static_cast<bool> (impl->widget); }
+void AbstractView::hide () { gtk_widget_hide (GTK_WIDGET (getUi ())); }
 
 /*--------------------------------------------------------------------------*/
 
 GObject *AbstractView::getUiOrThrow (std::string const &name)
 {
-        GObject *obj = gtk_builder_get_object (uiFile->getBuilder (), name.c_str ());
+        GObject *obj = getUi (name);
 
         if (!obj) {
-                throw Core::Exception ("GtkAbstractView::getGObject could not find an object in UI. Ui file : [" + uiFile->getFile () + "], object name : ["
-                                       + std::string (name) + "].");
+                throw Core::Exception ("GtkAbstractView::getGObject could not find an object in UI. Oject name : [" + std::string (name) + "].");
         }
 
         return obj;
 }
-
-/*--------------------------------------------------------------------------*/
-
-GObject *AbstractView::getUi (std::string const &name) { return gtk_builder_get_object (uiFile->getBuilder (), name.c_str ()); }
 
 /*****************************************************************************/
 
@@ -607,6 +534,21 @@ void Page::addToMapOrThrow (GObject *obj, Slot *slot, SlotWidgetMap *slotWidgets
         BOOST_LOG (lg) << "Found slot : [" << slot->getName () << "]";
         slotWidgets->operator[] (slot->getName ()) = GTK_BIN (obj);
 }
+
 #endif
+
+/*****************************************************************************/
+
+void AbstractView::setConfig (Config const *c) { impl->config = c; }
+
+/*****************************************************************************/
+
+void AbstractView::clearInternalState ()
+{
+        impl->inputWidgetsMap.clear ();
+        impl->outputWidgetsMap.clear ();
+        delete impl->mappingsByInputCache;
+        impl->mappingsByInputCache = nullptr;
+}
 
 } // namespace GtkForms

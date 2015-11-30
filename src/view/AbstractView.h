@@ -15,13 +15,13 @@
 #include <gtk/gtk.h>
 #include <core/Object.h>
 #include <ReflectionParserAnnotation.h>
-#include "UiFile.h"
 #include "mapping/Mapping.h"
 #include "decorator/IPageDecorator.h"
 
 namespace GtkForms {
 class Context;
 class AbstractController;
+struct Config;
 
 /**
  * View (a top level windows, or some inner GtkWidget) created from GtkBuilder. Thise views are
@@ -43,7 +43,7 @@ public:
          * name. If widget was obtained from the file earlier, it will be returned immediately, and no
          * new instance of this widget will be made.
          */
-        virtual void loadUi (App *app);
+        virtual void loadUi (App *app) = 0;
         virtual void show ();
         virtual void hide ();
         virtual void refresh (Context *) {}
@@ -52,19 +52,19 @@ public:
         /**
          * Destroys
          */
-        virtual void destroyUi ();
+        virtual void destroyUi () = 0;
 
         /**
          * Gets the main object (GTK+ GObject) from the ui file.
          */
-        virtual GObject *getUi () __tiliae_no_reflect__;
-        virtual bool isLoaded () const;
+        virtual GObject *getUi () __tiliae_no_reflect__ = 0;
+        virtual bool isLoaded () const = 0;
 
         /**
          * Get arbitrary object from UI.
          */
         virtual GObject *getUiOrThrow (std::string const &name);
-        virtual GObject *getUi (std::string const &name) __tiliae_no_reflect__;
+        virtual GObject *getUi (std::string const &name) __tiliae_no_reflect__ = 0;
 
         typedef std::multimap <std::string, GtkWidget *> InputMap;
         InputMap getInputs (std::string const &dataRange, bool outputs = false);
@@ -88,17 +88,20 @@ public:
         AbstractController *getController ();
         void setController (AbstractController *c);
 
+        void setConfig (Config const *c);
+
 public:
 
         std::string name;
-        std::string file;
         MappingVector mappings;
         PageDecoratorVector decorators;
-        UiFile *uiFile;
 
-private:
+protected:
 
         void populateInputMap ();
+        void clearInternalState ();
+
+private:
 
         struct Impl;
         Impl *impl = 0;

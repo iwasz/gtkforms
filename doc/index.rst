@@ -30,7 +30,21 @@ Nowe rzeczy
 * Uproszczona struktura widoków - jeden kontroler = jeden widok i jeden scope.
 * Struktura drzewiasta i to tylko w kontrolerze. Od tej struktury zależy struktura widoków i scopów (map na modele).
 * Nie ma setToUnitScope, setToFlashScope, tylko po prostu set/get, które działają hiertarchicznie.
+* Opisać w dokumentacji że w AbstractView można podać albo file (ścieżka), albo uiFIle (referencja do obiektu. W tym pierwsyzm
+  wypadku GtkView będzie przy każdym load ładował plik UI. A w tym drugim uiFile może być singletonem i załaduje siętylko raz.
 
+UWAGA!!!!!
+If you create a gtk.Window and close it using the window manager (WM) --- in other words, by clicking on a close or X button on the window decorations, or using some other way the WM provides --- the window by default is destroyed.
+
+W tym momencie wydaje mi się, że trzeba użyć gtk_builder_add_objects_from_file () i połączyć GtkView z UiFile (wywalić UiFile). Wygląda na to, że
+GtkBuilder tworzy **singletony**. Znaczy to, że wołając gtk_builder_get_object zawsze dostanę wskaźnik do twgo samego obiektu. Co chyba oznacza że:
+* Żeby stworzyć 2 okna, potrzebuję 2 instancje GtkBuilder.
+* Po zamknięciu okna stworzonego z GtkBuilder, wywołanie gtk_builder_get_object zwróci mi wskaźńik do tego zniszczonego okna.
+Niestety nie mogę znaleźć 100% potwierdzenia. Ale jeśli mam rację, to GtkView (==GtkWindow) pownno mieć relację 1 do 1 z GtkBulder, czyli pinno zawirać
+swój. Jeśli okno zostanie zamknięte, to builder powinien zostać zniszczony.
+
+Do BuilderView - opcja podania dodatkowych obiektów do załadowania (treeModel, adjustment etc - rzeczy, które nie są niczyimi dziećmi). Albo dodatkowa
+opcja do załadowania CAŁEGO pliku.
 
 TODO
 ====
@@ -52,6 +66,8 @@ TODO
         * mapa sessionScope powinna być w App moim zdaniem. Analogicznie do controlerScope.
         * Zrobić komantarz nada klasą Context i wyjaśnić tam po co ona jest. Może zamienić na jakąś bardziej
           samo-opisującą się nazwę? ViewDTO? Nie wiem, bo nie za bardzo rozumiem po co on jest.
+        * Kiedyś. Przejrzeć klasy pod kątem odpowiedzialności.
+        * Kiedyś. Przejrzeć klasy pod kątem publicznego API.
 
 TODO do przemyślenia
 ====================

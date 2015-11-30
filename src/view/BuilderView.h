@@ -6,37 +6,39 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#ifndef GTKVIEW_H_
-#define GTKVIEW_H_
+#ifndef BUILDERVIEW_H
+#define BUILDERVIEW_H
 
-#include <map>
-#include <string>
-#include <ReflectionParserAnnotation.h>
-#include "UiFile.h"
 #include "AbstractView.h"
 
 namespace GtkForms {
-class Context;
+class AbstractAccessor;
 
-/**
- * View (a top level windows, or some inner GtkWidget) created from GtkBuilder. Thise views are
- * loaded (i.e. memory is alloceted) in GtkView::show, and unloaded (memory is freed) in GtkView::hide.
- */
-class __tiliae_reflect__ GtkView : public AbstractView {
+class __tiliae_reflect__ BuilderView : public AbstractView {
 public:
 
-        GtkView ();
-        virtual ~GtkView ();
+        BuilderView ();
+        virtual ~BuilderView ();
 
-        void show ();
         virtual void loadUi (App *app);
+        virtual bool isLoaded () const;
+        virtual void destroyUi ();
+        virtual GObject *getUi () __tiliae_no_reflect__;
+        virtual GObject *getUi (std::string const &name) __tiliae_no_reflect__;
+        GObject *getUiOrThrow (std::string const &name);
+
+public:
+
+        std::string file;
 
 private:
+
+        void connectSignals (AbstractAccessor *accessor);
 
         struct Impl;
         Impl *impl;
 };
 
-} // namespace GtkForms
+}
 
-#endif /* GTKVIEW_H_ */
+#endif // BUILDERVIEW_H
