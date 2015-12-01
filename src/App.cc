@@ -186,22 +186,22 @@ void App::manageControllers ()
 
 /*--------------------------------------------------------------------------*/
 
-AbstractView *App::loadView (std::string const &v, AbstractController *controller)
+AbstractView *App::loadView (std::string const &viewAndSlot, AbstractController *controller)
 {
         std::string viewName;
         std::string slotName;
 
         size_t offset;
-        if ((offset = v.find ("->")) != std::string::npos) {
-                slotName = v.substr (offset + 2);
+        if ((offset = viewAndSlot.find ("->")) != std::string::npos) {
+                slotName = viewAndSlot.substr (offset + 2);
         }
-        viewName = v.substr (0, offset);
+        viewName = viewAndSlot.substr (0, offset);
 
         AbstractView *view = ocast<AbstractView *> (impl->container->getBean (viewName));
         view->setController (controller);
-        // Load UI file, or noop if loaded.
         view->loadUi (controller->getApp ());
-        //        view->reparent (&impl->context);
+        view->reparent (slotName);
+        view->show ();
         return view;
 }
 
@@ -210,8 +210,13 @@ AbstractView *App::loadView (std::string const &v, AbstractController *controlle
 void App::open (AbstractController *requestor, Core::StringVector const &childControllerNames)
 {
         for (std::string const &name : childControllerNames) {
-                impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::OPEN, requestor, name });
+                open (requestor, name);
         }
+}
+
+void App::open (AbstractController *requestor, std::string const &childControllerName)
+{
+        impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::OPEN, requestor, childControllerName });
 }
 
 /*--------------------------------------------------------------------------*/
@@ -220,13 +225,18 @@ void App::close (AbstractController *requestor, Core::StringVector const &contro
 {
         // Close requestor children.
         for (std::string const &name : controllerNames) {
-                impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::CLOSE, requestor, name });
+                close (requestor, name);
         }
 
         // Close requestor itself.
         if (controllerNames.empty ()) {
-                impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::CLOSE, requestor });
+                close (requestor, "");
         }
+}
+
+void App::close (AbstractController *requestor, std::string const &controllerName)
+{
+        impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::CLOSE, requestor, controllerName });
 }
 
 /*--------------------------------------------------------------------------*/
@@ -473,7 +483,7 @@ void App::doSubmit (SubmitEvent *event)
         view->printStructure ();
 #endif
 
-        AbstractView::InputMap inputMap = view->getInputs (event->inputRange);
+        AbstractView::WidgetMap inputMap = view->getInputs (event->inputRange);
         bool hasErrors = false;
 
         for (auto elem : inputMap) {
@@ -560,14 +570,14 @@ void App::doRefresh (RefreshEvent *event)
         //        impl->context.setCurrentController (event->controller);
 
         AbstractView *view = event->controller->getView ();
-        AbstractView::InputMap inputMap;
+        AbstractView::WidgetMap inputMap;
 
         if (!event->modelRange.empty ()) {
                 // 1. From mappings
                 MappingMultiMap mappings = view->getMappingsByModelRange (event->modelRange);
 
                 for (MappingMultiMap::value_type &elem : mappings) {
-                        AbstractView::InputMap tmp = view->getInputs (elem.second->getWidget (), true);
+                        AbstractView::WidgetMap tmp = view->getInputs (elem.second->getWidget (), true);
 
                         if (impl->config->logMappings) {
                                 BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << elem.second->getWidget () << "]\033[0m (refresh range event).";
@@ -595,7 +605,7 @@ void App::doRefresh (RefreshEvent *event)
          * would iterate over all the inputs and try to find models coresponding to those
          * inputs.
          */
-        AbstractView::InputMap tmp = view->getInputs (event->modelRange, true);
+        AbstractView::WidgetMap tmp = view->getInputs (event->modelRange, true);
         std::copy (tmp.begin (), tmp.end (), std::inserter (inputMap, inputMap.end ()));
 
         MappingMultiMap const &mappings = view->getMappingsByInput ();
@@ -647,16 +657,9 @@ void App::createContainer (std::string const &configFile)
         Ptr<MetaContainer> metaContainer = CompactMetaService::parseFile (configFile);
         impl->container = ContainerFactory::create (metaContainer, true);
 
-        //                impl->container->addConversion (typeid (Geometry::Point), Geometry::stringToPointVariant);
-        //                impl->container->addConversion (typeid (Geometry::Point3), Geometry::stringToPoint3Variant);
-        //                impl->container->addConversion (typeid (Geometry::LineString), Geometry::stringToLineStringVariant);
-        //                impl->container->addConversion (typeid (Model::HAlign), Model::stringToHAlign);
-        //                impl->container->addConversion (typeid (Model::VAlign), Model::stringToVAlign);
-        //                impl->container->addConversion (typeid (Model::HGravity), Model::stringToHGravity);
-        //                impl->container->addConversion (typeid (Model::VGravity), Model::stringToVGravity);
-        //                impl->container->addConversion (typeid (Model::LinearGroup::Type), Model::stringToLinearGroupType);
-
-        //        impl->container->addSingleton (i->first.c_str (), i->second);
+        // Example:
+        // impl->container->addConversion (typeid (Geometry::Point), Geometry::stringToPointVariant);
+        // impl->container->addSingleton (i->first.c_str (), i->second);
 
         ContainerFactory::init (impl->container.get (), metaContainer.get ());
         impl->config = vcast<Config *> (impl->container->getBean ("config"));

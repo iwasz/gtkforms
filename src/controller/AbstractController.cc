@@ -125,7 +125,7 @@ void AbstractController::closeList (Core::StringVector const &childControllerNam
 void AbstractController::replace (std::string const &childControllerName)
 {
         closeThis ();
-        open (childControllerName);
+        impl->app->open (nullptr, childControllerName);
 }
 
 /*****************************************************************************/

@@ -93,18 +93,15 @@ void BuilderView::loadUi (App *app)
                 Core::StringVector alsoLoadList;
                 if (!alsoLoad.empty ()) {
                         boost::split (alsoLoadList, alsoLoad, boost::is_any_of (", "), boost::token_compress_on);
-
                 }
 
-//                gchar nameCopy[name.size () + 1];
-//                strcpy (nameCopy, name.c_str ());
                 gchar *objectIds[alsoLoadList.size () + 2];
 
                 for (int i = 0; i < alsoLoadList.size (); ++i) {
-                        objectIds[i] = const_cast <char *> (alsoLoadList[i].c_str ());
+                        objectIds[i] = const_cast<char *> (alsoLoadList[i].c_str ());
                 }
 
-                objectIds[alsoLoadList.size ()] = const_cast <char *> (name.c_str ());
+                objectIds[alsoLoadList.size ()] = const_cast<char *> (name.c_str ());
                 objectIds[alsoLoadList.size () + 1] = 0;
 
                 gtk_builder_add_objects_from_file (impl->builder, file.c_str (), objectIds, &err);
@@ -124,13 +121,10 @@ void BuilderView::loadUi (App *app)
         }
 
         populateInputMap ();
-        show ();
 
-        if (!GTK_IS_WINDOW (getUi ())) {
-                throw Core::Exception ("BuilderView::loadUi : failed to cast ui object to GtkWindow.");
+        if (GTK_IS_WINDOW (getUi ())) {
+                g_signal_connect (GTK_WINDOW (getUi ()), "destroy", G_CALLBACK (&BuilderView::Impl::onUserClickedQuit), this);
         }
-
-        g_signal_connect (GTK_WINDOW (getUi ()), "destroy", G_CALLBACK (&BuilderView::Impl::onUserClickedQuit), this);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -161,7 +155,9 @@ void BuilderView::destroyUi ()
                 return;
         }
 
-
+//        if (!GTK_IS_WINDOW (impl->widget)) {
+//                gtk_widget_unparent (impl->widget);
+//        }
 #if 0
         BOOST_LOG (lg) << " -GtkBuilderView::destroyUi : [" << name << "]";
 #endif

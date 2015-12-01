@@ -47,7 +47,7 @@ public:
         virtual void show ();
         virtual void hide ();
         virtual void refresh (Context *) {}
-//        virtual void reparent (Context *context);
+        virtual void reparent (std::string const &slotName);
 
         /**
          * Destroys
@@ -66,15 +66,13 @@ public:
         virtual GObject *getUiOrThrow (std::string const &name);
         virtual GObject *getUi (std::string const &name) __tiliae_no_reflect__ = 0;
 
-        typedef std::multimap <std::string, GtkWidget *> InputMap;
-        InputMap getInputs (std::string const &dataRange, bool outputs = false);
+        typedef std::multimap <std::string, GtkWidget *> WidgetMap;
+        WidgetMap getInputs (std::string const &dataRange, bool outputs = false);
+        WidgetMap const &getSlots ();
+        GtkWidget *getSlot (std::string const &name);
         void printStructure ();
 
         /*---------------------------------------------------------------------------*/
-
-//        GtkView *getView () { return view; }
-//        std::string getName () const { return name; }
-//        SlotVector const &getSlots () const { return slots; }
 
         MappingVector const &getMappings () const __tiliae_no_reflect__ { return mappings; }
         MappingMultiMap const &getMappingsByInput () const;

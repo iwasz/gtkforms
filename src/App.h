@@ -42,7 +42,9 @@ public:
          * @param childControllerNames
          */
         void open (AbstractController *requestor, Core::StringVector const &childControllerNames) __tiliae_no_reflect__;
+        void open (AbstractController *requestor, std::string const &childControllerName) __tiliae_no_reflect__;
         void close (AbstractController *requestor, Core::StringVector const &controllerNames = Core::StringVector ()) __tiliae_no_reflect__;
+        void close (AbstractController *requestor, std::string const &controllerName) __tiliae_no_reflect__;
 
         /**
          * Quits entire application regardless of controller nesting level. Programmer
@@ -98,7 +100,7 @@ private:
          */
         void run ();
         void manageControllers ();
-        AbstractView *loadView (std::string const &viewName, AbstractController *controller);
+        AbstractView *loadView (std::string const &viewAndSlot, AbstractController *controller);
         void pushEvent (std::unique_ptr<IEvent> e) __tiliae_no_reflect__;
 
         friend struct SubmitEvent;

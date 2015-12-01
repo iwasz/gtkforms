@@ -41,10 +41,12 @@ GtkBuilder tworzy **singletony**. Znaczy to, że wołając gtk_builder_get_objec
 * Żeby stworzyć 2 okna, potrzebuję 2 instancje GtkBuilder.
 * Po zamknięciu okna stworzonego z GtkBuilder, wywołanie gtk_builder_get_object zwróci mi wskaźńik do tego zniszczonego okna.
 Niestety nie mogę znaleźć 100% potwierdzenia. Ale jeśli mam rację, to GtkView (==GtkWindow) pownno mieć relację 1 do 1 z GtkBulder, czyli pinno zawirać
-swój. Jeśli okno zostanie zamknięte, to builder powinien zostać zniszczony.
+swój. Jeśli okno zostanie zamknięte, to builder powinien zostać zniszczony. Ze starych notatek wynika to samo : "W ogóle, to GtkBuilder ZAWSZE zwroci tą
+samą instancję obiektu (po ID). Nawet kiedy ten obiekt zniszczymy, to będzie zwracał wskaźnik to tego zniszczonego."
 
 Do BuilderView - opcja podania dodatkowych obiektów do załadowania (treeModel, adjustment etc - rzeczy, które nie są niczyimi dziećmi). Albo dodatkowa
 opcja do załadowania CAŁEGO pliku.
+Uwaga! Sloty muszą mieć ID lub nazwę zaczynającą się od ^
 
 TODO
 ====
@@ -85,8 +87,8 @@ TODO zrobione
 Plany
 =====
 controller
-* add (lista po przewcinkach), replace (lista), remove (this), remove (lista)
-
+* open (lista po przewcinkach), replace (lista), close (this), close (lista)
+* BuilderView file - plik, alsoLoad, loadWholeFile.
 
 What it is
 ==========

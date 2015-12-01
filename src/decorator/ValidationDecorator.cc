@@ -28,9 +28,9 @@ void ValidationDecorator::run (AbstractView *view, Context *ctx)
         }
 
         for (ValidationAndBindingResult const &result : results) {
-                AbstractView::InputMap inputMap = view->getInputs (result.model);
+                AbstractView::WidgetMap inputMap = view->getInputs (result.model);
 
-                AbstractView::InputMap::const_iterator i;
+                AbstractView::WidgetMap::const_iterator i;
                 if ((i = inputMap.find (result.model)) != inputMap.end ()) {
 #if 0
                         BOOST_LOG (lg) << result.model;
