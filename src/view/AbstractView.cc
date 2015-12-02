@@ -400,7 +400,9 @@ void AbstractView::reparent (std::string const &slotName)
                 if (oldChild) {
 //                        gtk_container_remove (GTK_CONTAINER (slotWidget), oldChild);
 //                        gtk_widget_destroy (oldChild);
-                        BOOST_LOG (lg) << "Cannot reparent view named : [" << getName () << "] into slot named : [" << slotName << "], because slot is not empty.";
+                        BOOST_LOG (lg) << "Cannot reparent view named : [" << getName () << "] into slot named : [" << slotName << "], because slot is not empty."
+                                       << "gtk_widget_get_name of the slot : [" << gtk_widget_get_name (slot) << "], gtk_buildable_get_name of the slot : [" << gtk_buildable_get_name (GTK_BUILDABLE (slot)) << "], "
+                                       << "gtk_widget_get_name of its child : [" << gtk_widget_get_name (oldChild) << "], gtk_buildable_get_name of its child : [" << gtk_buildable_get_name (GTK_BUILDABLE (oldChild)) << "].";
                 }
 
                 // Add new.
@@ -629,6 +631,7 @@ void AbstractView::clearInternalState ()
 {
         impl->inputWidgetsMap.clear ();
         impl->outputWidgetsMap.clear ();
+        impl->slotWidgetsMap.clear ();
         delete impl->mappingsByInputCache;
         impl->mappingsByInputCache = nullptr;
 }

@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <boost/algorithm/string/split.hpp>
 #include "App.h"
 #include "Context.h"
 #include "controller/SubmitEvent.h"
@@ -41,6 +42,10 @@ struct App::Impl {
                 AbstractController *requestor;
                 std::string controllerName;
         };
+
+        void controllerRemoval (AbstractController *controller, bool removeFromParent);
+        void controllerOpen (std::string const &controllerName, AbstractController *requestor, App *app);
+        AbstractView *loadView (std::string const &viewAndSlot, AbstractController *controller);
 
         typedef std::vector<ControllerOperation> ControllerOperationVector;
         ControllerOperationVector controllerOperations;
@@ -97,7 +102,82 @@ void App::run ()
         }
 }
 
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
+
+// TODO to spokojnie mogłaby być metoda kontrolera.
+void App::Impl::controllerRemoval (AbstractController *controller, bool removeFromParent)
+{
+        for (AbstractController *child : controller->getChildren ()) {
+                controllerRemoval (child, false);
+        }
+
+        AbstractView *view = controller->getView ();
+        // TODO jeśli controller jest singletonem, to tylkol hide.
+        view->destroyUi ();
+        view->setController (nullptr);
+
+        controller->onStop ();
+
+        // Clear some fields.
+        controller->setApp (nullptr);
+        controller->setView (nullptr);
+        controller->clearControllerScope ();
+        controller->getChildren ().clear ();
+
+        if (!removeFromParent) {
+                return;
+        }
+
+        // Usuń zadany kontroler z aktualnej struktury drzewiastej
+        if (!controller->getParent ()) {
+                rootController = nullptr;
+        }
+        else {
+                AbstractController *parent = controller->getParent ();
+                ControllerVector &children = parent->getChildren ();
+                auto i = std::remove (children.begin (), children.end (), controller);
+                children.erase (i, children.end ());
+        }
+}
+
+/*****************************************************************************/
+
+// TODO to spokojnie mogłaby być metoda kontrolera.
+void App::Impl::controllerOpen (std::string const &controllerName, AbstractController *requestor, App *app)
+{
+        AbstractController *controller = ocast<AbstractController *> (container->getBean (controllerName));
+
+        if (!controller) {
+                throw Core::Exception ("Can't find controller with name : [" + controllerName + "] in container.");
+        }
+
+        controller->setApp (app);
+        controller->clearControllerScope ();
+
+        if (requestor) {
+                requestor->getChildren ().push_back (controller);
+        }
+        else {
+                rootController = controller;
+        }
+
+        controller->setParent (requestor);
+
+        std::string viewName = controller->onStart ();
+        AbstractView *view = loadView (viewName, controller);
+        controller->setView (view);
+
+        Core::StringVector alsoOpenList;
+        if (!controller->alsoOpen.empty ()) {
+                boost::split (alsoOpenList, controller->alsoOpen, boost::is_any_of (", "), boost::token_compress_on);
+        }
+
+        for (std::string const &name : alsoOpenList) {
+                controllerOpen (name, controller, app);
+        }
+}
+
+/*****************************************************************************/
 
 void App::manageControllers ()
 {
@@ -119,29 +199,7 @@ void App::manageControllers ()
                         controller = operation.requestor;
                 }
 
-                AbstractView *view = controller->getView ();
-                // TODO jeśli controller jest singletonem, to tylkol hide.
-                view->destroyUi ();
-                view->setController (nullptr);
-
-                controller->onStop ();
-
-                // Clear some fields.
-                controller->setApp (nullptr);
-                controller->setView (nullptr);
-                controller->clearControllerScope ();
-                //                impl->context.setCurrentController (nullptr);
-
-                // Usuń zadany kontroler z aktualnej struktury drzewiastej
-                if (!controller->getParent ()) {
-                        impl->rootController = nullptr;
-                }
-                else {
-                        AbstractController *parent = controller->getParent ();
-                        ControllerVector &children = parent->getChildren ();
-                        auto i = std::remove (children.begin (), children.end (), controller);
-                        children.erase (i, children.end ());
-                }
+                impl->controllerRemoval (controller, true);
         }
 
         // Kontrolery do otworzenia
@@ -150,29 +208,7 @@ void App::manageControllers ()
                         continue;
                 }
 
-                AbstractController *controller = ocast<AbstractController *> (impl->container->getBean (operation.controllerName));
-
-                if (!controller) {
-                        throw Core::Exception ("Can't find controller with name : [" + operation.controllerName + "] in container.");
-                }
-
-                controller->setApp (this);
-                controller->clearControllerScope ();
-                //                impl->context.setCurrentController (controller);
-
-                if (operation.requestor) {
-                        operation.requestor->getChildren ().push_back (controller);
-                }
-                else {
-                        impl->rootController = controller;
-                }
-
-                controller->setParent (operation.requestor);
-
-                std::string viewName = controller->onStart ();
-                AbstractView *view = loadView (viewName, controller);
-                controller->setView (view);
-                //                view->setController (controller);
+                impl->controllerOpen (operation.controllerName, operation.requestor, this);
         }
 
         impl->controllerOperations.clear ();
@@ -186,7 +222,7 @@ void App::manageControllers ()
 
 /*--------------------------------------------------------------------------*/
 
-AbstractView *App::loadView (std::string const &viewAndSlot, AbstractController *controller)
+AbstractView *App::Impl::loadView (std::string const &viewAndSlot, AbstractController *controller)
 {
         std::string viewName;
         std::string slotName;
@@ -197,7 +233,7 @@ AbstractView *App::loadView (std::string const &viewAndSlot, AbstractController 
         }
         viewName = viewAndSlot.substr (0, offset);
 
-        AbstractView *view = ocast<AbstractView *> (impl->container->getBean (viewName));
+        AbstractView *view = ocast<AbstractView *> (container->getBean (viewName));
         view->setController (controller);
         view->loadUi (controller->getApp ());
         view->reparent (slotName);

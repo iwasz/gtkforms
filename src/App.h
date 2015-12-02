@@ -100,7 +100,6 @@ private:
          */
         void run ();
         void manageControllers ();
-        AbstractView *loadView (std::string const &viewAndSlot, AbstractController *controller);
         void pushEvent (std::unique_ptr<IEvent> e) __tiliae_no_reflect__;
 
         friend struct SubmitEvent;

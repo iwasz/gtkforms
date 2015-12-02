@@ -48,6 +48,16 @@ Do BuilderView - opcja podania dodatkowych obiektów do załadowania (treeModel,
 opcja do załadowania CAŁEGO pliku.
 Uwaga! Sloty muszą mieć ID lub nazwę zaczynającą się od ^
 
+Wyjaśnienie czemu w XML nie można dodawać child-kontrolerów jako referencje do innych kontrolerów. Otóż dodanie
+child-kontrolera wymaga uruchomienia metody parent.open ('childName'). Tam się dzieje dużo rzeczy, które przy
+zwykłym dodaniu referencji by się nie uruchomiły. No dobra, ale można by zrobić jakąś iterację po wektrze
+dzieci i dla każdego uruchomić takie "open". Niby tak, ale pododuje to wiele niejasności. Przede wszystkim co
+miałoby się stać z tymi child-kontrolerami kiedy zamykamy parent? Wektor ten nie powinien być wyczyszczony, bo
+user będzie oczekiwał, że jak otworzy dany "parent", to zawsze otrzyma to co zdefiniował w XML (statycznie). Ale
+w wypadku gdy nie będziemy czyścić listy child-kontrolerów przy zamykaniu parenta, to wówczas child-kontrolery
+dodane do parenta dynamicznie też nie będą usuwane, co przecież jest bez sensu.
+
+
 TODO
 ====
         * Zastanowić się nad globalnymi mapowaniami. Jak miałyby działać?

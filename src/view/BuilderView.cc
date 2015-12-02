@@ -146,6 +146,7 @@ void BuilderView::Impl::onUserClickedQuit (GtkWidget *object, gpointer userData)
 
 /*--------------------------------------------------------------------------*/
 
+// TODO sporo (jeśli nie cały) poniższego kodu powinba być przeniesiona do AbstractView.
 void BuilderView::destroyUi ()
 {
         BOOST_LOG (lg) << "BuilderView::destroyUi : \033[35m[" << name << "]\033[0m";
@@ -155,14 +156,28 @@ void BuilderView::destroyUi ()
                 return;
         }
 
-//        if (!GTK_IS_WINDOW (impl->widget)) {
-//                gtk_widget_unparent (impl->widget);
-//        }
+        hide ();
+
+        GtkWidget *container = gtk_widget_get_parent (impl->widget);
+        // That's strange, but gtk_widget_get_ancestor will return the widget itself if it is a GtkContiner.
+
+        if (container) {
+                container = gtk_widget_get_ancestor (container, GTK_TYPE_CONTAINER);
+        }
+
+        if (container) {
+                BOOST_LOG (lg) << "Attempting to remove a widget : "
+                               << "gtk_widget_get_name : [" << gtk_widget_get_name (impl->widget) << "], gtk_buildable_get_name : ["
+                               << gtk_buildable_get_name (GTK_BUILDABLE (impl->widget)) << "], "
+                               << "from container : gtk_widget_get_name : [" << gtk_widget_get_name (container) << "], gtk_buildable_get_name of its child : ["
+                               << gtk_buildable_get_name (GTK_BUILDABLE (container)) << "].";
+
+                gtk_container_remove (GTK_CONTAINER (container), impl->widget);
+        }
+
 #if 0
         BOOST_LOG (lg) << " -GtkBuilderView::destroyUi : [" << name << "]";
 #endif
-
-        hide ();
 
         //        Sholud I? Or shouldn't?
         //        if (GTK_IS_WINDOW (impl->widget)) {
