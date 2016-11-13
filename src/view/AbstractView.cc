@@ -80,7 +80,14 @@ AbstractView *AbstractView::loadView (std::string const &viewAndSlot, AbstractCo
         view->loadUi (controller->getApp ());
         view->setController (controller);
         view->connectSignals (controller->getModelAccessor ());
-        view->reparent (slotName);
+
+        if (!slotName.empty ()) {
+                if (!view->reparent (slotName)) {
+                        // TODO zmienić na warning
+                        BOOST_LOG (lg) << "Warn : could not reparent!";
+                }
+        }
+
         view->show ();
         return view;
 }
@@ -403,22 +410,43 @@ AbstractController *AbstractView::getControllerByWidget (GObject *widget)
 
 /*****************************************************************************/
 
-void AbstractView::reparent (std::string const &slotName)
+bool AbstractView::reparent (std::string const &slotName)
 {
         // Reparent..
         AbstractController *controller = getController ();
 
-        while ((controller = controller->getParent ())) {
+/*
+ * Do zastanowienia się. Gdy FIND_SLOTS_RECURSIVELY jest 1, to po utworzeniu widoku, GtkForms szuka slotu we wszystkich przodkach
+ * jego kontrolera.
+ *
+ * Gdy jednak FIND_SLOTS_RECURSIVELY 0, to szuka tylko w rodzicu.
+ */
+#define FIND_SLOTS_RECURSIVELY 0
+
+#if FIND_SLOTS_RECURSIVELY
+        while
+#else
+        if
+#endif
+                ((controller = controller->getParent ())) {
                 AbstractView *parentView = controller->getView ();
 
                 if (!parentView) {
+#if FIND_SLOTS_RECURSIVELY
                         continue;
+#else
+                        return false;
+#endif
                 }
 
                 GtkWidget *slot = parentView->getSlot (slotName);
 
                 if (!slot) {
+#if FIND_SLOTS_RECURSIVELY
                         continue;
+#else
+                        return false;
+#endif
                 }
 
                 if (!GTK_IS_BIN (slot)) {
@@ -431,7 +459,7 @@ void AbstractView::reparent (std::string const &slotName)
                 if (oldChild) {
                         gtk_widget_hide (oldChild);
                         gtk_container_remove (GTK_CONTAINER (slotWidget), oldChild);
-//                        gtk_widget_destroy (oldChild);
+                        //                        gtk_widget_destroy (oldChild);
 
                         AbstractController *c = AbstractView::getControllerByWidget (G_OBJECT (oldChild));
 
@@ -468,6 +496,8 @@ void AbstractView::reparent (std::string const &slotName)
                 BOOST_LOG (lg) << "Reparented view named : [" << getName () << "] into slot named : [" << slotName << "], tileWidget [" << (void *)getUi ()
                                << "], to slot [" << (void *)slotWidget << "]";
         }
+
+        return true;
 }
 
 #if 0

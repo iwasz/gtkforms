@@ -50,7 +50,7 @@ public:
         virtual void show ();
         virtual void hide ();
         virtual void refresh (Context *) {}
-        virtual void reparent (std::string const &slotName);
+        virtual bool reparent (std::string const &slotName);
 
         /**
          * Destroys
