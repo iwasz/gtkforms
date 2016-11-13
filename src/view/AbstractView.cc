@@ -44,7 +44,7 @@ struct AbstractView::Impl {
         Config const *config = nullptr;
 
         mutable MappingMultiMap *mappingsByInputCache = nullptr;
-        AbstractController *controller = nullptr;
+        //        AbstractController *controller = nullptr;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -64,6 +64,28 @@ void AbstractView::show () { gtk_widget_show_all (GTK_WIDGET (getUi ())); }
 void AbstractView::hide () { gtk_widget_hide (GTK_WIDGET (getUi ())); }
 
 /*--------------------------------------------------------------------------*/
+
+AbstractView *AbstractView::loadView (std::string const &viewAndSlot, AbstractController *controller, Ptr<Container::BeanFactoryContainer> container)
+{
+        std::string viewName;
+        std::string slotName;
+
+        size_t offset;
+        if ((offset = viewAndSlot.find ("->")) != std::string::npos) {
+                slotName = viewAndSlot.substr (offset + 2);
+        }
+        viewName = viewAndSlot.substr (0, offset);
+
+        AbstractView *view = ocast<AbstractView *> (container->getBean (viewName));
+        view->loadUi (controller->getApp ());
+        view->setController (controller);
+        view->connectSignals (controller->getModelAccessor ());
+        view->reparent (slotName);
+        view->show ();
+        return view;
+}
+
+/*---------------------------------------------------------------------------*/
 
 GObject *AbstractView::getUiOrThrow (std::string const &name)
 {
@@ -364,11 +386,20 @@ MappingMultiMap AbstractView::getMappingsByModelRange (std::string const &modelR
 
 /*****************************************************************************/
 
-AbstractController *AbstractView::getController () { return impl->controller; }
+// AbstractController *AbstractView::getController () { return impl->controller; }
 
 /*---------------------------------------------------------------------------*/
 
-void AbstractView::setController (AbstractController *c) { impl->controller = c; }
+// void AbstractView::setController (AbstractController *c) { impl->controller = c; }
+
+void AbstractView::setController (AbstractController *c) { g_object_set_data (getUiOrThrow (getName ()), CONTROLLER_KEY, c); }
+
+AbstractController *AbstractView::getController () { return getControllerByWidget (getUiOrThrow (getName ())); }
+
+AbstractController *AbstractView::getControllerByWidget (GObject *widget)
+{
+        return static_cast<AbstractController *> (g_object_get_data (widget, CONTROLLER_KEY));
+}
 
 /*****************************************************************************/
 
@@ -398,11 +429,26 @@ void AbstractView::reparent (std::string const &slotName)
                 GtkWidget *oldChild = gtk_bin_get_child (slotWidget);
 
                 if (oldChild) {
-//                        gtk_container_remove (GTK_CONTAINER (slotWidget), oldChild);
+                        gtk_widget_hide (oldChild);
+                        gtk_container_remove (GTK_CONTAINER (slotWidget), oldChild);
 //                        gtk_widget_destroy (oldChild);
-                        BOOST_LOG (lg) << "Cannot reparent view named : [" << getName () << "] into slot named : [" << slotName << "], because slot is not empty."
-                                       << "gtk_widget_get_name of the slot : [" << gtk_widget_get_name (slot) << "], gtk_buildable_get_name of the slot : [" << gtk_buildable_get_name (GTK_BUILDABLE (slot)) << "], "
-                                       << "gtk_widget_get_name of its child : [" << gtk_widget_get_name (oldChild) << "], gtk_buildable_get_name of its child : [" << gtk_buildable_get_name (GTK_BUILDABLE (oldChild)) << "].";
+
+                        AbstractController *c = AbstractView::getControllerByWidget (G_OBJECT (oldChild));
+
+                        if (!c) {
+                                throw Core::Exception ("Could not find controller assigned to thos GtkWidget");
+                        }
+
+                        c->closeThis ();
+
+#if 0
+                        BOOST_LOG (lg) << "Cannot reparent view named : [" << getName () << "] into slot named : [" << slotName
+                                       << "], because slot is not empty."
+                                       << "gtk_widget_get_name of the slot : [" << gtk_widget_get_name (slot) << "],gtk_buildable_get_name of the slot : ["
+                                       << gtk_buildable_get_name (GTK_BUILDABLE (slot)) << "],"
+                                       << "gtk_widget_get_name of its child : [" << gtk_widget_get_name (oldChild)
+                                       << "], gtk_buildable_get_name of its child : [" << gtk_buildable_get_name (GTK_BUILDABLE (oldChild)) << "].";
+#endif
                 }
 
                 // Add new.

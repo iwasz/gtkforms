@@ -112,9 +112,11 @@ void App::Impl::controllerRemoval (AbstractController *controller, bool removeFr
         }
 
         AbstractView *view = controller->getView ();
-        // TODO jeśli controller jest singletonem, to tylkol hide.
-        view->destroyUi ();
-        view->setController (nullptr);
+        // TODO jeśli controller jest singletonem, to tylkol hide.? na pewno? Kontorlery chyba tworzą te widoki od nowa.
+        if (view) {
+                view->setController (nullptr);
+                view->destroyUi ();
+        }
 
         controller->onStop ();
 
@@ -164,7 +166,7 @@ void App::Impl::controllerOpen (std::string const &controllerName, AbstractContr
         controller->setParent (requestor);
 
         std::string viewName = controller->onStart ();
-        AbstractView *view = loadView (viewName, controller);
+        AbstractView *view = AbstractView::loadView (viewName, controller, container);
         controller->setView (view);
 
         Core::StringVector alsoOpenList;
@@ -185,30 +187,27 @@ void App::manageControllers ()
 
         // Kontrolery do zamknięcia
         for (App::Impl::ControllerOperation const &operation : impl->controllerOperations) {
-                if (operation.type == App::Impl::ControllerOperation::OPEN) {
-                        continue;
-                }
+                if (operation.type == App::Impl::ControllerOperation::CLOSE) {
 
-                // Find the controller that is to be closed.
-                AbstractController *controller = nullptr;
+                        // Find the controller that is to be closed.
+                        AbstractController *controller = nullptr;
 
-                if (!operation.controllerName.empty ()) {
-                        controller = impl->rootController->findByName (operation.controllerName);
-                }
-                else {
-                        controller = operation.requestor;
-                }
+                        if (!operation.controllerName.empty ()) {
+                                controller = impl->rootController->findByName (operation.controllerName);
+                        }
+                        else {
+                                controller = operation.requestor;
+                        }
 
-                impl->controllerRemoval (controller, true);
+                        impl->controllerRemoval (controller, true);
+                }
         }
 
         // Kontrolery do otworzenia
         for (App::Impl::ControllerOperation const &operation : impl->controllerOperations) {
-                if (operation.type == App::Impl::ControllerOperation::CLOSE) {
-                        continue;
+                if (operation.type == App::Impl::ControllerOperation::OPEN) {
+                        impl->controllerOpen (operation.controllerName, operation.requestor, this);
                 }
-
-                impl->controllerOpen (operation.controllerName, operation.requestor, this);
         }
 
         impl->controllerOperations.clear ();
@@ -218,27 +217,6 @@ void App::manageControllers ()
                 impl->events.pop ();
                 event->run (this);
         }
-}
-
-/*--------------------------------------------------------------------------*/
-
-AbstractView *App::Impl::loadView (std::string const &viewAndSlot, AbstractController *controller)
-{
-        std::string viewName;
-        std::string slotName;
-
-        size_t offset;
-        if ((offset = viewAndSlot.find ("->")) != std::string::npos) {
-                slotName = viewAndSlot.substr (offset + 2);
-        }
-        viewName = viewAndSlot.substr (0, offset);
-
-        AbstractView *view = ocast<AbstractView *> (container->getBean (viewName));
-        view->setController (controller);
-        view->loadUi (controller->getApp ());
-        view->reparent (slotName);
-        view->show ();
-        return view;
 }
 
 /*--------------------------------------------------------------------------*/

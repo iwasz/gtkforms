@@ -157,7 +157,7 @@ public:
         ValidatorVector validators;
         SignalAdapterVector signalAdapters;
         int loopDelayMs;
-        /// Which controllers to open as child-controllers of this controller.
+        /// Which controllers to open as child-controllers of this controller. TODO StringVector + converter.
         std::string alsoOpen;
 
 private:

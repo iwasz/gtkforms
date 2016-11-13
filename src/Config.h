@@ -33,7 +33,7 @@ struct __tiliae_reflect__ Config {
         IHandler *quitHandler;
 
         /**
-         * @brief Turns on more alaborate debug output about input and ouput wodgets, and their mappings.
+         * @brief Turns on more alaborate debug output about input and ouput widgets, and their mappings.
          */
         bool logMappings;
 

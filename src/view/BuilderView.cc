@@ -68,6 +68,9 @@ BuilderView::~BuilderView () { delete impl; }
 
 /*****************************************************************************/
 
+/*
+ * Z tego co pamiętam, to gtk_builder tworzy singletony.
+ */
 void BuilderView::loadUi (App *app)
 {
         BOOST_LOG (lg) << "BuilderView::loadUi : \033[35m[" << name << "]\033[0m";
@@ -110,8 +113,6 @@ void BuilderView::loadUi (App *app)
         if (err) {
                 throw Core::Exception ("gtk_builder_add_from_file returned an error. Error message is : [" + std::string (err->message) + "]");
         }
-
-        connectSignals (getController ()->getModelAccessor ());
 
         impl->loaded = true;
         impl->widget = GTK_WIDGET (gtk_builder_get_object (impl->builder, name.c_str ()));

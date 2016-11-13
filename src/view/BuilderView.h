@@ -26,6 +26,7 @@ public:
         virtual GObject *getUi () __tiliae_no_reflect__;
         virtual GObject *getUi (std::string const &name) __tiliae_no_reflect__;
         GObject *getUiOrThrow (std::string const &name);
+        virtual void connectSignals (AbstractAccessor *accessor);
 
 public:
 
@@ -47,8 +48,6 @@ public:
         bool loadWholeFile;
 
 private:
-
-        void connectSignals (AbstractAccessor *accessor);
 
         struct Impl;
         Impl *impl;

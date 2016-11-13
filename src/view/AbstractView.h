@@ -21,6 +21,7 @@
 namespace GtkForms {
 class Context;
 class AbstractController;
+class AbstractAccessor;
 struct Config;
 
 /**
@@ -37,6 +38,8 @@ public:
         void contId (std::string const &id) { name = id; }
 
         /*---------------------------------------------------------------------------*/
+
+        static AbstractView *loadView (std::string const &viewAndSlot, AbstractController *controller, Ptr<Container::BeanFactoryContainer> container);
 
         /**
          * Loads a UI file into memory (if not loaded allready), and gets pointer to widget with name
@@ -82,9 +85,13 @@ public:
 
         /*---------------------------------------------------------------------------*/
 
+        virtual void connectSignals (AbstractAccessor *accessor) = 0;
+
         // TODO Should be protected
-        AbstractController *getController ();
-        void setController (AbstractController *c);
+#define CONTROLLER_KEY "controller"
+        static AbstractController *getControllerByWidget (GObject *widget);
+        virtual AbstractController *getController ();
+        virtual void setController (AbstractController *c);
 
         void setConfig (Config const *c);
 
