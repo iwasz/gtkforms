@@ -44,7 +44,7 @@ struct AbstractView::Impl {
         Config const *config = nullptr;
 
         mutable MappingMultiMap *mappingsByInputCache = nullptr;
-        //        AbstractController *controller = nullptr;
+        AbstractController *controller = nullptr;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -77,8 +77,11 @@ AbstractView *AbstractView::loadView (std::string const &viewAndSlot, AbstractCo
         viewName = viewAndSlot.substr (0, offset);
 
         AbstractView *view = ocast<AbstractView *> (container->getBean (viewName));
-        view->loadUi (controller->getApp ());
+        // Ustawi w polu impl->controller
         view->setController (controller);
+        view->loadUi (controller->getApp ());
+        // Teraz ma załadowany widok, i ustawi
+        view->setControllerToUi (controller);
         view->connectSignals (controller->getModelAccessor ());
 
         if (!slotName.empty ()) {
@@ -393,15 +396,14 @@ MappingMultiMap AbstractView::getMappingsByModelRange (std::string const &modelR
 
 /*****************************************************************************/
 
-// AbstractController *AbstractView::getController () { return impl->controller; }
+AbstractController *AbstractView::getController () { return impl->controller; }
+void AbstractView::setController (AbstractController *c) { impl->controller = c; }
 
 /*---------------------------------------------------------------------------*/
 
-// void AbstractView::setController (AbstractController *c) { impl->controller = c; }
+void AbstractView::setControllerToUi (AbstractController *c) { g_object_set_data (getUiOrThrow (getName ()), CONTROLLER_KEY, c); }
 
-void AbstractView::setController (AbstractController *c) { g_object_set_data (getUiOrThrow (getName ()), CONTROLLER_KEY, c); }
-
-AbstractController *AbstractView::getController () { return getControllerByWidget (getUiOrThrow (getName ())); }
+AbstractController *AbstractView::getControllerFromUi () { return getControllerByWidget (getUiOrThrow (getName ())); }
 
 AbstractController *AbstractView::getControllerByWidget (GObject *widget)
 {
@@ -413,7 +415,7 @@ AbstractController *AbstractView::getControllerByWidget (GObject *widget)
 bool AbstractView::reparent (std::string const &slotName)
 {
         // Reparent..
-        AbstractController *controller = getController ();
+        AbstractController *controller = getControllerFromUi ();
 
 /*
  * Do zastanowienia się. Gdy FIND_SLOTS_RECURSIVELY jest 1, to po utworzeniu widoku, GtkForms szuka slotu we wszystkich przodkach
@@ -456,10 +458,18 @@ bool AbstractView::reparent (std::string const &slotName)
                 GtkBin *slotWidget = GTK_BIN (slot);
                 GtkWidget *oldChild = gtk_bin_get_child (slotWidget);
 
+                /*
+                 * Zawartość tego IF spowodowała wiele niejasności. Kiedy góra jest odkomentowana, to
+                 * podczas umieszczania nowego widoku w slocie, jeśli jest on już zajęty, to zostanie
+                 * opróżniony (wiok + jego kontroler).
+                 *
+                 * Natomiast kiedy dół jest odkomentowany, to jeśli slot jest zajęty, to zostanie na
+                 * konsoli zgłoszony warning i nic więcej się nie stanie.
+                 */
                 if (oldChild) {
+#if 1
                         gtk_widget_hide (oldChild);
                         gtk_container_remove (GTK_CONTAINER (slotWidget), oldChild);
-                        //                        gtk_widget_destroy (oldChild);
 
                         AbstractController *c = AbstractView::getControllerByWidget (G_OBJECT (oldChild));
 
@@ -469,7 +479,7 @@ bool AbstractView::reparent (std::string const &slotName)
 
                         c->closeThis ();
 
-#if 0
+#else
                         BOOST_LOG (lg) << "Cannot reparent view named : [" << getName () << "] into slot named : [" << slotName
                                        << "], because slot is not empty."
                                        << "gtk_widget_get_name of the slot : [" << gtk_widget_get_name (slot) << "],gtk_buildable_get_name of the slot : ["

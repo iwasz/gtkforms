@@ -114,7 +114,7 @@ void App::Impl::controllerRemoval (AbstractController *controller, bool removeFr
         AbstractView *view = controller->getView ();
         // TODO jeśli controller jest singletonem, to tylkol hide.? na pewno? Kontorlery chyba tworzą te widoki od nowa.
         if (view) {
-                view->setController (nullptr);
+                view->setControllerToUi (nullptr);
                 view->destroyUi ();
         }
 

@@ -86,11 +86,19 @@ public:
         /*---------------------------------------------------------------------------*/
 
         virtual void connectSignals (AbstractAccessor *accessor) = 0;
+        virtual void connectSignal (gpointer obj, std::string const &signalName, std::string const &code) = 0;
 
         // TODO Should be protected
 #define CONTROLLER_KEY "controller"
         static AbstractController *getControllerByWidget (GObject *widget);
+        /// Gets the controller pointer from the GTK widget
+        virtual AbstractController *getControllerFromUi ();
+        /// Adds controller pointer to the GTK widget
+        virtual void setControllerToUi (AbstractController *c);
+
+        /// Gets the controller pointer from class field
         virtual AbstractController *getController ();
+        /// Adds controller pointer to a class field
         virtual void setController (AbstractController *c);
 
         void setConfig (Config const *c);

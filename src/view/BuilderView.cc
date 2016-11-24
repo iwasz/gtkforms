@@ -133,7 +133,7 @@ void BuilderView::loadUi (App *app)
 void BuilderView::Impl::onUserClickedQuit (GtkWidget *object, gpointer userData)
 {
         BuilderView *view = static_cast<BuilderView *> (userData);
-        AbstractController *controller = view->getController ();
+        AbstractController *controller = view->getControllerFromUi ();
         App *app = controller->getApp ();
 
         // Close this controller
@@ -216,6 +216,38 @@ GObject *BuilderView::getUiOrThrow (std::string const &name)
         }
 
         return obj;
+}
+
+/*****************************************************************************/
+
+void BuilderView::connectSignal (gpointer object, std::string const &signalName, std::string const &code)
+{
+        ClosureDTO *closureDTO = static_cast<ClosureDTO *> (malloc (sizeof (ClosureDTO)));
+        assert (getController ());
+        closureDTO->accessor = getController ()->getModelAccessor();
+
+        closureDTO->handler = g_strdup (code.c_str());
+
+        const char *tmpString = G_OBJECT_TYPE_NAME (object);
+        tmpString = ((tmpString) ? (tmpString) : (""));
+        closureDTO->gObjectName = g_strdup (tmpString);
+
+        closureDTO->signal = g_strdup (signalName.c_str());
+
+        if (GTK_IS_BUILDABLE (object)) {
+                closureDTO->widgetId = gtk_buildable_get_name (GTK_BUILDABLE (object));
+        }
+        else {
+                closureDTO->widgetId = 0;
+        }
+
+        /*
+         * https://developer.gnome.org/gobject/stable/gobject-Closures.html#g-cclosure-new
+         */
+        GClosure *closure = g_cclosure_new (G_CALLBACK (handler), closureDTO, gclosureUserDataDelete);
+
+        g_closure_set_marshal (closure, gClosureMarshal);
+        g_signal_connect_closure (object, signalName.c_str(), closure, FALSE);
 }
 
 /*****************************************************************************/
@@ -349,4 +381,5 @@ void gclosureUserDataDelete (gpointer data, GClosure *closure)
         g_free (dto->signal);
         free (dto);
 }
+
 }
