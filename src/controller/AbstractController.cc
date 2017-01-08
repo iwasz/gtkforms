@@ -71,7 +71,7 @@ void AbstractController::setToSessionScope (std::string const &path, Core::Varia
 
 Core::Variant AbstractController::get (const std::string &path)
 {
-        Wrapper::BeanWrapper *wrapper = App::getBeanWrapper ();
+        Wrapper::BeanWrapper *wrapper = impl->app->getBeanWrapper ();
         wrapper->setWrappedObject (Core::Variant (&impl->accessor));
         Core::DebugContext ctx;
         bool error = false;

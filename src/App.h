@@ -9,15 +9,15 @@
 #ifndef GTK_FORMS_APP_H_
 #define GTK_FORMS_APP_H_
 
-#include <string>
-#include <ReflectionParserAnnotation.h>
-#include <gtk/gtk.h>
-#include "controller/RefreshEvent.h"
 #include "Config.h"
-#include <core/Typedefs.h>
-#include <k202/K202.h>
-#include <beanWrapper/BeanWrapper.h>
 #include "controller/AbstractController.h"
+#include "controller/RefreshEvent.h"
+#include <ReflectionParserAnnotation.h>
+#include <beanWrapper/BeanWrapper.h>
+#include <core/Typedefs.h>
+#include <gtk/gtk.h>
+#include <k202/K202.h>
+#include <string>
 
 namespace GtkForms {
 
@@ -32,8 +32,10 @@ class AbstractView;
  */
 class __tiliae_reflect__ App {
 public:
-        App (std::string const &configurationFile, std::string const &initialControllerName) __tiliae_no_reflect__;
-        ~App ();
+//        App (std::string const &configurationFile, std::string const &initialControllerName) __tiliae_no_reflect__;
+        virtual void init (std::string const &configurationFile, std::string const &initialControllerName) __tiliae_no_reflect__;
+
+        virtual ~App ();
 
         /**
          * @brief Starts a controller.
@@ -79,9 +81,18 @@ public:
 
         Context &getContext ();
         static k202::K202 *getK202 ();
-        static Wrapper::BeanWrapper *getBeanWrapper ();
+
+        /// BeanWrapper used for view to model mapping. Not used in the container.
+        Wrapper::BeanWrapper *getBeanWrapper ();
 
         Config const *getConfig () const;
+
+protected:
+        /// Initialization of BeanWrapper used for view to model mapping. Not used in the container. Add custom editors here.
+        virtual void initBeanWrapper ();
+
+        /// Initialization of the container. Add custom conversions here.
+        virtual Ptr<Container::BeanFactoryContainer> createContainer (Ptr<Container::MetaContainer> metaContainer);
 
 private:
         /**
@@ -93,7 +104,7 @@ private:
         /**
          * Creates a tiliae container instance (pointer is in Impl).
          */
-        void createContainer (std::string const &configFile);
+        void initContainer (std::string const &configFile);
 
         /**
          * Method which has to be invoked in your main application loop.

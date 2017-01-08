@@ -20,7 +20,7 @@ namespace GtkForms {
  */
 class Context {
 public:
-        Context (Wrapper::BeanWrapper *w) : wrapper {w} {}
+        Context (Wrapper::BeanWrapper *w = nullptr) : wrapper {w} {}
         virtual ~Context () {}
 
         Core::VariantMap &getSessionScope () { return sessionScope; }
@@ -41,6 +41,8 @@ public:
 
 //        void setCurrentController (AbstractController *c) { hierarchicalAccessor.setCurrentController (c); }
 //        HierarchicalAccessor &getHierarchicalAccessor () { return hierarchicalAccessor; }
+
+        void setBeanWrapper (Wrapper::BeanWrapper *bw) { wrapper = bw; }
 
 private:
 

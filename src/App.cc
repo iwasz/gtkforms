@@ -6,21 +6,21 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <algorithm>
-#include <memory>
-#include <boost/algorithm/string/split.hpp>
 #include "App.h"
-#include "Context.h"
-#include "controller/SubmitEvent.h"
-#include "controller/RefreshEvent.h"
-#include "controller/QuitEvent.h"
-#include <boost/regex.hpp>
-#include "controller/RefreshEvent.h"
-#include "Logging.h"
 #include "Config.h"
-#include <time.h>
+#include "Context.h"
+#include "Logging.h"
 #include "controller/DefaultQuitHandler.h"
+#include "controller/QuitEvent.h"
+#include "controller/RefreshEvent.h"
+#include "controller/RefreshEvent.h"
+#include "controller/SubmitEvent.h"
 #include "view/AbstractView.h"
+#include <algorithm>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/regex.hpp>
+#include <memory>
+#include <time.h>
 
 namespace GtkForms {
 using namespace Container;
@@ -54,15 +54,16 @@ struct App::Impl {
         EventStack events;
 
         Ptr<BeanFactoryContainer> container;
-        Context context{ getBeanWrapper () };
+        Context context;
         Config *config = nullptr;
         bool controllersIdling = true;
 
-        static Wrapper::BeanWrapper *getBeanWrapper ();
         unsigned int getCurrentMs () const;
         unsigned int lastMs = 0;
         bool quitRequested = false;
         DefaultQuitHandler defaultQuitHandler;
+        bool beanWrapperInitialized = false;
+        Wrapper::BeanWrapper *beanWrapper = 0;
 
         //        TODO w forrest jest potrzbene cofanie
         //        typedef std::stack<std::string> UnitNameStack;
@@ -71,12 +72,16 @@ struct App::Impl {
 
 /*--------------------------------------------------------------------------*/
 
-App::App (std::string const &configurationFile, std::string const &initialControllerName)
+//App::App (std::string const &configurationFile, std::string const &initialControllerName) { init (configurationFile, initialControllerName); }
+
+/*---------------------------------------------------------------------------*/
+
+void App::init (std::string const &configurationFile, std::string const &initialControllerName)
 {
         impl = new Impl;
-        createContainer (configurationFile);
+        initContainer (configurationFile);
         g_idle_add (guiThread, static_cast<gpointer> (this));
-        impl->context.setToSessionScope ("app", Core::Variant (this));
+        getContext ().setToSessionScope ("app", Core::Variant (this));
         impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::OPEN, nullptr, initialControllerName });
 }
 
@@ -666,22 +671,35 @@ void App::doRefresh (RefreshEvent *event)
 
 /*--------------------------------------------------------------------------*/
 
-void App::createContainer (std::string const &configFile)
+Ptr<Container::BeanFactoryContainer> App::createContainer (Ptr<Container::MetaContainer> metaContainer)
+{
+        Ptr<Container::BeanFactoryContainer> container = ContainerFactory::create (metaContainer, true);
+        // Example:
+        // container->addConversion (typeid (Geometry::Point), Geometry::stringToPointVariant);
+        // container->addSingleton (i->first.c_str (), i->second);
+        return container;
+}
+
+/*---------------------------------------------------------------------------*/
+
+void App::initContainer (std::string const &configFile)
 {
         Ptr<MetaContainer> metaContainer = CompactMetaService::parseFile (configFile);
-        impl->container = ContainerFactory::create (metaContainer, true);
-
-        // Example:
-        // impl->container->addConversion (typeid (Geometry::Point), Geometry::stringToPointVariant);
-        // impl->container->addSingleton (i->first.c_str (), i->second);
-
+        impl->container = createContainer (metaContainer);
         ContainerFactory::init (impl->container.get (), metaContainer.get ());
         impl->config = vcast<Config *> (impl->container->getBean ("config"));
 }
 
 /*--------------------------------------------------------------------------*/
 
-Context &App::getContext () { return impl->context; }
+Context &App::getContext ()
+{
+        if (!impl->beanWrapperInitialized) {
+                initBeanWrapper ();
+        }
+
+        return impl->context;
+}
 
 /*--------------------------------------------------------------------------*/
 
@@ -693,53 +711,47 @@ k202::K202 *App::getK202 ()
 
 /*--------------------------------------------------------------------------*/
 
-struct BWInitializer {
+void App::initBeanWrapper ()
+{
+        impl->beanWrapper = new Wrapper::BeanWrapper (true);
+        //                beanWrapper->addPlugin (new GObjectWrapperPlugin);
+        impl->beanWrapper->addPlugin (new Wrapper::PropertyRWBeanWrapperPlugin ());
+        impl->beanWrapper->addPlugin (new Wrapper::GetPutMethodRWBeanWrapperPlugin ());
+        impl->beanWrapper->addPlugin (new Wrapper::MethodPlugin (Wrapper::MethodPlugin::METHOD));
 
-        BWInitializer ()
-        {
-                beanWrapper = new Wrapper::BeanWrapper (true);
-                //                beanWrapper->addPlugin (new GObjectWrapperPlugin);
-                beanWrapper->addPlugin (new Wrapper::PropertyRWBeanWrapperPlugin ());
-                beanWrapper->addPlugin (new Wrapper::GetPutMethodRWBeanWrapperPlugin ());
-                beanWrapper->addPlugin (new Wrapper::MethodPlugin (Wrapper::MethodPlugin::METHOD));
+        Editor::TypeEditor *typeEditor = new Editor::TypeEditor (true);
+        typeEditor->setEqType (new Editor::NoopEditor ());
+        typeEditor->setNullType (new Editor::NoopEditor ());
 
-                Editor::TypeEditor *typeEditor = new Editor::TypeEditor (true);
-                typeEditor->setEqType (new Editor::NoopEditor ());
-                typeEditor->setNullType (new Editor::NoopEditor ());
+        typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (int), new Editor::StreamEditor<std::string, int> ()));
+        typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (double), new Editor::LexicalEditor<std::string, double> ()));
+        typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (float), new Editor::LexicalEditor<std::string, float> ()));
+        typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (char), new Editor::LexicalEditor<std::string, char> ()));
+        typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (bool), new Editor::LexicalEditor<std::string, bool> ()));
+        typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned int), new Editor::StreamEditor<std::string, unsigned int> ()));
+        typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned char), new Editor::StreamEditor<std::string, unsigned char> ()));
+        typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (long), new Editor::StreamEditor<std::string, long> ()));
+        typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned long), new Editor::StreamEditor<std::string, unsigned long> ()));
 
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (int), new Editor::StreamEditor<std::string, int> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (double), new Editor::LexicalEditor<std::string, double> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (float), new Editor::LexicalEditor<std::string, float> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (char), new Editor::LexicalEditor<std::string, char> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (bool), new Editor::LexicalEditor<std::string, bool> ()));
-                typeEditor->addType (
-                        Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned int), new Editor::StreamEditor<std::string, unsigned int> ()));
-                typeEditor->addType (
-                        Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned char), new Editor::StreamEditor<std::string, unsigned char> ()));
-                typeEditor->addType (Editor::TypeEditor::Type (typeid (std::string), typeid (long), new Editor::StreamEditor<std::string, long> ()));
-                typeEditor->addType (
-                        Editor::TypeEditor::Type (typeid (std::string), typeid (unsigned long), new Editor::StreamEditor<std::string, unsigned long> ()));
+        Editor::ChainEditor *chain = new Editor::ChainEditor (true);
+        chain->addEditor (typeEditor);
+        chain->addEditor (new Editor::NoopEditor ());
 
-                Editor::ChainEditor *chain = new Editor::ChainEditor (true);
-                chain->addEditor (typeEditor);
-                chain->addEditor (new Editor::NoopEditor ());
+        impl->beanWrapper->setEditor (chain);
+        impl->beanWrapperInitialized = true;
 
-                beanWrapper->setEditor (chain);
+        impl->context.setBeanWrapper (impl->beanWrapper);
+}
+
+/*--------------------------------------------------------------------------*/
+
+Wrapper::BeanWrapper *App::getBeanWrapper ()
+{
+        if (!impl->beanWrapperInitialized) {
+                initBeanWrapper ();
         }
 
-        Wrapper::BeanWrapper *beanWrapper = 0;
-};
-
-/*--------------------------------------------------------------------------*/
-
-Wrapper::BeanWrapper *App::getBeanWrapper () { return App::Impl::getBeanWrapper (); }
-
-/*--------------------------------------------------------------------------*/
-
-Wrapper::BeanWrapper *App::Impl::getBeanWrapper ()
-{
-        static BWInitializer bwInitializer;
-        return bwInitializer.beanWrapper;
+        return impl->beanWrapper;
 }
 
 /*--------------------------------------------------------------------------*/
