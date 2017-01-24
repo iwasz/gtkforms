@@ -694,6 +694,14 @@ void App::initContainer (std::string const &configFile)
 
 Context &App::getContext ()
 {
+        /*
+         * Warning : if by any chance you are facing a SegF and debugger points you here, and :
+         * - this method is called by AbstractController::set
+         * - the controller is created using tiliae container
+         * then it may mean, that container is trying to set some non-existent property of the
+         * controller, but it fails, and falls back to the "set" method, which at this point
+         * can not be used, and should not be used during controller creation.
+         */
         if (!impl->beanWrapperInitialized) {
                 initBeanWrapper ();
         }
