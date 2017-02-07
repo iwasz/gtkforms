@@ -125,7 +125,7 @@ public:
          * \return View name to be displayed or empty string in case nothing to be done with
          * views.
          */
-        virtual void onSubmit () = 0;
+        virtual void onSubmit () {}
 
         /**
          * Gets called by managing objects when controller is about to be closed. Returns name
@@ -133,7 +133,7 @@ public:
          *
          * \returns Page to be closed or empty string in case nothing should be done with views.
          */
-        virtual void onStop () = 0;
+        virtual void onStop () {}
 
         int getLoopDelayMs () const { return loopDelayMs; }
         int &getLastMs ();

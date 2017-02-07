@@ -12,4 +12,3 @@
 #include "signalAdapter/SignalAdapter.h"
 #include "validator/Validator.h"
 #include "view/BuilderView.h"
-

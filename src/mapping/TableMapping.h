@@ -32,7 +32,7 @@ class __tiliae_reflect__ TableMapping : public IMapping {
 public:
         virtual ~TableMapping () {}
 
-        std::string getWidget () const { return input; }
+        std::string getWidget () const { return widget; }
         std::string getModel () const { return model; }
 
         ValidationAndBindingResult view2Model (MappingDTO *dto);
@@ -40,7 +40,7 @@ public:
 
 public:
 
-        std::string input;
+        std::string widget;
         std::string model;
         ColumnVector columns;
         Core::VariantVector modelColumnCopy;
