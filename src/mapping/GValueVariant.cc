@@ -83,7 +83,7 @@ GValue *variantToGValue (GValue *gVal, Core::Variant const &vVal)
         switch (vVal.getType ()) {
         case Variant::STRING:
                 g_value_init (gVal, G_TYPE_STRING);
-                g_value_set_string (gVal, vcast <std::string> (vVal).c_str ()); // Tu chyba się zrobi kopia.
+                g_value_set_string (gVal, vcast <std::string> (vVal).c_str ()); // Tu się robi kopia : "caller-owned string to be duplicated for the GValue."
                 break;
         case Variant::STRING_POINTER:
                 g_value_init (gVal, G_TYPE_STRING);

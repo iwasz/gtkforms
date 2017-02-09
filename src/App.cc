@@ -15,6 +15,7 @@
 #include "controller/RefreshEvent.h"
 #include "controller/RefreshEvent.h"
 #include "controller/SubmitEvent.h"
+#include "mapping/TableMapping.h"
 #include "view/AbstractView.h"
 #include <algorithm>
 #include <boost/algorithm/string/split.hpp>
@@ -46,6 +47,7 @@ struct App::Impl {
         void controllerRemoval (AbstractController *controller, bool removeFromParent);
         void controllerOpen (std::string const &controllerName, AbstractController *requestor, App *app);
         AbstractView *loadView (std::string const &viewAndSlot, AbstractController *controller);
+        static IMapping *getDefaultMapping (ViewElementDTO *vd);
 
         typedef std::vector<ControllerOperation> ControllerOperationVector;
         ControllerOperationVector controllerOperations;
@@ -72,7 +74,7 @@ struct App::Impl {
 
 /*--------------------------------------------------------------------------*/
 
-//App::App (std::string const &configurationFile, std::string const &initialControllerName) { init (configurationFile, initialControllerName); }
+// App::App (std::string const &configurationFile, std::string const &initialControllerName) { init (configurationFile, initialControllerName); }
 
 /*---------------------------------------------------------------------------*/
 
@@ -298,152 +300,6 @@ void guiLoadTheme (const char *directory, const char *theme_name, GObject *tople
 
 /*--------------------------------------------------------------------------*/
 
-// void App::removePage (std::string const &pageName)
-//{
-//        BOOST_LOG (lg) << "-" << pageName;
-
-//        if (impl->pages.find (pageName) != impl->pages.end ()) {
-//                throw Core::Exception ("Illegal attempt to close page : [" + pageName + "] which is not active.");
-//        }
-
-//        // Load from container, or return if already loaded.
-//        Page *page = getPage (pageName);
-//        impl->pages.erase (pageName);
-//        page->destroyUi ();
-//}
-
-/*--------------------------------------------------------------------------*/
-
-// void App::movePage (std::string const &s, std::string const &pageBName)
-//{
-//        std::string pageAName = s;
-
-//        // Define which page we are moving from and to.
-//        if (pageAName.empty () && impl->pages.size () > 1) {
-//                throw Core::Exception ("-> operation failed. If 'from' page is empty, only one active page can be present. Provide 'from' page name.");
-//        }
-
-//        if (pageAName.empty () && impl->pages.size () > 0) {
-//                pageAName = impl->pages.begin ()->first;
-//        }
-
-//        if (pageAName.empty ()) {
-//                addPage (pageBName);
-//                return;
-//        }
-
-//        BOOST_LOG (lg) << pageAName << "->" << pageBName;
-
-//        // Load from container, or return if already loaded.
-//        Page *pageA = getPage (pageAName);
-//        Page *pageB = getPage (pageBName);
-
-//        if (impl->pages.find (pageBName) != impl->pages.end ()) {
-//                throw Core::Exception ("Illegal attempt to open multiple instances of page : [" + pageBName + "]");
-//        }
-
-//        impl->pages[pageBName] = pageB;
-
-//        if (impl->pages.find (pageAName) == impl->pages.end ()) {
-//                throw Core::Exception ("Page [" + pageAName + "] is not loaded curently, so it cannot be moved to page [" + pageBName + "].");
-//        }
-
-//        impl->pages.erase (pageAName);
-
-//        // Make sure  the entire pageB is loaded (i.e. all its elements that is : its view and its tiles.
-//        pageB->loadUi (this);
-
-//        SlotVector const &slotsA = pageA->getSlots ();
-//        SlotVector const &slotsB = pageB->getSlots ();
-
-//        // Find out common views.
-//        GtkView *mainViewA = pageA->getView ();
-//        GtkView *mainViewB = pageB->getView ();
-
-//        if (!mainViewB) {
-//                throw Core::Exception ("view property of object Page is NULL.");
-//        }
-
-//        pageB->reparent (&impl->context);
-
-//        /*
-//         * W ogóle, to GtkBuilder ZAWSZE zwroci tą samą instancję obiektu (po ID).
-//         * Nawet kiedy ten obiekt zniszczymy, to będzie zwracał wskaźnik to tego zniszczonego. Jedyny
-//         * sposób, żeby zniszczyć i stworzyć obiekt na nowo, to zniszczyć i stworzyć cały GtkBuilder, ale
-//         * wtedy zniszczymy też i inne obiekty!. Czyli to by dobrze działo, gdyby każde okno było w osobnym
-//         * pliku, ale to by trzeba było jakoś sprytnie wymusić, na przykład żeby GtkView i GtkTile miały
-//         * propery ui, gdzie by się podawało nazwę pliku. I wtedy nawet gdyby ktoś robił tak jak my wszystko
-//         * w jednym pliku (wszystkie okna), to taki XML ładował by się tyle razy ile zdefiniowano GtkView i
-//         * GtkTie.
-//         */
-
-//        // Find out tiles that are not needed anymore.
-//        for (Slot *slotA : slotsA) {
-//                GtkTile *tileA = slotA->getTile ();
-
-//                bool tileAPresentInPageB = false;
-//                for (Slot *slotB : slotsB) {
-//                        GtkTile *tileB = slotB->getTile ();
-//                        if (tileB == tileA) {
-//                                tileAPresentInPageB = true;
-//                                break;
-//                        }
-//                }
-
-//                if (!tileAPresentInPageB) {
-//                        tileA->destroyUi ();
-//                }
-//        }
-
-//        if (mainViewA != mainViewB) {
-//                mainViewA->destroyUi ();
-//                mainViewB->show ();
-//        }
-//}
-
-/*--------------------------------------------------------------------------*/
-
-// std::pair<IView *, Page *> App::Impl::getActiveViewOrThrow (std::string const &viewName)
-//{
-//        IView *view = 0;
-//        Page *page = 0;
-
-//        for (auto elem : pages) {
-//                page = elem.second;
-//                view = page->getView ();
-
-//                if (view->getName () == viewName) {
-//                        break;
-//                }
-
-//                SlotVector const &slots = page->getSlots ();
-//                for (Slot *slot : slots) {
-//                        GtkTile *tile = slot->getTile ();
-
-//                        if (tile->getName () == viewName) {
-//                                view = tile;
-//                                break;
-//                        }
-//                }
-//        }
-
-//        // Throw an error if no such view was found
-//        if (!view) {
-//                std::ostringstream o;
-//                o << "You requested submit from view which is not currently loaded. Available pages and their views are :\n";
-
-//                for (auto elem : pages) {
-//                        o << elem.second << "\n";
-//                }
-
-//                throw Core::Exception (o.str ());
-//        }
-
-//        return std::make_pair (view, page);
-//}
-
-/*--------------------------------------------------------------------------*/
-
 void App::pushEvent (std::unique_ptr<IEvent> e) { impl->events.push (std::move (e)); }
 
 /*--------------------------------------------------------------------------*/
@@ -535,7 +391,8 @@ void App::doSubmit (SubmitEvent *event)
 
                 // Falling back to default mapping if none specifica were found.
                 if (!mappingFoundForInput) {
-                        ValidationAndBindingResult vr = Mapping::view2Model (&dto, inputName, "", "");
+                        IMapping *defaultMapping = Impl::getDefaultMapping (&elementDTO);
+                        ValidationAndBindingResult vr = defaultMapping->view2Model (&dto, inputName, "", "");
                         controller->getValidationResults ().add (vr);
 
                         if (!vr.valid) {
@@ -584,6 +441,22 @@ void App::doSubmit (SubmitEvent *event)
 
 /*--------------------------------------------------------------------------*/
 
+IMapping *App::Impl::getDefaultMapping (ViewElementDTO *vd)
+{
+        GObject *inputWidget = vd->inputWidget;
+        static Mapping mapping;
+        // static TableMapping tableMapping;
+
+        if (GTK_IS_TREE_VIEW (inputWidget)) {
+                // return &tableMapping;
+                return nullptr; // You can not get column names from a ListStore, so there is no way to know which models to use.
+        }
+
+        return &mapping;
+}
+
+/*--------------------------------------------------------------------------*/
+
 void App::doRefresh (RefreshEvent *event)
 {
         //        impl->context.setCurrentController (event->controller);
@@ -591,8 +464,8 @@ void App::doRefresh (RefreshEvent *event)
         AbstractView *view = event->controller->getView ();
         AbstractView::WidgetMap inputMap;
 
+        // 1. From mappings
         if (!event->modelRange.empty ()) {
-                // 1. From mappings
                 MappingMultiMap mappings = view->getMappingsByModelRange (event->modelRange);
 
                 for (MappingMultiMap::value_type &elem : mappings) {
@@ -662,7 +535,13 @@ void App::doRefresh (RefreshEvent *event)
 
                 // Default.
                 if (!customMappingWasRun) {
-                        Mapping::model2View (&dto, inputName, "", "");
+                        IMapping *defaultMapping = Impl::getDefaultMapping (&elementDTO);
+
+                        if (!defaultMapping) {
+                                throw Core::Exception ("No default conversion for widget : [" + inputName + "].");
+                        }
+
+                        defaultMapping->model2View (&dto, inputName, "", "");
                 }
         }
 

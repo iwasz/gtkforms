@@ -7,26 +7,28 @@
  ****************************************************************************/
 
 #include "TableMapping.h"
-#include "Logging.h"
 #include "App.h"
 #include "Context.h"
-#include <gtk/gtk.h>
-#include <Tiliae.h>
 #include "GValueVariant.h"
+#include "Logging.h"
+#include <Tiliae.h>
+#include <gtk/gtk.h>
 
 namespace GtkForms {
-static src::logger_mt& lg = logger::get();
+static src::logger_mt &lg = logger::get ();
 using namespace Core;
 
-ValidationAndBindingResult TableMapping::view2Model (MappingDTO *dto)
+ValidationAndBindingResult TableMapping::view2Model (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName,
+                                                     std::string const &modelName, Editor::IEditor *editor)
 {
         // TODO
-        return ValidationAndBindingResult {};
+        return ValidationAndBindingResult{};
 }
 
 /*--------------------------------------------------------------------------*/
 
-void TableMapping::model2View (MappingDTO *dto)
+void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName, std::string const &modelName,
+                               Editor::IEditor *editor)
 {
         if (!GTK_IS_TREE_VIEW (dto->viewElement->inputWidget)) {
                 throw Core::Exception ("TableMapping::view2Model : Could not conver inputWidget to to GtkTreeView.");
@@ -49,7 +51,7 @@ void TableMapping::model2View (MappingDTO *dto)
 
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
         wrapper->setWrappedObject (dto->m2vModelObject);
-        Ptr <IIterator> i = wrapper->iterator (model);
+        Ptr<IIterator> i = wrapper->iterator (modelName);
         GtkTreeIter iter;
 
         // Per row iteration.
@@ -81,12 +83,12 @@ void TableMapping::model2View (MappingDTO *dto)
                                  * GtkListStore. If one wish to include the whole "model-object" (this is the object which gets
                                  * converted into single row of GtkListStore), he adds a <Column> without model specified, which
                                  * means that pointer to the whole model-object has to be stored in a GtkListStore's column. So
-                                 * far so good, but problem occur, when model collection contain model-objects in form of values
-                                 * not pointers. If you get such object as such:
+                                 * far so good, but problem occurs, when model collection contain model-objects in form of values
+                                 * not pointers. If you get such object as so:
                                  *
                                  * Variant element = i->next ();
                                  *
-                                 * you get the copy (in fact Variant hold a smart_pointer then) which gets destroyed when Variant is
+                                 * you get a copy (in fact Variant hold a smart_pointer then) which gets destroyed when Variant is
                                  * destroyed. But in GtkListStore we can store only a pointer to custom "model-objects", so finally
                                  * we end up with invalid pointer. modelColumnCopy collection solves this by maintaining a copy of
                                  * all model objects. So point to remember : collections of values in your domain model will cause

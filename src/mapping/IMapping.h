@@ -5,15 +5,16 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
+
 #ifndef IMAPPING_H_
 #define IMAPPING_H_
 
-#include <string>
-#include <core/Object.h>
-#include <gtk/gtk.h>
 #include "MappingDTO.h"
 #include "ValidationAndBindingResult.h"
 #include <ReflectionParserAnnotation.h>
+#include <core/Object.h>
+#include <gtk/gtk.h>
+#include <string>
 
 namespace GtkForms {
 class App;
@@ -33,8 +34,13 @@ public:
          */
         virtual std::string getModel () const = 0;
 
-        virtual ValidationAndBindingResult view2Model (MappingDTO *dto) = 0;
-        virtual void model2View (MappingDTO *dto) = 0;
+        virtual ValidationAndBindingResult view2Model (MappingDTO *dto) __tiliae_no_reflect__ = 0;
+        virtual ValidationAndBindingResult view2Model (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName,
+                                                       std::string const &modelName, Editor::IEditor *editor = nullptr) __tiliae_no_reflect__ = 0;
+
+        virtual void model2View (MappingDTO *dto) __tiliae_no_reflect__ = 0;
+        virtual void model2View (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName, std::string const &modelName,
+                                 Editor::IEditor *editor = nullptr) __tiliae_no_reflect__ = 0;
 };
 
 } /* namespace GtkForms */

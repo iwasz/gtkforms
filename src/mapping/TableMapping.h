@@ -9,9 +9,9 @@
 #ifndef TABLEMAPPING_H_
 #define TABLEMAPPING_H_
 
+#include "Column.h"
 #include "IMapping.h"
 #include <ReflectionParserAnnotation.h>
-#include "Column.h"
 
 namespace GtkForms {
 
@@ -35,11 +35,15 @@ public:
         std::string getWidget () const { return widget; }
         std::string getModel () const { return model; }
 
-        ValidationAndBindingResult view2Model (MappingDTO *dto);
-        void model2View (MappingDTO *dto);
+        ValidationAndBindingResult view2Model (MappingDTO *dto) __tiliae_no_reflect__ { return view2Model (dto, widget, "", model, nullptr); }
+        virtual ValidationAndBindingResult view2Model (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName,
+                                                       std::string const &modelName, Editor::IEditor *editor = nullptr) __tiliae_no_reflect__;
+
+        void model2View (MappingDTO *dto) __tiliae_no_reflect__ { model2View (dto, widget, "", model, nullptr); }
+        virtual void model2View (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName, std::string const &modelName,
+                                 Editor::IEditor *editor = nullptr) __tiliae_no_reflect__;
 
 public:
-
         std::string widget;
         std::string model;
         ColumnVector columns;
