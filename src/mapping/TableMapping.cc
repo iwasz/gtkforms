@@ -53,7 +53,13 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                 throw Core::Exception ("TableMapping::view2Model : Could not conver treeViewModel to to GtkListStore.");
         }
 
-        // gtk_list_store_clear (list);
+        if (listStore) {
+                gtk_list_store_clear (listStore);
+        }
+        else if (treeStore && !dynamic_cast<ColumnElementDTO *> (dto->viewElement)) {
+                gtk_tree_store_clear (treeStore);
+        }
+
         modelColumnCopy.clear ();
 
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();

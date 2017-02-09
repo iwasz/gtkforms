@@ -7,25 +7,23 @@
  ****************************************************************************/
 
 #include "PixbufColumn.h"
-#include <gtk/gtk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#include "RawData.h"
 #include "Context.h"
+#include "RawData.h"
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gtk/gtk.h>
 
 namespace GtkForms {
-static src::logger_mt& lg = logger::get();
+static src::logger_mt &lg = logger::get ();
 
 void PixbufColumn::setToView (ViewElementDTO *viewObject, std::string const &, Core::Variant valueToSet)
 {
-        // TODO reimplement as in Column
-        ColumnElementDTO *colElem = static_cast <ColumnElementDTO *> (viewObject);
+        ColumnElementDTO *colElem = dynamic_cast<ColumnElementDTO *> (viewObject);
 
-        if (!GTK_IS_LIST_STORE (colElem->inputWidget)) {
-                throw Core::Exception ("Column::setToView : Could not conver treeViewModel to to GtkListStore.");
+        if (!colElem) {
+                throw Core::Exception ("Column::setToView : dynamic_cast <ColumnElementDTO *> (viewObject) failed.");
         }
 
-        GtkListStore *list = GTK_LIST_STORE (colElem->inputWidget);
-        std::string index = lcast <std::string> (valueToSet);
+        std::string index = lcast<std::string> (valueToSet);
 
         AssociationMap::const_iterator it;
         if ((it = dict.find (index)) == dict.end ()) {
@@ -36,10 +34,16 @@ void PixbufColumn::setToView (ViewElementDTO *viewObject, std::string const &, C
         GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (it->second.c_str (), &e);
 
         if (!pixbuf) {
-                throw Core::Exception ("ConstantToPixbufMapping::model2View : failed to create GtkPixbuf from RawData. Message : [" + std::string (e->message) + "]");
+                throw Core::Exception ("ConstantToPixbufMapping::model2View : failed to create GtkPixbuf from RawData. Message : [" + std::string (e->message)
+                                       + "]");
         }
 
-        gtk_list_store_set (list, colElem->iter, colElem->columnNumber, pixbuf, -1);
+        if (colElem->listStore) {
+                gtk_list_store_set (colElem->listStore, colElem->iter, colElem->columnNumber, pixbuf, -1);
+        }
+        else if (colElem->treeStore) {
+                gtk_tree_store_set (colElem->treeStore, colElem->iter, colElem->columnNumber, pixbuf, -1);
+        }
 }
 
-} //namespace
+} // namespace
