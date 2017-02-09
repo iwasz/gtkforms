@@ -31,7 +31,7 @@ protected:
 
 };
 
-typedef __tiliae_reflect__ std::vector <Column *> ColumnVector;
+//typedef __tiliae_reflect__ std::vector <Column *> ColumnVector;
 
 } /* namespace GtkForms */
 #endif /* COLUMN_H_ */

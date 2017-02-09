@@ -73,7 +73,7 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                 elementDTO.iter = &iter;
                 columnDTO.viewElement = &elementDTO;
 
-                for (Column *column : columns) {
+                for (IMapping *column : columns) {
 
                         if (column->getModel ().empty ()) {
                                 /*

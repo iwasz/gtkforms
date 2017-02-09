@@ -46,7 +46,7 @@ public:
 public:
         std::string widget;
         std::string model;
-        ColumnVector columns;
+        MappingVector columns;
         Core::VariantVector modelColumnCopy;
 };
 
