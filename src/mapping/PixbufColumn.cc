@@ -17,6 +17,7 @@ static src::logger_mt& lg = logger::get();
 
 void PixbufColumn::setToView (ViewElementDTO *viewObject, std::string const &, Core::Variant valueToSet)
 {
+        // TODO reimplement as in Column
         ColumnElementDTO *colElem = static_cast <ColumnElementDTO *> (viewObject);
 
         if (!GTK_IS_LIST_STORE (colElem->inputWidget)) {

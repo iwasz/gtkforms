@@ -41,12 +41,19 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                 throw Core::Exception ("TableMapping::view2Model : GtkTreeModel is NULL in GtkTreeView.");
         }
 
-        if (!GTK_IS_LIST_STORE (treeModel)) {
+        GtkListStore *listStore = nullptr;
+        GtkTreeStore *treeStore = nullptr;
+        if (GTK_IS_LIST_STORE (treeModel)) {
+                listStore = GTK_LIST_STORE (treeModel);
+        }
+        else if (GTK_IS_TREE_STORE (treeModel)) {
+                treeStore = GTK_TREE_STORE (treeModel);
+        }
+        else {
                 throw Core::Exception ("TableMapping::view2Model : Could not conver treeViewModel to to GtkListStore.");
         }
 
-        GtkListStore *list = GTK_LIST_STORE (treeModel);
-        gtk_list_store_clear (list);
+        // gtk_list_store_clear (list);
         modelColumnCopy.clear ();
 
         Wrapper::BeanWrapper *wrapper = dto->app->getBeanWrapper ();
@@ -65,11 +72,25 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                 columnDTO.dataRange = "";
 
                 // Dodaj wiersz i uzyskaj iterator.
-                gtk_list_store_append (list, &iter);
+                if (listStore) {
+                        gtk_list_store_append (listStore, &iter);
+                }
+                else if (treeStore) {
+                        ColumnElementDTO *parentElementDTO = dynamic_cast<ColumnElementDTO *> (dto->viewElement);
+
+                        if (!parentElementDTO) {
+                                gtk_tree_store_append (treeStore, &iter, nullptr);
+                        }
+                        else {
+                                gtk_tree_store_append (treeStore, &iter, parentElementDTO->iter);
+                        }
+                }
 
                 ColumnElementDTO elementDTO;
                 elementDTO.columnNumber = 0;
-                elementDTO.inputWidget = G_OBJECT (list);
+                elementDTO.inputWidget = dto->viewElement->inputWidget;
+                elementDTO.listStore = listStore;
+                elementDTO.treeStore = treeStore;
                 elementDTO.iter = &iter;
                 columnDTO.viewElement = &elementDTO;
 
@@ -97,7 +118,14 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                                 modelColumnCopy.push_back (element);
                                 GValue gVal = G_VALUE_INIT;
                                 GtkForms::variantToGValue (&gVal, element);
-                                gtk_list_store_set_value (list, &iter, elementDTO.columnNumber, &gVal);
+
+                                if (listStore) {
+                                        gtk_list_store_set_value (listStore, &iter, elementDTO.columnNumber, &gVal);
+                                }
+                                else if (treeStore) {
+                                        gtk_tree_store_set_value (treeStore, &iter, elementDTO.columnNumber, &gVal);
+                                }
+
                                 g_value_unset (&gVal);
                         }
                         else {

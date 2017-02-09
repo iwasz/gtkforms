@@ -9,16 +9,18 @@
 #ifndef MAPPINGDTO_H_
 #define MAPPINGDTO_H_
 
-#include <string>
-#include <gtk/gtk.h>
 #include <Tiliae.h>
+#include <gtk/gtk.h>
+#include <string>
 
 namespace GtkForms {
-class  App;
+class App;
 class Context;
 
 struct ViewElementDTO {
-        ViewElementDTO (GObject *i) : inputWidget {i} {}
+        ViewElementDTO (GObject *i) : inputWidget{ i } {}
+        virtual ~ViewElementDTO () {}
+
         GObject *inputWidget = 0;
 };
 
