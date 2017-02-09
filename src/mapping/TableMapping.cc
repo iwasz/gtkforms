@@ -102,7 +102,8 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
 
                 for (IMapping *column : columns) {
 
-                        if (column->getModel ().empty ()) {
+                        // TODO add a property to Column class.
+                        if (false) {
                                 /*
                                  * This copy prevents deletion of smart_pointers. Rationale : TableMapping converts between some
                                  * custom collection (lets call it model-collection) of objects (lets call them modl-objects.
@@ -133,8 +134,11 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                                 }
 
                                 g_value_unset (&gVal);
+
                         }
-                        else {
+
+                        // If Column::model is empty, we skip to another column both in Collumns, and in GtkListStore.
+                        if (!column->getModel ().empty ()) {
                                 column->model2View (&columnDTO);
                         }
 
