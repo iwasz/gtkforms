@@ -35,6 +35,8 @@ public:
         virtual void model2View (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName, std::string const &modelName,
                                  Editor::IEditor *editor = nullptr) __tiliae_no_reflect__;
 
+        virtual Core::Variant getConstValue () const { return constValue; }
+
 protected:
         virtual void finalPropertyAndModel (std::string *finalProperty, std::string *finalModelName, MappingDTO *dto, const std::__cxx11::string &widgetName,
                                             const std::__cxx11::string &propertyName, const std::__cxx11::string &modelName);
@@ -54,6 +56,7 @@ public:
         std::string model;
         Editor::IEditor *m2vEditor;
         Editor::IEditor *v2mEditor;
+        Core::Variant constValue;
 };
 
 typedef __tiliae_reflect__ std::vector<IMapping *> MappingVector;

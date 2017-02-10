@@ -114,6 +114,10 @@ std::string Mapping::getDefaultProperty (App *app, ViewElementDTO *dto) const
 Core::Variant Mapping::getFromModel (Wrapper::BeanWrapper *wrapper, Core::Variant objectToWrap, std::string const &finalModelName,
                                      Editor::IEditor *model2viewEditor)
 {
+        if (!constValue.isNone ()) {
+                return constValue;
+        }
+
         wrapper->setWrappedObject (objectToWrap);
         Core::Variant v = wrapper->get (finalModelName);
 

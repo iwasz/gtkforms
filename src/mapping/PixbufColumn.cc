@@ -23,15 +23,22 @@ void PixbufColumn::setToView (ViewElementDTO *viewObject, std::string const &, C
                 throw Core::Exception ("Column::setToView : dynamic_cast <ColumnElementDTO *> (viewObject) failed.");
         }
 
-        std::string index = lcast<std::string> (valueToSet);
-
-        AssociationMap::const_iterator it;
-        if ((it = dict.find (index)) == dict.end ()) {
-                return;
-        }
-
+        GdkPixbuf *pixbuf = nullptr;
         GError *e = nullptr;
-        GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (it->second.c_str (), &e);
+
+        if (getConstValue ().isNone ()) {
+                std::string index = lcast<std::string> (valueToSet);
+
+                AssociationMap::const_iterator it;
+                if ((it = dict.find (index)) == dict.end ()) {
+                        return;
+                }
+
+                pixbuf = gdk_pixbuf_new_from_file (it->second.c_str (), &e);
+        }
+        else {
+                pixbuf = gdk_pixbuf_new_from_file (vcast<std::string> (getConstValue ()).c_str (), &e);
+        }
 
         if (!pixbuf) {
                 throw Core::Exception ("ConstantToPixbufMapping::model2View : failed to create GtkPixbuf from RawData. Message : [" + std::string (e->message)

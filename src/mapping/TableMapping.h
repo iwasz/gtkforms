@@ -43,11 +43,14 @@ public:
         virtual void model2View (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName, std::string const &modelName,
                                  Editor::IEditor *editor = nullptr) __tiliae_no_reflect__;
 
+        virtual Core::Variant getConstValue () const { return constValue; }
+
 public:
         std::string widget;
         std::string model;
         MappingVector columns;
         Core::VariantVector modelColumnCopy;
+        Core::Variant constValue;
 };
 
 } /* namespace GtkForms */

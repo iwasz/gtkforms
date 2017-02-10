@@ -34,6 +34,12 @@ public:
          */
         virtual std::string getModel () const = 0;
 
+        /**
+         * Instead of setting the model name, you can set the constValue property. This way
+         * the mapping will not look for model, but will always return the constValue.
+         */
+        virtual Core::Variant getConstValue () const = 0;
+
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto) __tiliae_no_reflect__ = 0;
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName,
                                                        std::string const &modelName, Editor::IEditor *editor = nullptr) __tiliae_no_reflect__ = 0;

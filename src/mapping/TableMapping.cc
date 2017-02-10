@@ -134,11 +134,10 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                                 }
 
                                 g_value_unset (&gVal);
-
                         }
 
                         // If Column::model is empty, we skip to another column both in Collumns, and in GtkListStore.
-                        if (!column->getModel ().empty ()) {
+                        if (!column->getModel ().empty () || !column->getConstValue ().isNone ()) {
                                 column->model2View (&columnDTO);
                         }
 
