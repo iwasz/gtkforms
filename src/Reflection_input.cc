@@ -2,6 +2,7 @@
 #include "controller/IHandler.h"
 #include "controller/HierarchicalAccessor.h"
 #include "decorator/ValidationDecorator.h"
+#include "decorator/GtkTreeViewDecorator.h"
 #include "mapping/AdjustmentMapping.h"
 #include "mapping/AssociationMap.h"
 #include "mapping/Column.h"
@@ -12,4 +13,3 @@
 #include "signalAdapter/SignalAdapter.h"
 #include "validator/Validator.h"
 #include "view/BuilderView.h"
-

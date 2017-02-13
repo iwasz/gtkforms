@@ -6,15 +6,15 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <gtk/gtk.h>
-#include <cstdint>
 #include "AbstractView.h"
-#include <Tiliae.h>
 #include "App.h"
 #include "Context.h"
 #include "Logging.h"
-#include "mapping/GValueVariant.h"
 #include "RegexHelper.h"
+#include "mapping/GValueVariant.h"
+#include <Tiliae.h>
+#include <cstdint>
+#include <gtk/gtk.h>
 
 namespace GtkForms {
 static src::logger_mt &lg = logger::get ();
@@ -720,6 +720,30 @@ void AbstractView::clearInternalState ()
         impl->slotWidgetsMap.clear ();
         delete impl->mappingsByInputCache;
         impl->mappingsByInputCache = nullptr;
+}
+
+/*****************************************************************************/
+
+void AbstractView::runDecorators (IPageDecorator::Stage stage, Context *ctx)
+{
+        for (IPageDecorator *decorator : decorators) {
+                switch (stage) {
+                case IPageDecorator::PRE_SUBMIT:
+                        decorator->preSubmit (this, ctx);
+                        break;
+
+                case IPageDecorator::POST_START:
+                        decorator->preSubmit (this, ctx);
+                        break;
+
+                case IPageDecorator::POST_REFRESH:
+                        decorator->postRefresh (this, ctx);
+                        break;
+
+                default:
+                        throw Core::Exception ("AbstractView::runDecorators : Hey, programmer, you forgot to add an enum value to this switch!");
+                }
+        }
 }
 
 } // namespace GtkForms

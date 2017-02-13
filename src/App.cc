@@ -175,6 +175,7 @@ void App::Impl::controllerOpen (std::string const &controllerName, AbstractContr
         std::string viewName = controller->onStart ();
         AbstractView *view = AbstractView::loadView (viewName, controller, container);
         controller->setView (view);
+        view->runDecorators (IPageDecorator::POST_START, &context);
 
         Core::StringVector alsoOpenList;
         if (!controller->alsoOpen.empty ()) {
@@ -428,11 +429,7 @@ void App::doSubmit (SubmitEvent *event)
         impl->context.setValidationResults (&controller->getValidationResults ());
 
         // Fire decorators.
-        PageDecoratorVector &decorators = view->getDecorators ();
-
-        for (IPageDecorator *decorator : decorators) {
-                decorator->run (view, &impl->context);
-        }
+        view->runDecorators (IPageDecorator::PRE_SUBMIT, &impl->context);
 
         if (!hasErrors) {
                 controller->onSubmit ();
@@ -546,6 +543,7 @@ void App::doRefresh (RefreshEvent *event)
         }
 
         view->refresh (&impl->context);
+        view->runDecorators (IPageDecorator::POST_REFRESH, &impl->context);
 }
 
 /*--------------------------------------------------------------------------*/

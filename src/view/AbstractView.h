@@ -82,6 +82,7 @@ public:
         MappingMultiMap getMappingsByModelRange (std::string const &modelRange) const;
 
         PageDecoratorVector &getDecorators () __tiliae_no_reflect__ { return decorators; }
+        virtual void runDecorators (IPageDecorator::Stage stage, Context *ctx);
 
         /*---------------------------------------------------------------------------*/
 

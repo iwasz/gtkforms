@@ -8,8 +8,8 @@
 #ifndef IPAGEDECORATOR_H_
 #define IPAGEDECORATOR_H_
 
-#include <Tiliae.h>
 #include <ReflectionParserAnnotation.h>
+#include <Tiliae.h>
 
 namespace GtkForms {
 class Context;
@@ -20,11 +20,18 @@ class AbstractView;
  */
 class __tiliae_reflect__ IPageDecorator : public Core::Object {
 public:
+        enum Stage { POST_START, PRE_SUBMIT, POST_REFRESH };
+
         virtual ~IPageDecorator () {}
-        virtual void run (AbstractView *view, Context *ctx) = 0;
+        /// On view start
+        virtual void postStart (AbstractView *view, Context *ctx) = 0;
+        /// On submit (prior to controller->onSubmit).
+        virtual void preSubmit (AbstractView *view, Context *ctx) = 0;
+        /// After refresh (after widgets are populated with data).
+        virtual void postRefresh (AbstractView *view, Context *ctx) = 0;
 };
 
-typedef __tiliae_reflect__ std::vector <IPageDecorator *> PageDecoratorVector;
+typedef __tiliae_reflect__ std::vector<IPageDecorator *> PageDecoratorVector;
 
 } /* namespace GtkForms */
 

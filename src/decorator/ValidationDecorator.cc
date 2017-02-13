@@ -15,7 +15,7 @@
 namespace GtkForms {
 static src::logger_mt& lg = logger::get();
 
-void ValidationDecorator::run (AbstractView *view, Context *ctx)
+void ValidationDecorator::preSubmit (AbstractView *view, Context *ctx)
 {
         if (!ctx->getValidationResults ()) {
                 return;

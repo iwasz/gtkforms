@@ -9,18 +9,17 @@
 #ifndef VALIDATIONDECORATOR_H_
 #define VALIDATIONDECORATOR_H_
 
-#include "IPageDecorator.h"
-#include <ReflectionParserAnnotation.h>
+#include "AbstractPageDecorator.h"
 
 namespace GtkForms {
 
 /**
  * @brief Changs color of an input to red if validation falis.
  */
-class __tiliae_reflect__ ValidationDecorator : public IPageDecorator {
+class __tiliae_reflect__ ValidationDecorator : public AbstractPageDecorator {
 public:
         virtual ~ValidationDecorator () {}
-        virtual void run (AbstractView *view, Context *ctx);
+        virtual void preSubmit (AbstractView *view, Context *ctx);
 };
 
 } /* namespace GtkForms */

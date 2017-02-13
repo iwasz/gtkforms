@@ -5,10 +5,24 @@
  *  License : see COPYING file for details.                                 *
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
-#ifndef GTK_FORMS_DECORATOR_H_
-#define GTK_FORMS_DECORATOR_H_
 
-#include "ValidationDecorator.h"
-#include "GtkTreeViewDecorator.h"
+#ifndef ABSTRACTDECORATOR_H
+#define ABSTRACTDECORATOR_H
 
-#endif /* DECORATOR_H_ */
+#include "IPageDecorator.h"
+#include <ReflectionParserAnnotation.h>
+
+namespace GtkForms {
+
+class __tiliae_reflect__ AbstractPageDecorator : public IPageDecorator {
+public:
+        virtual ~AbstractPageDecorator () {}
+
+        virtual void postStart (AbstractView *view, Context *ctx) {}
+        virtual void preSubmit (AbstractView *view, Context *ctx) {}
+        virtual void postRefresh (AbstractView *view, Context *ctx) {}
+};
+
+} /* namespace GtkForms */
+
+#endif // ABSTRACTDECORATOR_H
