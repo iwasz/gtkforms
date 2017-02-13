@@ -102,8 +102,8 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
 
                 for (IMapping *column : columns) {
 
-                        // TODO add a property to Column class.
-                        if (false) {
+                        Column *c = dynamic_cast<Column *> (column);
+                        if (c && c->isStoreThisRow ()) {
                                 /*
                                  * This copy prevents deletion of smart_pointers. Rationale : TableMapping converts between some
                                  * custom collection (lets call it model-collection) of objects (lets call them modl-objects.

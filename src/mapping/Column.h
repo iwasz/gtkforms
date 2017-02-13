@@ -26,11 +26,20 @@ struct ColumnElementDTO : public ViewElementDTO {
         unsigned int columnNumber = 0;
 };
 
+/**
+ * @brief The Column struct
+ */
 struct __tiliae_reflect__ Column : public Mapping {
         virtual ~Column () {}
 
+        bool isStoreThisRow () const { return storeThisRow; }
+        void setStoreThisRow (bool value) { storeThisRow = value; }
+
 protected:
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
+
+private:
+        bool storeThisRow = false;
 };
 
 // typedef __tiliae_reflect__ std::vector <Column *> ColumnVector;
