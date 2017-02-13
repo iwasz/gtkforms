@@ -9,14 +9,15 @@
 #ifndef GTK_ABSTRACT_VIEW_H_
 #define GTK_ABSTRACT_VIEW_H_
 
-#include <string>
+#include "decorator/IPageDecorator.h"
+#include "mapping/Mapping.h"
+#include "signalAdapter/AbstractSignalAdapter.h"
+#include <ReflectionParserAnnotation.h>
+#include <core/Object.h>
+#include <gtk/gtk.h>
 #include <map>
 #include <set>
-#include <gtk/gtk.h>
-#include <core/Object.h>
-#include <ReflectionParserAnnotation.h>
-#include "mapping/Mapping.h"
-#include "decorator/IPageDecorator.h"
+#include <string>
 
 namespace GtkForms {
 class Context;
@@ -28,9 +29,8 @@ struct Config;
  * View (a top level windows, or some inner GtkWidget) created from GtkBuilder. Thise views are
  * loaded (i.e. memory is alloceted) in GtkAbstractView::show, and unloaded (memory is freed) in GtkAbstractView::hide (loadUi/destroyUi?).
  */
-class __tiliae_reflect__  AbstractView : public Core::Object {
+class __tiliae_reflect__ AbstractView : public Core::Object {
 public:
-
         AbstractView ();
         virtual ~AbstractView ();
 
@@ -69,7 +69,7 @@ public:
         virtual GObject *getUiOrThrow (std::string const &name);
         virtual GObject *getUi (std::string const &name) __tiliae_no_reflect__ = 0;
 
-        typedef std::multimap <std::string, GtkWidget *> WidgetMap;
+        typedef std::multimap<std::string, GtkWidget *> WidgetMap;
         WidgetMap getInputs (std::string const &dataRange, bool outputs = false);
         WidgetMap const &getSlots ();
         GtkWidget *getSlot (std::string const &name);
@@ -86,9 +86,10 @@ public:
         /*---------------------------------------------------------------------------*/
 
         virtual void connectSignals (AbstractAccessor *accessor) = 0;
-        virtual void connectSignal (gpointer obj, std::string const &signalName, std::string const &code) = 0;
 
-        // TODO Should be protected
+        SignalAdapterVector &getSignalAdapters () { return signalAdapters; }
+
+// TODO Should be protected
 #define CONTROLLER_KEY "controller"
         static AbstractController *getControllerByWidget (GObject *widget);
         /// Gets the controller pointer from the GTK widget
@@ -104,24 +105,22 @@ public:
         void setConfig (Config const *c);
 
 public:
-
         std::string name;
         MappingVector mappings;
         PageDecoratorVector decorators;
+        SignalAdapterVector signalAdapters;
 
 protected:
-
         void populateInputMap ();
         void clearInternalState ();
 
 private:
-
         struct Impl;
         Impl *impl = 0;
 };
 
-typedef __tiliae_reflect__ std::map <std::string, AbstractView *> ViewMap;
-typedef std::set <AbstractView *> ViewSet;
+typedef __tiliae_reflect__ std::map<std::string, AbstractView *> ViewMap;
+typedef std::set<AbstractView *> ViewSet;
 
 } // namespace GtkForms
 

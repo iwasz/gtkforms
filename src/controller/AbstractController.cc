@@ -69,6 +69,10 @@ void AbstractController::setToSessionScope (std::string const &path, Core::Varia
 
 /*---------------------------------------------------------------------------*/
 
+/*
+ * Warning, IoC container crashes here, when non existent property was specified (it falls back
+ * to generic get/set methods which were not meant to be used for that).
+ */
 Core::Variant AbstractController::get (const std::string &path)
 {
         Wrapper::BeanWrapper *wrapper = impl->app->getBeanWrapper ();

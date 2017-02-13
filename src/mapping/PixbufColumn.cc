@@ -15,6 +15,7 @@
 namespace GtkForms {
 static src::logger_mt &lg = logger::get ();
 
+// TODO create pixbufs on startup, not everytime setToView is called. Total waste of memory.
 void PixbufColumn::setToView (ViewElementDTO *viewObject, std::string const &, Core::Variant valueToSet)
 {
         ColumnElementDTO *colElem = dynamic_cast<ColumnElementDTO *> (viewObject);

@@ -6,7 +6,6 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <gtk/gtk.h>
 #include "GValueVariant.h"
 
 namespace GtkForms {
@@ -22,12 +21,14 @@ Variant gValueToVariant (GValue const *gVal)
         std::cerr << "G_TYPE_IS_OBJECT() : " << G_TYPE_IS_OBJECT(G_VALUE_TYPE (gVal)) << std::endl;
 #endif
 
-        switch (G_TYPE_FUNDAMENTAL(G_VALUE_TYPE (gVal))) {
+        switch (G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (gVal))) {
         case G_TYPE_OBJECT:
         case G_TYPE_INTERFACE:
                 return Variant (G_OBJECT (g_value_get_object (gVal)));
-        case G_TYPE_STRING:
-                return Variant (std::string (g_value_get_string (gVal)));
+        case G_TYPE_STRING: {
+                const gchar *gStr = g_value_get_string (gVal);
+                return Variant (std::string ((gStr) ? (gStr) : ("")));
+        }
         case G_TYPE_INT:
                 return Variant ((int)g_value_get_int (gVal));
         case G_TYPE_FLOAT:
@@ -83,80 +84,80 @@ GValue *variantToGValue (GValue *gVal, Core::Variant const &vVal)
         switch (vVal.getType ()) {
         case Variant::STRING:
                 g_value_init (gVal, G_TYPE_STRING);
-                g_value_set_string (gVal, vcast <std::string> (vVal).c_str ()); // Tu się robi kopia : "caller-owned string to be duplicated for the GValue."
+                g_value_set_string (gVal, vcast<std::string> (vVal).c_str ()); // Tu się robi kopia : "caller-owned string to be duplicated for the GValue."
                 break;
         case Variant::STRING_POINTER:
                 g_value_init (gVal, G_TYPE_STRING);
-                g_value_set_string (gVal, vcast <std::string> (vVal).c_str ());
+                g_value_set_string (gVal, vcast<std::string> (vVal).c_str ());
                 break;
         case Variant::STRING_POINTER_CONST:
                 g_value_init (gVal, G_TYPE_STRING);
-                g_value_set_string (gVal, vcast <std::string> (vVal).c_str ());
+                g_value_set_string (gVal, vcast<std::string> (vVal).c_str ());
                 break;
         case Variant::POINTER:
                 g_value_init (gVal, G_TYPE_POINTER);
-                g_value_set_pointer (gVal, vcast <void *> (vVal));
+                g_value_set_pointer (gVal, vcast<void *> (vVal));
                 break;
         case Variant::SMART:
                 g_value_init (gVal, G_TYPE_POINTER);
-                g_value_set_pointer (gVal, vcast <void *> (vVal));
+                g_value_set_pointer (gVal, vcast<void *> (vVal));
                 break;
                 break;
         case Variant::OBJECT:
                 g_value_init (gVal, G_TYPE_POINTER);
-                g_value_set_pointer (gVal, vcast <void *> (vVal));
+                g_value_set_pointer (gVal, vcast<void *> (vVal));
                 break;
         case Variant::SMART_OBJECT:
                 g_value_init (gVal, G_TYPE_POINTER);
-                g_value_set_pointer (gVal, vcast <void *> (vVal));
+                g_value_set_pointer (gVal, vcast<void *> (vVal));
                 break;
         case Variant::BOOL:
                 g_value_init (gVal, G_TYPE_BOOLEAN);
-                g_value_set_boolean (gVal, vcast <bool> (vVal));
+                g_value_set_boolean (gVal, vcast<bool> (vVal));
                 break;
         case Variant::CHAR:
                 g_value_init (gVal, G_TYPE_CHAR);
-                g_value_set_schar (gVal, vcast <char> (vVal));
+                g_value_set_schar (gVal, vcast<char> (vVal));
                 break;
         case Variant::UNSIGNED_CHAR:
                 g_value_init (gVal, G_TYPE_UCHAR);
-                g_value_set_uchar (gVal, vcast <unsigned char> (vVal));
+                g_value_set_uchar (gVal, vcast<unsigned char> (vVal));
                 break;
         case Variant::DOUBLE:
                 g_value_init (gVal, G_TYPE_DOUBLE);
-                g_value_set_double (gVal, vcast <double> (vVal));
+                g_value_set_double (gVal, vcast<double> (vVal));
                 break;
         case Variant::LONG_DOUBLE:
                 g_value_init (gVal, G_TYPE_DOUBLE);
-                g_value_set_double (gVal, vcast <long double> (vVal));
+                g_value_set_double (gVal, vcast<long double> (vVal));
                 break;
         case Variant::FLOAT:
                 g_value_init (gVal, G_TYPE_FLOAT);
-                g_value_set_float (gVal, vcast <float> (vVal));
+                g_value_set_float (gVal, vcast<float> (vVal));
                 break;
         case Variant::INT:
                 g_value_init (gVal, G_TYPE_INT);
-                g_value_set_int (gVal, vcast <int> (vVal));
+                g_value_set_int (gVal, vcast<int> (vVal));
                 break;
         case Variant::UNSIGNED_INT:
                 g_value_init (gVal, G_TYPE_UINT);
-                g_value_set_uint (gVal, vcast <unsigned int> (vVal));
+                g_value_set_uint (gVal, vcast<unsigned int> (vVal));
                 break;
         case Variant::LONG_INT:
                 g_value_init (gVal, G_TYPE_LONG);
-                g_value_set_long (gVal, vcast <long int> (vVal));
+                g_value_set_long (gVal, vcast<long int> (vVal));
                 break;
         case Variant::UNSIGNED_LONG_INT:
                 g_value_init (gVal, G_TYPE_ULONG);
-                g_value_set_long (gVal, vcast <unsigned long int> (vVal));
+                g_value_set_long (gVal, vcast<unsigned long int> (vVal));
                 break;
         case Variant::SHORT_INT:
                 g_value_init (gVal, G_TYPE_INT);
-                g_value_set_int (gVal, vcast <short int> (vVal));
+                g_value_set_int (gVal, vcast<short int> (vVal));
                 break;
         case Variant::UNSIGNED_SHORT_INT:
                 g_value_init (gVal, G_TYPE_UINT);
-                g_value_set_uint (gVal, vcast <unsigned short int> (vVal));
+                g_value_set_uint (gVal, vcast<unsigned short int> (vVal));
                 break;
         case Variant::NIL:
                 g_value_init (gVal, G_TYPE_POINTER);
@@ -170,5 +171,4 @@ GValue *variantToGValue (GValue *gVal, Core::Variant const &vVal)
 
         return gVal;
 }
-
 }

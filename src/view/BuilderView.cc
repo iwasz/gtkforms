@@ -6,11 +6,12 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <gtk/gtk.h>
-#include <boost/algorithm/string/split.hpp>
-#include "Logging.h"
-#include "App.h"
 #include "BuilderView.h"
+#include "App.h"
+#include "Logging.h"
+#include "signalAdapter/ISignalAdapter.h"
+#include <boost/algorithm/string/split.hpp>
+#include <gtk/gtk.h>
 
 namespace GtkForms {
 static src::logger_mt &lg = logger::get ();
@@ -20,15 +21,17 @@ extern "C" {
  * Helper class for passing required data between user code and GObject closures.
  */
 struct ClosureDTO {
-        char *signal;
-        char *gObjectName;
-        char const *widgetId;
-        char *handler;
-        AbstractAccessor *accessor;
+        char *signal = nullptr;
+        char *gObjectName = nullptr;
+        char const *widgetId = nullptr;
+        char *handler = nullptr;
+        AbstractAccessor *accessor = nullptr;
+        SignalAdapterVector *signalAdapters = nullptr;
 };
 
 struct ConnectDTO {
-        AbstractAccessor *accessor;
+        AbstractAccessor *accessor = nullptr;
+        SignalAdapterVector *signalAdapters = nullptr;
 };
 
 /*
@@ -220,41 +223,10 @@ GObject *BuilderView::getUiOrThrow (std::string const &name)
 
 /*****************************************************************************/
 
-void BuilderView::connectSignal (gpointer object, std::string const &signalName, std::string const &code)
-{
-        ClosureDTO *closureDTO = static_cast<ClosureDTO *> (malloc (sizeof (ClosureDTO)));
-        assert (getController ());
-        closureDTO->accessor = getController ()->getModelAccessor();
-
-        closureDTO->handler = g_strdup (code.c_str());
-
-        const char *tmpString = G_OBJECT_TYPE_NAME (object);
-        tmpString = ((tmpString) ? (tmpString) : (""));
-        closureDTO->gObjectName = g_strdup (tmpString);
-
-        closureDTO->signal = g_strdup (signalName.c_str());
-
-        if (GTK_IS_BUILDABLE (object)) {
-                closureDTO->widgetId = gtk_buildable_get_name (GTK_BUILDABLE (object));
-        }
-        else {
-                closureDTO->widgetId = 0;
-        }
-
-        /*
-         * https://developer.gnome.org/gobject/stable/gobject-Closures.html#g-cclosure-new
-         */
-        GClosure *closure = g_cclosure_new (G_CALLBACK (handler), closureDTO, gclosureUserDataDelete);
-
-        g_closure_set_marshal (closure, gClosureMarshal);
-        g_signal_connect_closure (object, signalName.c_str(), closure, FALSE);
-}
-
-/*****************************************************************************/
-
 void BuilderView::connectSignals (AbstractAccessor *accessor)
 {
         impl->connectDTO.accessor = accessor;
+        impl->connectDTO.signalAdapters = &getSignalAdapters ();
         // https://developer.gnome.org/gtk3/stable/GtkBuilder.html#gtk-builder-connect-signals-full
         gtk_builder_connect_signals_full (impl->builder, myConnectFunc, static_cast<gpointer> (&impl->connectDTO));
 
@@ -276,8 +248,8 @@ void myConnectFunc (GtkBuilder *builder, GObject *object, const gchar *signal_na
         closureDTO->handler = g_strdup (tmpString);
 
         ConnectDTO *connectDTO = static_cast<ConnectDTO *> (user_data);
-        //        closureDTO->context = &connectDTO->app->getContext ();
         closureDTO->accessor = connectDTO->accessor;
+        closureDTO->signalAdapters = connectDTO->signalAdapters;
 
         tmpString = G_OBJECT_TYPE_NAME (object);
         tmpString = ((tmpString) ? (tmpString) : (""));
@@ -319,24 +291,25 @@ void gClosureMarshal (GClosure *closure, GValue *return_value, guint n_param_val
         std::string widgetIdCopy = (dto->widgetId) ? (dto->widgetId) : ("");
 
         ISignalAdapter *signalParametersAdapter = 0;
-        //         TODO signal dapters!
-        //        SignalAdapterVector adapters = dto->app->getCurrentUnit ()->getSignalAdapters();
+        SignalAdapterVector *adapters = dto->signalAdapters;
 
-        //        for (ISignalAdapter *a : adapters) {
-        //                if (a->getSignal () == signalNameCopy) {
-        //                        signalParametersAdapter = a;
+        if (adapters) {
+                for (ISignalAdapter *a : *adapters) {
+                        if (a->getSignal () == signalNameCopy) {
+                                signalParametersAdapter = a;
 
-        //                        if (a->getGObjectName () == gObjectNameCopy) {
-        //                                signalParametersAdapter = a;
+                                if (a->getGObjectName () == gObjectNameCopy) {
+                                        signalParametersAdapter = a;
 
-        //                                // Full match;
-        //                                if (a->getWidgetId () == widgetIdCopy) {
-        //                                        signalParametersAdapter = a;
-        //                                        break;
-        //                                }
-        //                        }
-        //                }
-        //        }
+                                        // Full match;
+                                        if (a->getWidgetId () == widgetIdCopy) {
+                                                signalParametersAdapter = a;
+                                                break;
+                                        }
+                                }
+                        }
+                }
+        }
 
         if (signalParametersAdapter) {
                 BOOST_LOG (lg) << "Signal adapter has been found : signal : [" << signalParametersAdapter->getSignal () << "], gObjectname : ["
@@ -381,5 +354,4 @@ void gclosureUserDataDelete (gpointer data, GClosure *closure)
         g_free (dto->signal);
         free (dto);
 }
-
 }

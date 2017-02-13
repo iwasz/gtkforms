@@ -9,9 +9,9 @@
 #ifndef ABSTRACTSIGNALADAPTER_H_
 #define ABSTRACTSIGNALADAPTER_H_
 
+#include "ISignalAdapter.h"
 #include "Logging.h"
 #include <ReflectionParserAnnotation.h>
-#include "ISignalAdapter.h"
 #include <string>
 
 namespace GtkForms {
@@ -25,13 +25,10 @@ public:
         virtual std::string getWidgetId () const { return widgetId; }
 
 private:
-
         std::string signal;
         std::string gObjectName;
         std::string widgetId;
 };
-
-typedef __tiliae_reflect__ std::vector <ISignalAdapter *> SignalAdapterVector;
 
 } /* namespace GtkForms */
 #endif /* ABSTRACTSIGNALADAPTER_H_ */

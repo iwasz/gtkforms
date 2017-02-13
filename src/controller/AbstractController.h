@@ -16,7 +16,6 @@
 #include <core/Object.h>
 #include <ReflectionParserAnnotation.h>
 #include <ReflectionParserAnnotation.h>
-#include "signalAdapter/AbstractSignalAdapter.h"
 #include "validator/IValidator.h"
 #include "AbstractAccessor.h"
 
@@ -78,7 +77,6 @@ public:
 
         virtual ValidationAndBindingResult validate () { return ValidationAndBindingResult {}; }
 
-        SignalAdapterVector &getSignalAdapters () { return signalAdapters; }
         ValidatorVector const &getValidators () const { return validators; }
 
         ValidationAndBindingResultContainer const &getValidationResults () const __tiliae_no_reflect__;
@@ -155,7 +153,6 @@ public:
 public:
 
         ValidatorVector validators;
-        SignalAdapterVector signalAdapters;
         int loopDelayMs;
         /// Which controllers to open as child-controllers of this controller. TODO StringVector + converter.
         std::string alsoOpen;

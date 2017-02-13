@@ -27,7 +27,6 @@ public:
         virtual GObject *getUi (std::string const &name) __tiliae_no_reflect__;
         GObject *getUiOrThrow (std::string const &name);
         virtual void connectSignals (AbstractAccessor *accessor);
-        virtual void connectSignal (gpointer object, std::string const &signalName, std::string const &code);
 
 public:
 

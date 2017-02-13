@@ -10,6 +10,7 @@
 #define GVALUE_VARIANT_GTKFORMS_H_
 
 #include <Tiliae.h>
+#include <gtk/gtk.h>
 
 namespace GtkForms {
 
@@ -23,7 +24,6 @@ extern Core::Variant gValueToVariant (GValue const *gVal);
  * memory. Use g_value_unset (&val);
  */
 extern GValue *variantToGValue (GValue *gVal, Core::Variant const &);
-
 }
 
-#	endif /* GTKFORMS_H_ */
+#endif /* GTKFORMS_H_ */
