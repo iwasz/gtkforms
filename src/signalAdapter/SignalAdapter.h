@@ -10,6 +10,7 @@
 #define SIGNALADAPTER_H_
 
 #include "ISignalAdapter.h"
+#include "KeyPressEventAdapter.h"
 #include "RowActivatedAdapter.h"
 
 #endif /* SIGNALADAPTER_H_ */

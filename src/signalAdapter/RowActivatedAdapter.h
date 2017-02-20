@@ -10,7 +10,6 @@
 #define ROWACTIVATEDADAPTER_H_
 
 #include "AbstractSignalAdapter.h"
-#include <ReflectionParserAnnotation.h>
 
 namespace GtkForms {
 
