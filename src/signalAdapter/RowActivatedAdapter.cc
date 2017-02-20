@@ -189,12 +189,13 @@ Core::VariantVector RowActivatedAdapter::adaptSelectionChanged (guint n_param_va
                 GtkTreeModel *treeModel = nullptr;
                 GtkTreeIter iter;
                 if (!gtk_tree_selection_get_selected (selection, &treeModel, &iter)) {
-                        return params;
+                        params.push_back (Core::Variant ());
                 }
-
-                GValue gVal = { 0 };
-                gtk_tree_model_get_value (treeModel, &iter, modelColumn, &gVal);
-                params.push_back (gValueToVariant (&gVal));
+                else {
+                        GValue gVal = { 0 };
+                        gtk_tree_model_get_value (treeModel, &iter, modelColumn, &gVal);
+                        params.push_back (gValueToVariant (&gVal));
+                }
         }
 
         params.push_back (Core::Variant (selection));
