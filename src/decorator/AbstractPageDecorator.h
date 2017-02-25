@@ -18,9 +18,11 @@ class __tiliae_reflect__ AbstractPageDecorator : public IPageDecorator {
 public:
         virtual ~AbstractPageDecorator () {}
 
-        virtual void postStart (AbstractView *view, Context *ctx) {}
+        virtual void preShow (AbstractView *view, Context *ctx) {}
+        virtual void postShow (AbstractView *view, Context *ctx) {}
         virtual void preSubmit (AbstractView *view, Context *ctx) {}
         virtual void postRefresh (AbstractView *view, Context *ctx) {}
+        virtual void preClose (AbstractView *view, Context *ctx) {}
 };
 
 } /* namespace GtkForms */

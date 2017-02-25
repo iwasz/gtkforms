@@ -59,6 +59,7 @@ struct BuilderView::Impl {
         GtkBuilder *builder = nullptr;
         bool loaded = false;
         ConnectDTO connectDTO;
+        Context *context = nullptr;
 };
 
 /*****************************************************************************/
@@ -79,6 +80,7 @@ void BuilderView::loadUi (App *app)
         BOOST_LOG (lg) << "BuilderView::loadUi : \033[35m[" << name << "]\033[0m";
         clearInternalState ();
         setConfig (app->getConfig ());
+        impl->context = &app->getContext ();
 
         if (impl->loaded) {
                 return;
@@ -154,6 +156,8 @@ void BuilderView::Impl::onUserClickedQuit (GtkWidget *object, gpointer userData)
 void BuilderView::destroyUi ()
 {
         BOOST_LOG (lg) << "BuilderView::destroyUi : \033[35m[" << name << "]\033[0m";
+
+        runDecorators (IPageDecorator::PRE_CLOSE, impl->context);
         clearInternalState ();
 
         if (!impl->widget) {
@@ -188,7 +192,7 @@ void BuilderView::destroyUi ()
         //                g_object_unref (impl->widget);
         //        }
 
-        impl->widget = 0;
+        impl->widget = nullptr;
 
         g_object_unref (impl->builder);
         impl->loaded = false;

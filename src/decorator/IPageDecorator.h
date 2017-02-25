@@ -20,15 +20,19 @@ class AbstractView;
  */
 class __tiliae_reflect__ IPageDecorator : public Core::Object {
 public:
-        enum Stage { POST_START, PRE_SUBMIT, POST_REFRESH };
+        enum Stage { PRE_SHOW, POST_SHOW, PRE_SUBMIT, POST_REFRESH, PRE_CLOSE };
 
         virtual ~IPageDecorator () {}
         /// On view start
-        virtual void postStart (AbstractView *view, Context *ctx) = 0;
+        virtual void preShow (AbstractView *view, Context *ctx) = 0;
+        /// On view start
+        virtual void postShow (AbstractView *view, Context *ctx) = 0;
         /// On submit (prior to controller->onSubmit).
         virtual void preSubmit (AbstractView *view, Context *ctx) = 0;
         /// After refresh (after widgets are populated with data).
         virtual void postRefresh (AbstractView *view, Context *ctx) = 0;
+        /// Before close (does not matter if window gets destroyed or not)
+        virtual void preClose (AbstractView *view, Context *ctx) = 0;
 };
 
 typedef __tiliae_reflect__ std::vector<IPageDecorator *> PageDecoratorVector;

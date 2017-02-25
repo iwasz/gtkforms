@@ -25,7 +25,7 @@ void GtkTreeViewDecorator::expandAll (AbstractView *view)
 
 /*****************************************************************************/
 
-void GtkTreeViewDecorator::postStart (AbstractView *view, Context *)
+void GtkTreeViewDecorator::postShow (AbstractView *view, Context *)
 {
         if (postStartExpandAll) {
                 expandAll (view);

@@ -91,6 +91,7 @@ AbstractView *AbstractView::loadView (std::string const &viewAndSlot, AbstractCo
                 }
         }
 
+        view->runDecorators (IPageDecorator::PRE_SHOW, &controller->getApp ()->getContext ());
         view->show ();
         return view;
 }
@@ -732,12 +733,20 @@ void AbstractView::runDecorators (IPageDecorator::Stage stage, Context *ctx)
                         decorator->preSubmit (this, ctx);
                         break;
 
-                case IPageDecorator::POST_START:
-                        decorator->preSubmit (this, ctx);
+                case IPageDecorator::PRE_SHOW:
+                        decorator->preShow (this, ctx);
+                        break;
+
+                case IPageDecorator::POST_SHOW:
+                        decorator->postShow (this, ctx);
                         break;
 
                 case IPageDecorator::POST_REFRESH:
                         decorator->postRefresh (this, ctx);
+                        break;
+
+                case IPageDecorator::PRE_CLOSE:
+                        decorator->preClose (this, ctx);
                         break;
 
                 default:

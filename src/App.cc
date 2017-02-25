@@ -175,7 +175,7 @@ void App::Impl::controllerOpen (std::string const &controllerName, AbstractContr
         std::string viewName = controller->onStart ();
         AbstractView *view = AbstractView::loadView (viewName, controller, container);
         controller->setView (view);
-        view->runDecorators (IPageDecorator::POST_START, &context);
+        view->runDecorators (IPageDecorator::POST_SHOW, &context);
 
         Core::StringVector alsoOpenList;
         if (!controller->alsoOpen.empty ()) {

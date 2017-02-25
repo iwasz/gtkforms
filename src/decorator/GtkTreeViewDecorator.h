@@ -16,7 +16,7 @@ namespace GtkForms {
 class __tiliae_reflect__ GtkTreeViewDecorator : public AbstractPageDecorator {
 public:
         virtual ~GtkTreeViewDecorator () {}
-        virtual void postStart (AbstractView *view, Context *ctx);
+        virtual void postShow (AbstractView *view, Context *ctx);
         virtual void postRefresh (AbstractView *view, Context *ctx);
 
         std::string getWidget () const { return widget; }
