@@ -33,19 +33,50 @@ void DimensionRestoreDecorator::preShow (AbstractView *view, Context *ctx)
 
                 gtk_window_resize (win, values[0], values[1]);
         }
+        else if (GTK_IS_PANED (wid)) {
+                GtkPaned *paned = GTK_PANED (wid);
+                g_signal_connect (G_OBJECT (paned), "notify::position", G_CALLBACK (&DimensionRestoreDecorator::onPanedPositionNotify), this);
+
+                DimensionRestoreDatabase::ValueVector values = database->get (widget, key);
+
+                if (values.size () < 1) {
+                        return;
+                }
+
+                gtk_paned_set_position (paned, values[0]);
+        }
 }
 
 /*****************************************************************************/
 
 void DimensionRestoreDecorator::onSizeAllocate (GtkWidget *widget, GdkRectangle *allocation, gpointer userData)
 {
-        BOOST_LOG (lg) << "DimensionRestoreDecorator::onSizeAllocate";
         DimensionRestoreDecorator *decorator = static_cast<DimensionRestoreDecorator *> (userData);
         DimensionRestoreDatabase *database = decorator->database;
 
         DimensionRestoreDatabase::ValueVector values;
         values.push_back (allocation->width);
         values.push_back (allocation->height);
+        database->set (decorator->widget, decorator->key, values);
+}
+
+/*****************************************************************************/
+
+void DimensionRestoreDecorator::onPanedPositionNotify (GObject *gobject, GParamSpec *pspec, gpointer userData)
+{
+        GType propType = pspec->value_type;
+        GValue propValue = { 0 };
+
+        g_value_init (&propValue, propType);
+        g_object_get_property (gobject, "position", &propValue);
+        int pos = g_value_get_int (&propValue);
+        g_value_unset (&propValue);
+
+        DimensionRestoreDecorator *decorator = static_cast<DimensionRestoreDecorator *> (userData);
+        DimensionRestoreDatabase *database = decorator->database;
+
+        DimensionRestoreDatabase::ValueVector values;
+        values.push_back (pos);
         database->set (decorator->widget, decorator->key, values);
 }
 

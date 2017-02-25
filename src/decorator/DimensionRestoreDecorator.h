@@ -54,6 +54,7 @@ public:
 
 private:
         static void onSizeAllocate (GtkWidget *widget, GdkRectangle *allocation, gpointer user_data);
+        static void onPanedPositionNotify (GObject *gobject, GParamSpec *pspec, gpointer userData);
 };
 
 } // GtkForms
