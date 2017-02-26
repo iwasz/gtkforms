@@ -18,7 +18,7 @@ struct TableFilterMapping::Impl {
         GtkTreeModelFilter *gtkTreeModelFilter = nullptr;
         //        std::string widget;
         //        std::string model;
-        std::string query;
+        Core::Variant query;
         int columnNumber = -1;
 
         static gboolean gtkTreeModelFilterVisibleFunc (GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
@@ -50,9 +50,9 @@ void TableFilterMapping::setToView (ViewElementDTO *viewObject, std::string cons
                 throw Core::Exception ("TableFilterMapping::view2Model : GtkTreeModel is NULL in GtkTreeView.");
         }
 
-        if (impl->columnNumber < 0) {
-                throw Core::Exception ("TableFilterMapping::view2Model : please set columnNumber first.");
-        }
+        //        if (impl->columnNumber < 0) {
+        //                throw Core::Exception ("TableFilterMapping::view2Model : please set columnNumber first.");
+        //        }
 
         if (!impl->gtkTreeModelFilter) {
                 impl->gtkTreeModelFilter = GTK_TREE_MODEL_FILTER (gtk_tree_model_filter_new (treeModel, nullptr));
@@ -60,7 +60,7 @@ void TableFilterMapping::setToView (ViewElementDTO *viewObject, std::string cons
                 gtk_tree_view_set_model (treeView, GTK_TREE_MODEL (impl->gtkTreeModelFilter));
         }
 
-        impl->query = vcast<std::string> (valueToSet);
+        impl->query = /*vcast<std::string> (*/ valueToSet /*)*/;
         BOOST_LOG (lg) << "++++ [" << impl->query << "]";
         gtk_tree_model_filter_refilter (impl->gtkTreeModelFilter);
 }
@@ -75,24 +75,34 @@ void TableFilterMapping::setColumnNumber (int value) { impl->columnNumber = valu
 gboolean TableFilterMapping::Impl::gtkTreeModelFilterVisibleFunc (GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
         TableFilterMapping *that = static_cast<TableFilterMapping *> (data);
-        return that->gtkTreeModelFilterVisibleFunc (model, iter);
+
+        if (that->impl->query.isNone ()) {
+                return true;
+        }
+
+        return that->gtkTreeModelFilterVisibleFunc (model, iter, that->impl->query);
 }
 
 /*****************************************************************************/
 
-gboolean TableFilterMapping::gtkTreeModelFilterVisibleFunc (GtkTreeModel *model, GtkTreeIter *iter)
+gboolean TableFilterMapping::gtkTreeModelFilterVisibleFunc (GtkTreeModel *model, GtkTreeIter *iter, const Core::Variant &query)
 {
         GValue gVal = { 0 };
-        gtk_tree_model_get_value (model, iter, impl->columnNumber, &gVal);
+        gtk_tree_model_get_value (model, iter, getColumnNumber (), &gVal);
         const gchar *gStr = g_value_get_string (&gVal);
 
         if (!gStr) {
                 return false;
         }
 
-        bool found = (std::string (gStr).find (impl->query) != std::string::npos);
+        std::string queryStr = vcast<std::string> (query);
+        bool found = (std::string (gStr).find (queryStr) != std::string::npos);
         BOOST_LOG (lg) << "---- [" << impl->query << "] =? [" << gStr << "], found = " << found;
         return found;
 }
+
+/*****************************************************************************/
+
+// Core::Variant TableFilterMapping::getQuery () const { return impl->query; }
 
 } // namespace

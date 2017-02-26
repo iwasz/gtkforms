@@ -23,11 +23,13 @@ public:
         int getColumnNumber () const;
         void setColumnNumber (int value);
 
+        //        Core::Variant getQuery () const;
+
 protected:
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 
         /// Overload thios method to implement your custom search.
-        virtual gboolean gtkTreeModelFilterVisibleFunc (GtkTreeModel *model, GtkTreeIter *iter);
+        virtual gboolean gtkTreeModelFilterVisibleFunc (GtkTreeModel *model, GtkTreeIter *iter, Core::Variant const &query) __tiliae_no_reflect__;
 
 private:
         struct Impl;
