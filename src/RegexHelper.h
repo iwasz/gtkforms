@@ -14,7 +14,7 @@ namespace GtkForms {
 struct RegexHelper {
 
         static bool inputNameMatches (std::string const &widgetName, std::string const &dataRange);
-        static bool modelNameMatches (std::string const &modelName, std::string const &dataRange);
+        static bool nameMatches (std::string const &modelName, std::string const &dataRange);
 };
 
 } /* namespace GtkForms */

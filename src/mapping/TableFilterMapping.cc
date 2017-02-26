@@ -56,7 +56,7 @@ void TableFilterMapping::setToView (ViewElementDTO *viewObject, std::string cons
 
         if (!impl->gtkTreeModelFilter) {
                 impl->gtkTreeModelFilter = GTK_TREE_MODEL_FILTER (gtk_tree_model_filter_new (treeModel, nullptr));
-                gtk_tree_model_filter_set_visible_func (impl->gtkTreeModelFilter, &TableFilterMapping::Impl::gtkTreeModelFilterVisibleFunc, impl, nullptr);
+                gtk_tree_model_filter_set_visible_func (impl->gtkTreeModelFilter, &TableFilterMapping::Impl::gtkTreeModelFilterVisibleFunc, this, nullptr);
                 gtk_tree_view_set_model (treeView, GTK_TREE_MODEL (impl->gtkTreeModelFilter));
         }
 
@@ -74,8 +74,14 @@ void TableFilterMapping::setColumnNumber (int value) { impl->columnNumber = valu
 
 gboolean TableFilterMapping::Impl::gtkTreeModelFilterVisibleFunc (GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
-        TableFilterMapping::Impl *impl = static_cast<TableFilterMapping::Impl *> (data);
+        TableFilterMapping *that = static_cast<TableFilterMapping *> (data);
+        return that->gtkTreeModelFilterVisibleFunc (model, iter);
+}
 
+/*****************************************************************************/
+
+gboolean TableFilterMapping::gtkTreeModelFilterVisibleFunc (GtkTreeModel *model, GtkTreeIter *iter)
+{
         GValue gVal = { 0 };
         gtk_tree_model_get_value (model, iter, impl->columnNumber, &gVal);
         const gchar *gStr = g_value_get_string (&gVal);

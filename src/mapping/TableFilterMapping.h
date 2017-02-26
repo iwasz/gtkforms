@@ -11,6 +11,7 @@
 
 #include "Mapping.h"
 #include <ReflectionParserAnnotation.h>
+#include <gtk/gtk.h>
 
 namespace GtkForms {
 
@@ -23,8 +24,10 @@ public:
         void setColumnNumber (int value);
 
 protected:
-
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
+
+        /// Overload thios method to implement your custom search.
+        virtual gboolean gtkTreeModelFilterVisibleFunc (GtkTreeModel *model, GtkTreeIter *iter);
 
 private:
         struct Impl;

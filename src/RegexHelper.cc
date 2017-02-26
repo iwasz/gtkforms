@@ -38,7 +38,7 @@ bool RegexHelper::inputNameMatches (std::string const &widgetName, std::string c
 
 /****************************************************************************/
 
-bool RegexHelper::modelNameMatches (std::string const &modelName, std::string const &dataRange)
+bool RegexHelper::nameMatches (std::string const &modelName, std::string const &dataRange)
 {
         boost::regex e;
 

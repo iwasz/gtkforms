@@ -80,7 +80,7 @@ public:
         /*---------------------------------------------------------------------------*/
 
         MappingVector const &getMappings () const __tiliae_no_reflect__ { return mappings; }
-        MappingMultiMap const &getMappingsByInput () const;
+        MappingMultiMap getMappingsByInputRange (std::string const &widgetNameRange = "") const;
         MappingMultiMap getMappingsByModelRange (std::string const &modelRange) const;
 
         PageDecoratorVector &getDecorators () __tiliae_no_reflect__ { return decorators; }

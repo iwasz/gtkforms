@@ -21,7 +21,7 @@ static src::logger_mt &lg = logger::get ();
 
 struct AbstractView::Impl {
 
-        ~Impl () { delete mappingsByInputCache; }
+        ~Impl () { /*delete mappingsByInputCache;*/}
 
         enum WidgetType { NOT_RELEVANT = 0x0, INPUT = 0x01, OUTPUT = 0x02, SLOT = 0x04 };
 
@@ -43,7 +43,7 @@ struct AbstractView::Impl {
         AbstractView::WidgetMap slotWidgetsMap;
         Config const *config = nullptr;
 
-        mutable MappingMultiMap *mappingsByInputCache = nullptr;
+        //        mutable MappingMultiMap *mappingsByInputCache = nullptr;
         AbstractController *controller = nullptr;
 };
 
@@ -365,19 +365,26 @@ void AbstractView::Impl::onPrintWidget (GtkWidget *widget, gpointer data)
 
 /*****************************************************************************/
 
-MappingMultiMap const &AbstractView::getMappingsByInput () const
+MappingMultiMap AbstractView::getMappingsByInputRange (std::string const &widgetNameRange) const
 {
-        if (impl->mappingsByInputCache) {
-                return *impl->mappingsByInputCache;
-        }
+        //        if (impl->mappingsByInputCache) {
+        //                return *impl->mappingsByInputCache;
+        //        }
 
-        impl->mappingsByInputCache = new MappingMultiMap;
+        //        impl->mappingsByInputCache = new MappingMultiMap;
+
+        MappingMultiMap ret;
 
         for (IMapping *mapping : mappings) {
-                impl->mappingsByInputCache->insert (std::make_pair (mapping->getWidget (), mapping));
+                if (RegexHelper::nameMatches (mapping->getWidget (), widgetNameRange)) {
+                        // impl->mappingsByInputCache->insert (std::make_pair (mapping->getWidget (), mapping));
+                        ret.insert (std::make_pair (mapping->getWidget (), mapping));
+                }
         }
 
-        return *impl->mappingsByInputCache;
+        return ret;
+
+        //        return *impl->mappingsByInputCache;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -387,7 +394,7 @@ MappingMultiMap AbstractView::getMappingsByModelRange (std::string const &modelR
         MappingMultiMap ret;
 
         for (IMapping *mapping : mappings) {
-                if (RegexHelper::modelNameMatches (mapping->getModel (), modelRange)) {
+                if (RegexHelper::nameMatches (mapping->getModel (), modelRange)) {
                         ret.insert (std::make_pair (mapping->getModel (), mapping));
                 }
         }
@@ -719,8 +726,8 @@ void AbstractView::clearInternalState ()
         impl->inputWidgetsMap.clear ();
         impl->outputWidgetsMap.clear ();
         impl->slotWidgetsMap.clear ();
-        delete impl->mappingsByInputCache;
-        impl->mappingsByInputCache = nullptr;
+        //        delete impl->mappingsByInputCache;
+        //        impl->mappingsByInputCache = nullptr;
 }
 
 /*****************************************************************************/
