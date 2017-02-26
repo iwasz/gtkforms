@@ -19,12 +19,6 @@ public:
         TableFilterMapping ();
         virtual ~TableFilterMapping ();
 
-//        std::string getWidget () const;
-//        void setWidget (const std::string &value);
-
-//        std::string getModel () const;
-//        void setModel (const std::string &value);
-
         int getColumnNumber () const;
         void setColumnNumber (int value);
 

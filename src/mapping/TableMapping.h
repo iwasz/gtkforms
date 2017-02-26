@@ -45,6 +45,10 @@ public:
 
         virtual Core::Variant getConstValue () const { return constValue; }
 
+private:
+
+        void extractModels (GtkTreeModel *treeModel, GtkListStore **listStore, GtkTreeStore **treeStore);
+
 public:
         std::string widget;
         std::string model;

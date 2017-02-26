@@ -43,15 +43,7 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
 
         GtkListStore *listStore = nullptr;
         GtkTreeStore *treeStore = nullptr;
-        if (GTK_IS_LIST_STORE (treeModel)) {
-                listStore = GTK_LIST_STORE (treeModel);
-        }
-        else if (GTK_IS_TREE_STORE (treeModel)) {
-                treeStore = GTK_TREE_STORE (treeModel);
-        }
-        else {
-                throw Core::Exception ("TableMapping::model2View : Could not conver treeViewModel to to GtkListStore.");
-        }
+        extractModels (treeModel, &listStore, &treeStore);
 
         if (listStore) {
                 gtk_list_store_clear (listStore);
@@ -143,6 +135,27 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
 
                         ++(elementDTO.columnNumber);
                 }
+        }
+}
+
+/*****************************************************************************/
+
+void TableMapping::extractModels (GtkTreeModel *treeModel, GtkListStore **listStore, GtkTreeStore **treeStore)
+{
+        if (GTK_IS_TREE_MODEL_FILTER (treeModel)) {
+                extractModels (gtk_tree_model_filter_get_model (GTK_TREE_MODEL_FILTER (treeModel)), listStore, treeStore);
+        }
+        else if (GTK_IS_TREE_MODEL_SORT (treeModel)) {
+                extractModels (gtk_tree_model_sort_get_model (GTK_TREE_MODEL_SORT (treeModel)), listStore, treeStore);
+        }
+        else if (GTK_IS_LIST_STORE (treeModel)) {
+                *listStore = GTK_LIST_STORE (treeModel);
+        }
+        else if (GTK_IS_TREE_STORE (treeModel)) {
+                *treeStore = GTK_TREE_STORE (treeModel);
+        }
+        else {
+                throw Core::Exception ("TableMapping::model2View : Could not conver treeViewModel to to GtkListStore.");
         }
 }
 

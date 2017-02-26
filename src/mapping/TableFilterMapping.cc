@@ -67,16 +67,7 @@ void TableFilterMapping::setToView (ViewElementDTO *viewObject, std::string cons
 
 /*****************************************************************************/
 
-// std::string TableFilterMapping::getWidget () const { return impl->widget; }
-
-// void TableFilterMapping::setWidget (const std::string &value) { impl->widget = value; }
-
-// std::string TableFilterMapping::getModel () const { return impl->model; }
-
-// void TableFilterMapping::setModel (const std::string &value) { impl->model = value; }
-
 int TableFilterMapping::getColumnNumber () const { return impl->columnNumber; }
-
 void TableFilterMapping::setColumnNumber (int value) { impl->columnNumber = value; }
 
 /*****************************************************************************/
@@ -88,6 +79,11 @@ gboolean TableFilterMapping::Impl::gtkTreeModelFilterVisibleFunc (GtkTreeModel *
         GValue gVal = { 0 };
         gtk_tree_model_get_value (model, iter, impl->columnNumber, &gVal);
         const gchar *gStr = g_value_get_string (&gVal);
+
+        if (!gStr) {
+                return false;
+        }
+
         bool found = (std::string (gStr).find (impl->query) != std::string::npos);
         BOOST_LOG (lg) << "---- [" << impl->query << "] =? [" << gStr << "], found = " << found;
         return found;
