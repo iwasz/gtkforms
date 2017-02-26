@@ -239,7 +239,7 @@ uint32_t AbstractView::Impl::getWidgetType (std::string const &widgetNameWithPre
 
 /*****************************************************************************/
 
-AbstractView::WidgetMap AbstractView::getInputs (std::string const &dataRange, bool outputs)
+AbstractView::WidgetMap AbstractView::getWidgets (std::string const &widgetNameRange, bool outputs)
 {
         if (!GTK_IS_BUILDABLE (getUi ())) {
                 BOOST_LOG (lg) << "Warn : UI is not of type GtkBuildable. Can not get ID then.";
@@ -247,7 +247,7 @@ AbstractView::WidgetMap AbstractView::getInputs (std::string const &dataRange, b
         }
 
         // Zwróć cały zakres.
-        if (dataRange.empty ()) {
+        if (widgetNameRange.empty ()) {
                 if (outputs) {
                         return impl->outputWidgetsMap;
                 }
@@ -265,7 +265,7 @@ AbstractView::WidgetMap AbstractView::getInputs (std::string const &dataRange, b
                 std::string const &name = i.first;
                 GtkWidget *widget = i.second;
 
-                if (RegexHelper::inputNameMatches (name, dataRange)) {
+                if (RegexHelper::inputNameMatches (name, widgetNameRange)) {
                         resultMap.insert (std::make_pair (name, widget));
                 }
         }

@@ -85,11 +85,12 @@ public:
         /**
          * Do the opposite of submit i.e. converts data from model suitable to be presented on the
          * view, and shows it there.
-         * \param dataRange Specifies which range of data to convert and display. Imagine you have
+         * \param widgetNameRange Specifies which range of model to convert and display on views. Imagine you have
          * beefy table with tons of data. It would be pointless to convert all the contents if only
-         * one tiny cell was changed. dataRange allows you to narrow the conversion process.
+         * one tiny cell was changed. widgetNameRange allows you to narrow the conversion process.
+         * TODO Przeciążyć, żeby z jednym arg i bez arg.
          */
-        void refresh (std::string const &dataRange);
+        void refresh (std::string const &widgetNameRange, std::string const &propertyName = "");
 
         /**
          * Users can request a submit using this action. It not perform any actions, only
@@ -97,7 +98,7 @@ public:
          * performs all the work.
          * TODO Przeciążyć, żeby z jednym arg i bez arg.
          */
-        void submit (std::string const &dataRange, std::string const &controllerName);
+        void submit (std::string const &widgetNameRange, std::string const &controllerName);
 
         /*---------------------------------------------------------------------------*/
 

@@ -35,6 +35,12 @@ public:
         virtual std::string getModel () const = 0;
 
         /**
+         * Name of the widget property which we are seting when converting from model
+         * to view and vice versa.
+         */
+        virtual std::string getProperty () const = 0;
+
+        /**
          * Instead of setting the model name, you can set the constValue property. This way
          * the mapping will not look for model, but will always return the constValue.
          */

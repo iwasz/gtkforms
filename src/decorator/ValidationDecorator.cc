@@ -28,7 +28,7 @@ void ValidationDecorator::preSubmit (AbstractView *view, Context *ctx)
         }
 
         for (ValidationAndBindingResult const &result : results) {
-                AbstractView::WidgetMap inputMap = view->getInputs (result.model);
+                AbstractView::WidgetMap inputMap = view->getWidgets (result.model);
 
                 AbstractView::WidgetMap::const_iterator i;
                 if ((i = inputMap.find (result.model)) != inputMap.end ()) {

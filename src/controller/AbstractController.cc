@@ -6,13 +6,13 @@
  *  ~~~~~~~~~                                                               *
  ****************************************************************************/
 
-#include <boost/algorithm/string/split.hpp>
 #include "AbstractController.h"
 #include "App.h"
 #include "Context.h"
-#include "SubmitEvent.h"
-#include "RefreshEvent.h"
 #include "HierarchicalAccessor.h"
+#include "RefreshEvent.h"
+#include "SubmitEvent.h"
+#include <boost/algorithm/string/split.hpp>
 
 namespace GtkForms {
 
@@ -149,6 +149,8 @@ void AbstractController::performIdle (unsigned int currentMs)
         }
 }
 
+/*****************************************************************************/
+
 AbstractController *AbstractController::findByName (std::string const &name)
 {
         if (getName () == name) {
@@ -165,24 +167,31 @@ AbstractController *AbstractController::findByName (std::string const &name)
         return nullptr;
 }
 
-void AbstractController::refresh (std::string const &modelRange)
+/*****************************************************************************/
+
+void AbstractController::refresh (std::string const &widgetNameRange, std::string const &propertyName)
 {
         RefreshEvent *event = new RefreshEvent;
         event->controller = this;
-        event->modelRange = modelRange;
+        event->widgetNameRange = widgetNameRange;
+        event->propertyName = propertyName;
         std::unique_ptr<IEvent> e{ event };
         impl->app->pushEvent (std::move (e));
 }
 
-void AbstractController::submit (std::string const &inputRange, std::string const &controllerName)
+/*****************************************************************************/
+
+void AbstractController::submit (std::string const &widgetNameRange, std::string const &controllerName)
 {
         SubmitEvent *event = new SubmitEvent;
         event->controller = this;
-        event->inputRange = inputRange;
+        event->widgetNameRange = widgetNameRange;
         event->controllerName = controllerName;
         std::unique_ptr<SubmitEvent> e{ event };
         impl->app->pushEvent (std::move (e));
 }
+
+/*****************************************************************************/
 
 ControllerVector &AbstractController::getChildren () { return impl->children; }
 
@@ -210,6 +219,6 @@ void AbstractController::setView (AbstractView *v) { impl->view = v; }
 
 Core::VariantMap &AbstractController::getControllerScope () { return impl->controllerScope; }
 
-AbstractAccessor *AbstractController::getModelAccessor() { return &impl->accessor; }
+AbstractAccessor *AbstractController::getModelAccessor () { return &impl->accessor; }
 
 } // namespace GtkForms

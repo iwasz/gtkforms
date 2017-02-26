@@ -70,7 +70,9 @@ public:
         virtual GObject *getUi (std::string const &name) __tiliae_no_reflect__ = 0;
 
         typedef std::multimap<std::string, GtkWidget *> WidgetMap;
-        WidgetMap getInputs (std::string const &dataRange, bool outputs = false);
+
+        /// Get some input/outpu widgets by name.
+        WidgetMap getWidgets (std::string const &widgetNameRange, bool outputs = false);
         WidgetMap const &getSlots ();
         GtkWidget *getSlot (std::string const &name);
         void printStructure ();

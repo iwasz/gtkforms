@@ -24,7 +24,7 @@ struct SubmitEvent : public IEvent {
 
         AbstractController *controller = nullptr;
         std::string controllerName;
-        std::string inputRange;
+        std::string widgetNameRange;
 };
 
 } // namespace GtkForms

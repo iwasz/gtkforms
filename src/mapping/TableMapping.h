@@ -34,6 +34,7 @@ public:
 
         std::string getWidget () const { return widget; }
         std::string getModel () const { return model; }
+        virtual std::string getProperty () const { return property; }
 
         ValidationAndBindingResult view2Model (MappingDTO *dto) __tiliae_no_reflect__ { return view2Model (dto, widget, "", model, nullptr); }
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName,
@@ -52,6 +53,7 @@ private:
 public:
         std::string widget;
         std::string model;
+        std::string property;
         MappingVector columns;
         Core::VariantVector modelColumnCopy;
         Core::Variant constValue;

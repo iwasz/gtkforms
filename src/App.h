@@ -116,8 +116,8 @@ private:
         friend struct SubmitEvent;
         friend class RefreshEvent;
         friend class QuitEvent;
-        friend void AbstractController::refresh (std::string const &modelRange);
-        friend void AbstractController::submit (const std::string &dataRange, const std::string &controllerName);
+        friend void AbstractController::refresh (std::string const &widgetNameRange, std::string const &propertyName);
+        friend void AbstractController::submit (const std::string &widgetNameRange, const std::string &controllerName);
         friend gboolean guiThread (gpointer user_data);
 
 private:

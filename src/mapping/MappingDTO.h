@@ -34,7 +34,7 @@ struct MappingDTO {
         Core::Variant v2mModelObject;
 
         /// modelRange or inputRange - depends on what event is processed.
-        std::string dataRange;
+        // std::string dataRange;
 };
 
 } /* namespace GtkForms */

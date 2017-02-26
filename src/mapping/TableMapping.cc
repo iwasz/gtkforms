@@ -67,7 +67,7 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                 columnDTO.app = dto->app;
                 columnDTO.m2vModelObject = element;
                 columnDTO.v2mModelObject = element;
-                columnDTO.dataRange = "";
+                // columnDTO.dataRange = "";
 
                 // Dodaj wiersz i uzyskaj iterator.
                 if (listStore) {

@@ -30,7 +30,10 @@ public:
          * Models to be converted and displayed on the view. If empty, then all inputs wil be
          * iterated and models set according to mappings.
          */
-        std::string modelRange;
+        std::string widgetNameRange;
+
+        /// Set only this property
+        std::string propertyName;
 };
 
 } /* namespace GtkForms */

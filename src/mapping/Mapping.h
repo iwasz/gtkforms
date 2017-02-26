@@ -27,11 +27,14 @@ public:
         virtual std::string getProperty () const { return property; }
         virtual std::string getModel () const { return model; }
 
-        ValidationAndBindingResult view2Model (MappingDTO *dto) __tiliae_no_reflect__ { return view2Model (dto, widget, property, model, v2mEditor); }
+        ValidationAndBindingResult view2Model (MappingDTO *dto) __tiliae_no_reflect__
+        {
+                return view2Model (dto, getWidget (), getProperty (), getModel (), v2mEditor);
+        }
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName,
                                                        std::string const &modelName, Editor::IEditor *editor = nullptr) __tiliae_no_reflect__;
 
-        void model2View (MappingDTO *dto) __tiliae_no_reflect__ { model2View (dto, widget, property, model, m2vEditor); }
+        void model2View (MappingDTO *dto) __tiliae_no_reflect__ { model2View (dto, getWidget (), getProperty (), getModel (), m2vEditor); }
         virtual void model2View (MappingDTO *dto, std::string const &widgetName, std::string const &propertyName, std::string const &modelName,
                                  Editor::IEditor *editor = nullptr) __tiliae_no_reflect__;
 

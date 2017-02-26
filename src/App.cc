@@ -333,7 +333,7 @@ void App::userQuitRequest ()
  */
 void App::doSubmit (SubmitEvent *event)
 {
-        BOOST_LOG (lg) << "SubmitEvent::run. dataRange : [" << event->inputRange << "], controllerName : [" << event->controllerName << "].";
+        BOOST_LOG (lg) << "SubmitEvent::run. widgetNameRange : [" << event->widgetNameRange << "], controllerName : [" << event->controllerName << "].";
 
         AbstractController *controller = nullptr;
 
@@ -359,7 +359,7 @@ void App::doSubmit (SubmitEvent *event)
         view->printStructure ();
 #endif
 
-        AbstractView::WidgetMap inputMap = view->getInputs (event->inputRange);
+        AbstractView::WidgetMap inputMap = view->getWidgets (event->widgetNameRange);
         bool hasErrors = false;
 
         for (auto elem : inputMap) {
@@ -368,7 +368,7 @@ void App::doSubmit (SubmitEvent *event)
                 dto.app = this;
                 dto.m2vModelObject = Core::Variant (controller->getModelAccessor ());
                 dto.v2mModelObject = Core::Variant (controller->getModelAccessor ());
-                dto.dataRange = event->inputRange;
+                //                dto.dataRange = event->widgetNameRange;
 
                 ViewElementDTO elementDTO{ G_OBJECT (elem.second) };
                 dto.viewElement = &elementDTO;
@@ -456,17 +456,15 @@ IMapping *App::Impl::getDefaultMapping (ViewElementDTO *vd)
 
 void App::doRefresh (RefreshEvent *event)
 {
-        //        impl->context.setCurrentController (event->controller);
-
         AbstractView *view = event->controller->getView ();
-        AbstractView::WidgetMap inputMap;
 
         // 1. From mappings
-        if (!event->modelRange.empty ()) {
-                MappingMultiMap mappings = view->getMappingsByModelRange (event->modelRange);
+        if (!event->widgetNameRange.empty ()) {
+                // TODO czy to nie powinno być getMappingsByInput !??!?
+                MappingMultiMap mappings = view->getMappingsByModelRange (event->widgetNameRange);
 
                 for (MappingMultiMap::value_type &elem : mappings) {
-                        AbstractView::WidgetMap tmp = view->getInputs (elem.second->getWidget (), true);
+                        AbstractView::WidgetMap tmp = view->getWidgets (elem.second->getWidget (), true);
 
                         if (impl->config->logMappings) {
                                 BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << elem.second->getWidget () << "]\033[0m (refresh range event).";
@@ -483,7 +481,7 @@ void App::doRefresh (RefreshEvent *event)
                         dto.app = this;
                         dto.m2vModelObject = Core::Variant (event->controller->getModelAccessor ());
                         dto.v2mModelObject = Core::Variant (event->controller->getModelAccessor ());
-                        dto.dataRange = event->modelRange;
+                        // dto.dataRange = event->widgetNameRange;
 
                         ViewElementDTO elementDTO{ G_OBJECT (input) };
                         dto.viewElement = &elementDTO;
@@ -498,9 +496,7 @@ void App::doRefresh (RefreshEvent *event)
          * would iterate over all the inputs and try to find models coresponding to those
          * inputs.
          */
-        AbstractView::WidgetMap tmp = view->getInputs (event->modelRange, true);
-        std::copy (tmp.begin (), tmp.end (), std::inserter (inputMap, inputMap.end ()));
-
+        AbstractView::WidgetMap inputMap = view->getWidgets (event->widgetNameRange, true);
         MappingMultiMap const &mappings = view->getMappingsByInput ();
 
         for (auto elem : inputMap) {
@@ -514,7 +510,7 @@ void App::doRefresh (RefreshEvent *event)
                 dto.app = this;
                 dto.m2vModelObject = Core::Variant (event->controller->getModelAccessor ());
                 dto.v2mModelObject = Core::Variant (event->controller->getModelAccessor ());
-                dto.dataRange = event->modelRange;
+                // dto.dataRange = event->widgetNameRange;
 
                 ViewElementDTO elementDTO{ G_OBJECT (elem.second) };
                 dto.viewElement = &elementDTO;
@@ -528,6 +524,10 @@ void App::doRefresh (RefreshEvent *event)
 
                         if (impl->config->logMappings) {
                                 BOOST_LOG (lg) << "Maping found. Input : [" << mapping->getWidget () << "], model : [" << mapping->getModel () << "]";
+                        }
+
+                        if (!event->propertyName.empty () && event->propertyName != mapping->getProperty ()) {
+                                continue;
                         }
 
                         mapping->model2View (&dto);
