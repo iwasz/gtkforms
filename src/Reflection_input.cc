@@ -10,8 +10,8 @@
 #include "mapping/PixbufColumn.h"
 #include "mapping/PixbufMapping.h"
 #include "mapping/TableMapping.h"
+#include "mapping/TableFilterMapping.h"
 #include "mapping/TextViewMapping.h"
 #include "signalAdapter/SignalAdapter.h"
 #include "validator/Validator.h"
 #include "view/BuilderView.h"
-

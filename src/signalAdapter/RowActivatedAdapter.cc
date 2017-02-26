@@ -88,7 +88,7 @@ Core::VariantVector RowActivatedAdapter::adaptRowActivated (guint n_param_values
 
         Core::VariantVector params;
 
-        if (modelColumn != NO_MODEL_COLUMN) {
+        if (columnNumber != NO_MODEL_COLUMN) {
                 GtkTreeModel *model = gtk_tree_view_get_model (treeView);
 
                 if (!GTK_IS_TREE_MODEL (model)) {
@@ -104,7 +104,7 @@ Core::VariantVector RowActivatedAdapter::adaptRowActivated (guint n_param_values
                 }
 
                 GValue gVal = { 0 };
-                gtk_tree_model_get_value (model, &iter, modelColumn, &gVal);
+                gtk_tree_model_get_value (model, &iter, columnNumber, &gVal);
                 params.push_back (gValueToVariant (&gVal));
         }
         else {
@@ -142,7 +142,7 @@ Core::VariantVector RowActivatedAdapter::adaptButtonPressEvent (guint n_param_va
 
         /*---------------------------------------------------------------------------*/
 
-        if (modelColumn != NO_MODEL_COLUMN) {
+        if (columnNumber != NO_MODEL_COLUMN) {
                 GtkTreeModel *treeModel = nullptr;
                 GtkTreeIter iter;
                 if (!gtk_tree_selection_get_selected (selection, &treeModel, &iter)) {
@@ -150,7 +150,7 @@ Core::VariantVector RowActivatedAdapter::adaptButtonPressEvent (guint n_param_va
                 }
 
                 GValue gVal = { 0 };
-                gtk_tree_model_get_value (treeModel, &iter, modelColumn, &gVal);
+                gtk_tree_model_get_value (treeModel, &iter, columnNumber, &gVal);
                 params.push_back (gValueToVariant (&gVal));
         }
         else {
@@ -185,7 +185,7 @@ Core::VariantVector RowActivatedAdapter::adaptSelectionChanged (guint n_param_va
 
         /*---------------------------------------------------------------------------*/
 
-        if (modelColumn != NO_MODEL_COLUMN) {
+        if (columnNumber != NO_MODEL_COLUMN) {
                 GtkTreeModel *treeModel = nullptr;
                 GtkTreeIter iter;
                 if (!gtk_tree_selection_get_selected (selection, &treeModel, &iter)) {
@@ -193,7 +193,7 @@ Core::VariantVector RowActivatedAdapter::adaptSelectionChanged (guint n_param_va
                 }
                 else {
                         GValue gVal = { 0 };
-                        gtk_tree_model_get_value (treeModel, &iter, modelColumn, &gVal);
+                        gtk_tree_model_get_value (treeModel, &iter, columnNumber, &gVal);
                         params.push_back (gValueToVariant (&gVal));
                 }
         }

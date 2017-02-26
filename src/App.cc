@@ -472,7 +472,11 @@ void App::doRefresh (RefreshEvent *event)
                                 BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << elem.second->getWidget () << "]\033[0m (refresh range event).";
                         }
 
-                        assert (tmp.size () == 1);
+                        if (tmp.size () != 1) {
+                                throw Core::Exception ("App::doRefresh there should be 1 imput with name [" + elem.second->getWidget () + "]. Is : ["
+                                                       + boost::lexical_cast<std::string> (tmp.size ()) + "].");
+                        }
+
                         GtkWidget *input = tmp.begin ()->second;
 
                         MappingDTO dto;

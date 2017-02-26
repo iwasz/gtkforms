@@ -31,14 +31,14 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                                Editor::IEditor *editor)
 {
         if (!GTK_IS_TREE_VIEW (dto->viewElement->inputWidget)) {
-                throw Core::Exception ("TableMapping::view2Model : Could not conver inputWidget to to GtkTreeView.");
+                throw Core::Exception ("TableMapping::model2View : Could not conver inputWidget to to GtkTreeView.");
         }
 
         GtkTreeView *treeView = GTK_TREE_VIEW (dto->viewElement->inputWidget);
         GtkTreeModel *treeModel = gtk_tree_view_get_model (treeView);
 
         if (!treeModel) {
-                throw Core::Exception ("TableMapping::view2Model : GtkTreeModel is NULL in GtkTreeView.");
+                throw Core::Exception ("TableMapping::model2View : GtkTreeModel is NULL in GtkTreeView.");
         }
 
         GtkListStore *listStore = nullptr;
@@ -50,7 +50,7 @@ void TableMapping::model2View (MappingDTO *dto, std::string const &widgetName, s
                 treeStore = GTK_TREE_STORE (treeModel);
         }
         else {
-                throw Core::Exception ("TableMapping::view2Model : Could not conver treeViewModel to to GtkListStore.");
+                throw Core::Exception ("TableMapping::model2View : Could not conver treeViewModel to to GtkListStore.");
         }
 
         if (listStore) {

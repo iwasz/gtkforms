@@ -30,7 +30,7 @@ namespace GtkForms {
  */
 class __tiliae_reflect__ RowActivatedAdapter : public AbstractSignalAdapter {
 public:
-        RowActivatedAdapter () : modelColumn (NO_MODEL_COLUMN) {}
+        RowActivatedAdapter () : columnNumber (NO_MODEL_COLUMN) {}
         virtual ~RowActivatedAdapter () {}
 
         std::string getSignal () const { return signal; }
@@ -38,8 +38,8 @@ public:
 
         Core::VariantVector adapt (guint n_param_values, const GValue *param_values) const;
 
-        int getModelColumn () const { return modelColumn; }
-        void setModelColumn (int value) { modelColumn = value; }
+        int getColumnNumber () const { return columnNumber; }
+        void setColumnNumber (int value) { columnNumber = value; }
 
 private:
         Core::VariantVector adaptRowActivated (guint n_param_values, const GValue *param_values) const;
@@ -47,7 +47,7 @@ private:
         Core::VariantVector adaptSelectionChanged (guint n_param_values, const GValue *param_values) const;
 
         const int NO_MODEL_COLUMN = -2;
-        int modelColumn;
+        int columnNumber;
         std::string signal = "row-activated";
 };
 
