@@ -17,7 +17,14 @@
 namespace GtkForms {
 
 /**
- *
+ * Maps model data onto GtkImage widgets. It can perform in different ways:
+ * - If model data (valueToSet parameter in setToView method) is of type RawData,
+ *   it is converted to GdkPixbuf and displayed.
+ * - If dict has at leas 1 element, model data (valueToSet parameter in setToView method)
+ *   will be converterd to string, and used as a key to obtain value from dict. Dict
+ *   values would be then interpreted as path to image files, which would the be displayed.
+ * - Id dict is empty, model data (valueToSet parameter in setToView method) would be
+ *   casted to string, and interpreted as path to image file.
  */
 class __tiliae_reflect__ PixbufMapping : public Mapping {
 public:

@@ -72,7 +72,7 @@ public:
         typedef std::multimap<std::string, GtkWidget *> WidgetMap;
 
         /// Get some input/outpu widgets by name.
-        WidgetMap getWidgets (std::string const &widgetNameRange, bool outputs = false);
+        WidgetMap getInputOutputWidgets (std::string const &widgetNameRange, bool outputs = false);
         WidgetMap const &getSlots ();
         GtkWidget *getSlot (std::string const &name);
         void printStructure ();

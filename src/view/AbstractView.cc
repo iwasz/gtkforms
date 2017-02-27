@@ -239,7 +239,7 @@ uint32_t AbstractView::Impl::getWidgetType (std::string const &widgetNameWithPre
 
 /*****************************************************************************/
 
-AbstractView::WidgetMap AbstractView::getWidgets (std::string const &widgetNameRange, bool outputs)
+AbstractView::WidgetMap AbstractView::getInputOutputWidgets (std::string const &widgetNameRange, bool outputs)
 {
         if (!GTK_IS_BUILDABLE (getUi ())) {
                 BOOST_LOG (lg) << "Warn : UI is not of type GtkBuildable. Can not get ID then.";
