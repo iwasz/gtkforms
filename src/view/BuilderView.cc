@@ -294,23 +294,23 @@ void gClosureMarshal (GClosure *closure, GValue *return_value, guint n_param_val
         std::string gObjectNameCopy = dto->gObjectName;
         std::string widgetIdCopy = (dto->widgetId) ? (dto->widgetId) : ("");
 
-        ISignalAdapter *signalParametersAdapter = 0;
+        ISignalAdapter *signalParametersAdapter = nullptr;
         SignalAdapterVector *adapters = dto->signalAdapters;
 
         if (adapters) {
                 for (ISignalAdapter *a : *adapters) {
-                        if (a->getSignal () == signalNameCopy) {
-                                signalParametersAdapter = a;
+                        signalParametersAdapter = (a->getSignal () == signalNameCopy) ? (a) : (nullptr);
 
-                                if (a->getGObjectName () == gObjectNameCopy) {
-                                        signalParametersAdapter = a;
+                        if (!a->getGObjectName ().empty ()) {
+                                signalParametersAdapter = (a->getGObjectName () == gObjectNameCopy) ? (a) : (nullptr);
+                        }
 
-                                        // Full match;
-                                        if (a->getWidgetId () == widgetIdCopy) {
-                                                signalParametersAdapter = a;
-                                                break;
-                                        }
-                                }
+                        if (!a->getWidgetId ().empty ()) {
+                                signalParametersAdapter = (a->getWidgetId () == widgetIdCopy) ? (a) : (nullptr);
+                        }
+
+                        if (signalParametersAdapter) {
+                                break;
                         }
                 }
         }
