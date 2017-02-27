@@ -16,6 +16,7 @@
 #include "controller/RefreshEvent.h"
 #include "controller/SubmitEvent.h"
 #include "mapping/TableMapping.h"
+#include "mapping/TextViewMapping.h"
 #include "view/AbstractView.h"
 #include <algorithm>
 #include <boost/algorithm/string/split.hpp>
@@ -441,14 +442,18 @@ void App::doSubmit (SubmitEvent *event)
 IMapping *App::Impl::getDefaultMapping (ViewElementDTO *vd)
 {
         GObject *inputWidget = vd->inputWidget;
-        static Mapping mapping;
-        // static TableMapping tableMapping;
 
         if (GTK_IS_TREE_VIEW (inputWidget)) {
+                // static TableMapping tableMapping;
                 // return &tableMapping;
                 return nullptr; // You can not get column names from a ListStore, so there is no way to know which models to use.
         }
+        else if (GTK_IS_TEXT_VIEW (inputWidget)) {
+                static TextViewMapping mapping;
+                return &mapping;
+        }
 
+        static Mapping mapping;
         return &mapping;
 }
 
@@ -495,7 +500,7 @@ void App::doRefresh (RefreshEvent *event)
                         mapping->model2View (&dto);
                 }
         }
-        else {
+//        else {
                 /*
                  * 2. From inputs
                  * If model range is empty, then we have to fall back to the default behavior, which
@@ -551,7 +556,7 @@ void App::doRefresh (RefreshEvent *event)
                                 defaultMapping->model2View (&dto, inputName, "", "");
                         }
                 }
-        }
+//        }
 
         view->refresh (&impl->context);
         view->runDecorators (IPageDecorator::POST_REFRESH, &impl->context);
