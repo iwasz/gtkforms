@@ -53,6 +53,7 @@ void handler (const std::string &sourceCode, const Core::VariantVector &paramVec
 
 struct BuilderView::Impl {
         static void onUserClickedQuit (GtkWidget *object, gpointer userData);
+        static void onDialogResponse (GtkDialog *dialog, gint responseId, gpointer userData);
 
         GtkWidget *widget = nullptr;
         bool deleteUiFile = false;
@@ -131,6 +132,9 @@ void BuilderView::loadUi (App *app)
         if (GTK_IS_WINDOW (getUi ())) {
                 g_signal_connect (GTK_WINDOW (getUi ()), "destroy", G_CALLBACK (&BuilderView::Impl::onUserClickedQuit), this);
         }
+        if (GTK_IS_DIALOG (getUi ())) {
+                g_signal_connect (GTK_DIALOG (getUi ()), "response", G_CALLBACK (&BuilderView::Impl::onDialogResponse), this);
+        }
 }
 
 /*--------------------------------------------------------------------------*/
@@ -147,6 +151,18 @@ void BuilderView::Impl::onUserClickedQuit (GtkWidget *object, gpointer userData)
         }
         else {
                 app->userQuitRequest ();
+        }
+}
+
+/*---------------------------------------------------------------------------*/
+
+void BuilderView::Impl::onDialogResponse (GtkDialog *dialog, gint responseId, gpointer userData)
+{
+        if (responseId == GTK_RESPONSE_CANCEL || responseId == GTK_RESPONSE_DELETE_EVENT) {
+                BuilderView *view = static_cast<BuilderView *> (userData);
+                AbstractController *controller = view->getControllerFromUi ();
+                App *app = controller->getApp ();
+                app->close (controller);
         }
 }
 
