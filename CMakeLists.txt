@@ -19,7 +19,7 @@ SET (BUILD_CATALOG             OFF CACHE BOOL "")
 SET (CMAKE_VERBOSE_MAKEFILE 0)
 
 #TODO -Wall
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall" CACHE INTERNAL "cxx compiler flags")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall" CACHE INTERNAL "cxx compiler flags")
 
 SET(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -Wall -DTILIAE_DLL" CACHE INTERNAL "c release compiler flags")
 SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -DTILIAE_DLL" CACHE INTERNAL "cxx release compiler flags")
