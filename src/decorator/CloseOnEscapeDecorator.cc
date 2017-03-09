@@ -22,9 +22,12 @@ void CloseOnEscapeDecorator::preShow (AbstractView *view, Context *ctx)
 
 gboolean CloseOnEscapeDecorator::onKeyPress (GtkWidget *widget, GdkEvent *event, gpointer userData)
 {
-        AbstractView *view = static_cast<AbstractView *> (userData);
-        AbstractController *controller = view->getController ();
-        controller->closeThis ();
+        if (event->key.keyval == GDK_KEY_Escape && !event->key.is_modifier) {
+                AbstractView *view = static_cast<AbstractView *> (userData);
+                AbstractController *controller = view->getController ();
+                controller->closeThis ();
+        }
+
         return false;
 }
 
