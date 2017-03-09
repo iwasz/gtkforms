@@ -4,6 +4,7 @@
 #include "decorator/GtkTreeViewDecorator.h"
 #include "decorator/ValidationDecorator.h"
 #include "decorator/DimensionRestoreDecorator.h"
+#include "decorator/CloseOnEscapeDecorator.h"
 #include "mapping/AdjustmentMapping.h"
 #include "mapping/AssociationMap.h"
 #include "mapping/Column.h"
