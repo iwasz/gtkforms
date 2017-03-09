@@ -23,8 +23,6 @@ public:
         int getColumnNumber () const;
         void setColumnNumber (int value);
 
-        //        Core::Variant getQuery () const;
-
 protected:
         virtual void setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet);
 

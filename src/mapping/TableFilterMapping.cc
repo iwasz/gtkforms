@@ -34,9 +34,6 @@ TableFilterMapping::~TableFilterMapping () { delete impl; }
 
 /*****************************************************************************/
 
-// To powinna być metoda setToview i dziedziczymy z Mapping.
-// Albo jeśli nie dziedziczymy z mapping, to to powinna być metoda model2View!
-
 void TableFilterMapping::setToView (ViewElementDTO *viewObject, std::string const &finalProperty, Core::Variant valueToSet)
 {
         if (!GTK_IS_TREE_VIEW (viewObject->inputWidget)) {
@@ -50,11 +47,7 @@ void TableFilterMapping::setToView (ViewElementDTO *viewObject, std::string cons
                 throw Core::Exception ("TableFilterMapping::view2Model : GtkTreeModel is NULL in GtkTreeView.");
         }
 
-        //        if (impl->columnNumber < 0) {
-        //                throw Core::Exception ("TableFilterMapping::view2Model : please set columnNumber first.");
-        //        }
-
-        if (!impl->gtkTreeModelFilter) {
+        if (!GTK_IS_TREE_MODEL_FILTER (treeModel)) {
                 impl->gtkTreeModelFilter = GTK_TREE_MODEL_FILTER (gtk_tree_model_filter_new (treeModel, nullptr));
                 gtk_tree_model_filter_set_visible_func (impl->gtkTreeModelFilter, &TableFilterMapping::Impl::gtkTreeModelFilterVisibleFunc, this, nullptr);
                 gtk_tree_view_set_model (treeView, GTK_TREE_MODEL (impl->gtkTreeModelFilter));
@@ -97,7 +90,9 @@ gboolean TableFilterMapping::gtkTreeModelFilterVisibleFunc (GtkTreeModel *model,
 
         std::string queryStr = vcast<std::string> (query);
         bool found = (std::string (gStr).find (queryStr) != std::string::npos);
+#if 0
         BOOST_LOG (lg) << "---- [" << impl->query << "] =? [" << gStr << "], found = " << found;
+#endif
         return found;
 }
 
