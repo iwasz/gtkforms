@@ -176,7 +176,10 @@ void App::Impl::controllerOpen (std::string const &controllerName, AbstractContr
         std::string viewName = controller->onStart ();
         AbstractView *view = AbstractView::loadView (viewName, controller, container);
         controller->setView (view);
-        view->runDecorators (IPageDecorator::POST_SHOW, &context);
+
+        if (view) {
+                view->runDecorators (IPageDecorator::POST_SHOW, &context);
+        }
 
         Core::StringVector alsoOpenList;
         if (!controller->alsoOpen.empty ()) {
@@ -354,6 +357,11 @@ void App::doSubmit (SubmitEvent *event)
         //        impl->context.setCurrentController (controller);
 
         AbstractView *view = controller->getView ();
+
+        if (!view) {
+                throw Core::Exception ("App::doSubmit : no view!");
+        }
+
         MappingMultiMap mappings = view->getMappingsByInputRange ();
 
 #if 0
@@ -462,6 +470,10 @@ IMapping *App::Impl::getDefaultMapping (ViewElementDTO *vd)
 void App::doRefresh (RefreshEvent *event)
 {
         AbstractView *view = event->controller->getView ();
+
+        if (!view) {
+                throw Core::Exception ("App::doRefresh : no view!");
+        }
 
         std::vector<std::string> alreadyRefreshedWidgets;
 

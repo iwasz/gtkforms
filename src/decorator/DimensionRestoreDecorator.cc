@@ -40,6 +40,11 @@ void DimensionRestoreDecorator::preShow (AbstractView *view, Context *ctx)
                 DimensionRestoreDatabase::ValueVector values = database->get (widget, key);
 
                 if (values.size () < 1) {
+
+//                        if (defaultValueSet) {
+//                                gtk_paned_set_position (paned, defaultValue);
+//                        }
+
                         return;
                 }
 

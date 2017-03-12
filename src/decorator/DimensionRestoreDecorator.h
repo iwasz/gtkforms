@@ -48,6 +48,13 @@ public:
 
         virtual void preShow (AbstractView *view, Context *ctx);
 
+//        void setDefaultValue (double d)
+//        {
+//                defaultValueSet = true;
+//                defaultValue = d;
+//        }
+
+public:
         std::string widget;
         std::string key;
         DimensionRestoreDatabase *database = nullptr;
@@ -55,6 +62,9 @@ public:
 private:
         static void onSizeAllocate (GtkWidget *widget, GdkRectangle *allocation, gpointer user_data);
         static void onPanedPositionNotify (GObject *gobject, GParamSpec *pspec, gpointer userData);
+
+//        double defaultValue = 0;
+//        bool defaultValueSet = false;
 };
 
 } // GtkForms

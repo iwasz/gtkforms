@@ -76,6 +76,10 @@ AbstractView *AbstractView::loadView (std::string const &viewAndSlot, AbstractCo
         }
         viewName = viewAndSlot.substr (0, offset);
 
+        if (viewName.empty ()) {
+                return nullptr;
+        }
+
         AbstractView *view = ocast<AbstractView *> (container->getBean (viewName));
         // Ustawi w polu impl->controller
         view->setController (controller);
@@ -409,7 +413,12 @@ void AbstractView::setController (AbstractController *c) { impl->controller = c;
 
 /*---------------------------------------------------------------------------*/
 
-void AbstractView::setControllerToUi (AbstractController *c) { g_object_set_data (getUiOrThrow (getName ()), CONTROLLER_KEY, c); }
+void AbstractView::setControllerToUi (AbstractController *c)
+{
+        if (getUi (getName ())) {
+                g_object_set_data (getUi (getName ()), CONTROLLER_KEY, c);
+        }
+}
 
 AbstractController *AbstractView::getControllerFromUi () { return getControllerByWidget (getUiOrThrow (getName ())); }
 
@@ -431,7 +440,7 @@ bool AbstractView::reparent (std::string const &slotName)
  *
  * Gdy jednak FIND_SLOTS_RECURSIVELY 0, to szuka tylko w rodzicu.
  */
-#define FIND_SLOTS_RECURSIVELY 0
+#define FIND_SLOTS_RECURSIVELY 1
 
 #if FIND_SLOTS_RECURSIVELY
         while

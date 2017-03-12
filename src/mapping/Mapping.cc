@@ -95,7 +95,7 @@ std::string Mapping::getDefaultProperty (App *app, ViewElementDTO *dto) const
         GObject *inputWidget = dto->inputWidget;
 
         // UWAGA! Od szczegółu do ogółu!
-        if (GTK_IS_SWITCH (inputWidget) || GTK_IS_TOGGLE_BUTTON (inputWidget)) {
+        if (GTK_IS_SWITCH (inputWidget) || GTK_IS_TOGGLE_BUTTON (inputWidget) || GTK_IS_TOGGLE_TOOL_BUTTON (inputWidget)) {
                 return "active";
         }
         else if (GTK_IS_LABEL (inputWidget) || GTK_IS_BUTTON (inputWidget)) {
