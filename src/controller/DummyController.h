@@ -19,7 +19,7 @@ class __tiliae_reflect__ DummyController : public AbstractController {
 public:
         virtual ~DummyController () {}
 
-        std::string onStart ()
+        ViewsToOpen onStart ()
         {
                 if (!model.isNone ()) {
                         set ("model", model);

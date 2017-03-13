@@ -176,15 +176,10 @@ void App::Impl::controllerOpen (std::string const &controllerName, AbstractContr
 
         controller->setParent (requestor);
 
-        std::string viewNames = controller->onStart ();
+        ViewsToOpen vto = controller->onStart ();
 
-        Core::StringVector viewNamesList;
-        if (!viewNames.empty ()) {
-                boost::split (viewNamesList, viewNames, boost::is_any_of (", "), boost::token_compress_on);
-        }
-
-        for (std::string const &viewName : viewNamesList) {
-                AbstractView *view = AbstractView::loadView (viewName, controller, container);
+        for (ViewsToOpen::ViewSlot const &vs : vto.getViewSlots ()) {
+                AbstractView *view = AbstractView::loadView (vs, controller, container);
                 controller->addView (view);
 
                 if (view) {

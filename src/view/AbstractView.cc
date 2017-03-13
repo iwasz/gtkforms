@@ -65,22 +65,9 @@ void AbstractView::hide () { gtk_widget_hide (GTK_WIDGET (getUi ())); }
 
 /*--------------------------------------------------------------------------*/
 
-AbstractView *AbstractView::loadView (std::string const &viewAndSlot, AbstractController *controller, Ptr<Container::BeanFactoryContainer> container)
+AbstractView *AbstractView::loadView (ViewsToOpen::ViewSlot const &vs, AbstractController *controller, Ptr<Container::BeanFactoryContainer> container)
 {
-        std::string viewName;
-        std::string slotName;
-
-        size_t offset;
-        if ((offset = viewAndSlot.find ("->")) != std::string::npos) {
-                slotName = viewAndSlot.substr (offset + 2);
-        }
-        viewName = viewAndSlot.substr (0, offset);
-
-        if (viewName.empty ()) {
-                return nullptr;
-        }
-
-        AbstractView *view = ocast<AbstractView *> (container->getBean (viewName));
+        AbstractView *view = ocast<AbstractView *> (container->getBean (vs.view));
         // Ustawi w polu impl->controller
         view->setController (controller);
         view->loadUi (controller->getApp ());
@@ -88,8 +75,8 @@ AbstractView *AbstractView::loadView (std::string const &viewAndSlot, AbstractCo
         view->setControllerToUi (controller);
         view->connectSignals (controller->getModelAccessor ());
 
-        if (!slotName.empty ()) {
-                if (!view->reparent (slotName)) {
+        if (!vs.slot.empty ()) {
+                if (!view->reparent (vs.slot)) {
                         // TODO zmienić na warning
                         BOOST_LOG (lg) << "Warn : could not reparent!";
                 }

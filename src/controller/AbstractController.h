@@ -10,6 +10,7 @@
 #define ABSTRACTCONTROLLER_H_
 
 #include "AbstractAccessor.h"
+#include "ViewsToOpen.h"
 #include "validator/IValidator.h"
 #include "view/AbstractView.h"
 #include <ReflectionParserAnnotation.h>
@@ -108,7 +109,7 @@ public:
          *
          * \returns View name to be shown or empty string in case nothing should be done with views.
          */
-        virtual std::string onStart () = 0;
+        virtual ViewsToOpen onStart () = 0;
 
         /**
          * This method is called whenever a view submits some data (model). Usually in MVC

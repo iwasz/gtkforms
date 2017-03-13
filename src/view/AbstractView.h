@@ -9,6 +9,7 @@
 #ifndef GTK_ABSTRACT_VIEW_H_
 #define GTK_ABSTRACT_VIEW_H_
 
+#include "controller/ViewsToOpen.h"
 #include "decorator/IPageDecorator.h"
 #include "mapping/Mapping.h"
 #include "signalAdapter/AbstractSignalAdapter.h"
@@ -16,8 +17,8 @@
 #include <core/Object.h>
 #include <gtk/gtk.h>
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace GtkForms {
 class Context;
@@ -39,7 +40,7 @@ public:
 
         /*---------------------------------------------------------------------------*/
 
-        static AbstractView *loadView (std::string const &viewAndSlot, AbstractController *controller, Ptr<Container::BeanFactoryContainer> container);
+        static AbstractView *loadView (ViewsToOpen::ViewSlot const &vs, AbstractController *controller, Ptr<Container::BeanFactoryContainer> container);
 
         /**
          * Loads a UI file into memory (if not loaded allready), and gets pointer to widget with name
@@ -122,9 +123,9 @@ private:
         Impl *impl = 0;
 };
 
-//typedef __tiliae_reflect__ std::map<std::string, AbstractView *> ViewMap;
-//typedef std::set<AbstractView *> ViewSet;
-typedef std::vector <AbstractView *> ViewVector;
+// typedef __tiliae_reflect__ std::map<std::string, AbstractView *> ViewMap;
+// typedef std::set<AbstractView *> ViewSet;
+typedef std::vector<AbstractView *> ViewVector;
 
 } // namespace GtkForms
 
