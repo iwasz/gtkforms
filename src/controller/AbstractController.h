@@ -9,19 +9,19 @@
 #ifndef ABSTRACTCONTROLLER_H_
 #define ABSTRACTCONTROLLER_H_
 
+#include "AbstractAccessor.h"
+#include "validator/IValidator.h"
+#include "view/AbstractView.h"
+#include <ReflectionParserAnnotation.h>
+#include <ReflectionParserAnnotation.h>
+#include <core/Object.h>
+#include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
-#include <map>
-#include <core/Object.h>
-#include <ReflectionParserAnnotation.h>
-#include <ReflectionParserAnnotation.h>
-#include "validator/IValidator.h"
-#include "AbstractAccessor.h"
 
 namespace GtkForms {
 
-class AbstractView;
 class AbstractController;
 class App;
 class AbstractAccessor;
@@ -29,21 +29,20 @@ class AbstractAccessor;
 /**
  * Vector of pointers to controllers.
  */
-typedef std::vector <AbstractController *> ControllerVector;
+typedef std::vector<AbstractController *> ControllerVector;
 
 /**
  * Set of pointers to controllers.
  */
-typedef std::set <AbstractController *> ControllerSet;
+typedef std::set<AbstractController *> ControllerSet;
 
 /**
  * Map of pointers to controllers.
  */
-typedef __tiliae_reflect__ std::map <std::string, AbstractController *> ControllerMap;
+typedef __tiliae_reflect__ std::map<std::string, AbstractController *> ControllerMap;
 
 class __tiliae_reflect__ AbstractController : public Core::Object {
 public:
-
         AbstractController ();
         virtual ~AbstractController ();
 
@@ -62,7 +61,7 @@ public:
         void closeList (Core::StringVector const &childControllerNames);
         void replace (std::string const &childControllerName);
 
-        ControllerVector &getChildren () __tiliae_no_reflect__ ;
+        ControllerVector &getChildren () __tiliae_no_reflect__;
         ControllerVector const &getChildren () const __tiliae_no_reflect__;
         AbstractController *getParent () __tiliae_no_reflect__;
         AbstractController const *getParent () const __tiliae_no_reflect__;
@@ -75,7 +74,7 @@ public:
 
         /*---------------------------------------------------------------------------*/
 
-        virtual ValidationAndBindingResult validate () { return ValidationAndBindingResult {}; }
+        virtual ValidationAndBindingResult validate () { return ValidationAndBindingResult{}; }
 
         ValidatorVector const &getValidators () const { return validators; }
 
@@ -107,7 +106,7 @@ public:
          * put it into one of scopes (session, controllerScope etc), and finally return the name of the
          * page to be shown. This method, should not be used by users.
          *
-         * \returns Page to be shown or empty string in case nothing should be done with views.
+         * \returns View name to be shown or empty string in case nothing should be done with views.
          */
         virtual std::string onStart () = 0;
 
@@ -146,20 +145,20 @@ public:
 
         /*****************************************************************************/
 
-        AbstractView *getView ();
-        void setView (AbstractView *v);
+        ViewVector const &getViews ();
+        // void setView (AbstractView *v);
+        void addView (AbstractView *v);
+        void clearViews ();
 
         App *getApp ();
 
 public:
-
         ValidatorVector validators;
         int loopDelayMs;
         /// Which controllers to open as child-controllers of this controller. TODO StringVector + converter.
         std::string alsoOpen;
 
 private:
-
         friend class App;
         void setApp (App *app);
 

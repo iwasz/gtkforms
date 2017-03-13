@@ -16,7 +16,7 @@
 #include <core/Object.h>
 #include <gtk/gtk.h>
 #include <map>
-#include <set>
+#include <vector>
 #include <string>
 
 namespace GtkForms {
@@ -122,8 +122,9 @@ private:
         Impl *impl = 0;
 };
 
-typedef __tiliae_reflect__ std::map<std::string, AbstractView *> ViewMap;
-typedef std::set<AbstractView *> ViewSet;
+//typedef __tiliae_reflect__ std::map<std::string, AbstractView *> ViewMap;
+//typedef std::set<AbstractView *> ViewSet;
+typedef std::vector <AbstractView *> ViewVector;
 
 } // namespace GtkForms
 

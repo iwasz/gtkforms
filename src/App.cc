@@ -119,18 +119,21 @@ void App::Impl::controllerRemoval (AbstractController *controller, bool removeFr
                 controllerRemoval (child, false);
         }
 
-        AbstractView *view = controller->getView ();
-        // TODO jeśli controller jest singletonem, to tylkol hide.? na pewno? Kontorlery chyba tworzą te widoki od nowa.
-        if (view) {
-                view->setControllerToUi (nullptr);
-                view->destroyUi ();
+        ViewVector const &views = controller->getViews ();
+
+        for (AbstractView *view : views) {
+                // TODO jeśli controller jest singletonem, to tylkol hide.? na pewno? Kontorlery chyba tworzą te widoki od nowa.
+                if (view) {
+                        view->setControllerToUi (nullptr);
+                        view->destroyUi ();
+                }
         }
 
         controller->onStop ();
 
         // Clear some fields.
         controller->setApp (nullptr);
-        controller->setView (nullptr);
+        controller->clearViews ();
         controller->clearControllerScope ();
         controller->getChildren ().clear ();
 
@@ -173,12 +176,20 @@ void App::Impl::controllerOpen (std::string const &controllerName, AbstractContr
 
         controller->setParent (requestor);
 
-        std::string viewName = controller->onStart ();
-        AbstractView *view = AbstractView::loadView (viewName, controller, container);
-        controller->setView (view);
+        std::string viewNames = controller->onStart ();
 
-        if (view) {
-                view->runDecorators (IPageDecorator::POST_SHOW, &context);
+        Core::StringVector viewNamesList;
+        if (!viewNames.empty ()) {
+                boost::split (viewNamesList, viewNames, boost::is_any_of (", "), boost::token_compress_on);
+        }
+
+        for (std::string const &viewName : viewNamesList) {
+                AbstractView *view = AbstractView::loadView (viewName, controller, container);
+                controller->addView (view);
+
+                if (view) {
+                        view->runDecorators (IPageDecorator::POST_SHOW, &context);
+                }
         }
 
         Core::StringVector alsoOpenList;
@@ -277,31 +288,31 @@ unsigned int App::Impl::getCurrentMs () const
 
 /*--------------------------------------------------------------------------*/
 
-/**
- * TODO wywalić gdzieś.
- */
-void guiLoadTheme (const char *directory, const char *theme_name, GObject *toplevel)
-{
-        GtkCssProvider *css_provider;
-        GError *error = NULL;
-        char buf[strlen (directory) + strlen (theme_name) + 32];
-        /* Gtk theme is a directory containing gtk-3.0/gtkrc file */
-        snprintf (buf, sizeof (buf), "%s/%s/gtk-3.0/gtk.css", directory, theme_name);
-        css_provider = gtk_css_provider_new ();
-        gtk_css_provider_load_from_file (css_provider, g_file_new_for_path (buf), &error);
+///**
+// * TODO wywalić gdzieś.
+// */
+// void guiLoadTheme (const char *directory, const char *theme_name, GObject *toplevel)
+//{
+//        GtkCssProvider *css_provider;
+//        GError *error = NULL;
+//        char buf[strlen (directory) + strlen (theme_name) + 32];
+//        /* Gtk theme is a directory containing gtk-3.0/gtkrc file */
+//        snprintf (buf, sizeof (buf), "%s/%s/gtk-3.0/gtk.css", directory, theme_name);
+//        css_provider = gtk_css_provider_new ();
+//        gtk_css_provider_load_from_file (css_provider, g_file_new_for_path (buf), &error);
 
-        if (error) {
-                g_warning ("%s\n", error->message);
-                return;
-        }
+//        if (error) {
+//                g_warning ("%s\n", error->message);
+//                return;
+//        }
 
-        GdkDisplay *display = gdk_display_get_default ();
-        GdkScreen *screen = gdk_display_get_default_screen (display);
+//        GdkDisplay *display = gdk_display_get_default ();
+//        GdkScreen *screen = gdk_display_get_default_screen (display);
 
-        gtk_style_context_add_provider_for_screen (screen, GTK_STYLE_PROVIDER (css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+//        gtk_style_context_add_provider_for_screen (screen, GTK_STYLE_PROVIDER (css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-        g_object_unref (css_provider);
-}
+//        g_object_unref (css_provider);
+//}
 
 /*--------------------------------------------------------------------------*/
 
@@ -356,60 +367,62 @@ void App::doSubmit (SubmitEvent *event)
         controller->getValidationResults ().clear ();
         //        impl->context.setCurrentController (controller);
 
-        AbstractView *view = controller->getView ();
+        ViewVector const &views = controller->getViews ();
+        bool hasErrors = false;
 
-        if (!view) {
-                throw Core::Exception ("App::doSubmit : no view!");
-        }
+        for (AbstractView *view : views) {
 
-        MappingMultiMap mappings = view->getMappingsByInputRange ();
+                MappingMultiMap mappings = view->getMappingsByInputRange ();
 
 #if 0
         view->printStructure ();
 #endif
 
-        AbstractView::WidgetMap inputMap = view->getInputOutputWidgets (event->widgetNameRange);
-        bool hasErrors = false;
+                AbstractView::WidgetMap inputMap = view->getInputOutputWidgets (event->widgetNameRange);
 
-        for (auto elem : inputMap) {
-                std::string inputName = elem.first;
-                MappingDTO dto;
-                dto.app = this;
-                dto.m2vModelObject = Core::Variant (controller->getModelAccessor ());
-                dto.v2mModelObject = Core::Variant (controller->getModelAccessor ());
-                //                dto.dataRange = event->widgetNameRange;
+                for (auto elem : inputMap) {
+                        std::string inputName = elem.first;
+                        MappingDTO dto;
+                        dto.app = this;
+                        dto.m2vModelObject = Core::Variant (controller->getModelAccessor ());
+                        dto.v2mModelObject = Core::Variant (controller->getModelAccessor ());
+                        //                dto.dataRange = event->widgetNameRange;
 
-                ViewElementDTO elementDTO{ G_OBJECT (elem.second) };
-                dto.viewElement = &elementDTO;
+                        ViewElementDTO elementDTO{ G_OBJECT (elem.second) };
+                        dto.viewElement = &elementDTO;
 
-                MappingMultiMap::const_iterator i;
-                auto eq = mappings.equal_range (inputName);
-                bool mappingFoundForInput = false;
-                for (i = eq.first; i != eq.second; ++i) {
-                        IMapping *mapping = i->second;
-                        ValidationAndBindingResult vr = mapping->view2Model (&dto);
-                        mappingFoundForInput = true;
-                        controller->getValidationResults ().add (vr);
+                        MappingMultiMap::const_iterator i;
+                        auto eq = mappings.equal_range (inputName);
+                        bool mappingFoundForInput = false;
+                        for (i = eq.first; i != eq.second; ++i) {
+                                IMapping *mapping = i->second;
+                                ValidationAndBindingResult vr = mapping->view2Model (&dto);
+                                mappingFoundForInput = true;
+                                controller->getValidationResults ().add (vr);
 
-                        if (!vr.valid) {
-                                BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
-                                hasErrors = true;
+                                if (!vr.valid) {
+                                        BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
+                                        hasErrors = true;
+                                }
+
+                                continue;
                         }
 
-                        continue;
-                }
+                        // Falling back to default mapping if none specifica were found.
+                        if (!mappingFoundForInput) {
+                                IMapping *defaultMapping = Impl::getDefaultMapping (&elementDTO);
+                                ValidationAndBindingResult vr = defaultMapping->view2Model (&dto, inputName, "", "");
+                                controller->getValidationResults ().add (vr);
 
-                // Falling back to default mapping if none specifica were found.
-                if (!mappingFoundForInput) {
-                        IMapping *defaultMapping = Impl::getDefaultMapping (&elementDTO);
-                        ValidationAndBindingResult vr = defaultMapping->view2Model (&dto, inputName, "", "");
-                        controller->getValidationResults ().add (vr);
-
-                        if (!vr.valid) {
-                                BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
-                                hasErrors = true;
+                                if (!vr.valid) {
+                                        BOOST_LOG (lg) << "Binding error. Model : [" << vr.model << "]";
+                                        hasErrors = true;
+                                }
                         }
                 }
+
+                // Fire decorators.
+                view->runDecorators (IPageDecorator::PRE_SUBMIT, &impl->context);
         }
 
         /*
@@ -436,9 +449,6 @@ void App::doSubmit (SubmitEvent *event)
         }
 
         impl->context.setValidationResults (&controller->getValidationResults ());
-
-        // Fire decorators.
-        view->runDecorators (IPageDecorator::PRE_SUBMIT, &impl->context);
 
         if (!hasErrors) {
                 controller->onSubmit ();
@@ -469,39 +479,70 @@ IMapping *App::Impl::getDefaultMapping (ViewElementDTO *vd)
 
 void App::doRefresh (RefreshEvent *event)
 {
-        AbstractView *view = event->controller->getView ();
+        ViewVector const &views = event->controller->getViews ();
 
-        if (!view) {
-                throw Core::Exception ("App::doRefresh : no view!");
-        }
+        for (AbstractView *view : views) {
 
-        std::vector<std::string> alreadyRefreshedWidgets;
+                std::vector<std::string> alreadyRefreshedWidgets;
 
-        // 1. From mappings
-        if (!event->widgetNameRange.empty ()) {
-                // TODO czy to nie powinno być getMappingsByInput !??!?
-                // MappingMultiMap mappings = view->getMappingsByModelRange (event->widgetNameRange);
-                MappingMultiMap mappings = view->getMappingsByInputRange (event->widgetNameRange);
+                // 1. From mappings
+                if (!event->widgetNameRange.empty ()) {
+                        // TODO czy to nie powinno być getMappingsByInput !??!?
+                        // MappingMultiMap mappings = view->getMappingsByModelRange (event->widgetNameRange);
+                        MappingMultiMap mappings = view->getMappingsByInputRange (event->widgetNameRange);
 
-                for (MappingMultiMap::value_type &elem : mappings) {
-                        IMapping *mapping = elem.second;
-                        if (!event->propertyName.empty () && event->propertyName != mapping->getProperty ()) {
+                        for (MappingMultiMap::value_type &elem : mappings) {
+                                IMapping *mapping = elem.second;
+                                if (!event->propertyName.empty () && event->propertyName != mapping->getProperty ()) {
+                                        continue;
+                                }
+
+                                AbstractView::WidgetMap tmp = view->getInputOutputWidgets (mapping->getWidget (), true);
+
+                                if (impl->config->logMappings) {
+                                        BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << mapping->getWidget () << "]\033[0m (refresh range event).";
+                                }
+
+                                if (tmp.size () != 1) {
+                                        throw Core::Exception ("App::doRefresh there should be 1 imput with name [" + mapping->getWidget () + "]. Is : ["
+                                                               + boost::lexical_cast<std::string> (tmp.size ()) + "].");
+                                }
+
+                                GtkWidget *input = tmp.begin ()->second;
+                                alreadyRefreshedWidgets.push_back (mapping->getWidget ());
+
+                                MappingDTO dto;
+                                dto.app = this;
+                                dto.m2vModelObject = Core::Variant (event->controller->getModelAccessor ());
+                                dto.v2mModelObject = Core::Variant (event->controller->getModelAccessor ());
+                                // dto.dataRange = event->widgetNameRange;
+
+                                ViewElementDTO elementDTO{ G_OBJECT (input) };
+                                dto.viewElement = &elementDTO;
+
+                                mapping->model2View (&dto);
+                        }
+                }
+
+                /*
+                 * 2. From inputs
+                 * If model range is empty, then we have to fall back to the default behavior, which
+                 * would iterate over all the inputs and try to find models coresponding to those
+                 * inputs.
+                 */
+                AbstractView::WidgetMap inputMap = view->getInputOutputWidgets (event->widgetNameRange, true);
+                MappingMultiMap mappings = view->getMappingsByInputRange ();
+
+                for (auto elem : inputMap) {
+                        std::string inputName = elem.first;
+
+                        if (std::find (alreadyRefreshedWidgets.cbegin (), alreadyRefreshedWidgets.cend (), inputName) != alreadyRefreshedWidgets.cend ()) {
                                 continue;
                         }
 
-                        AbstractView::WidgetMap tmp = view->getInputOutputWidgets (mapping->getWidget (), true);
-
                         if (impl->config->logMappings) {
-                                BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << mapping->getWidget () << "]\033[0m (refresh range event).";
+                                BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << inputName << "]\033[0m (refresh all event)";
                         }
-
-                        if (tmp.size () != 1) {
-                                throw Core::Exception ("App::doRefresh there should be 1 imput with name [" + mapping->getWidget () + "]. Is : ["
-                                                       + boost::lexical_cast<std::string> (tmp.size ()) + "].");
-                        }
-
-                        GtkWidget *input = tmp.begin ()->second;
-                        alreadyRefreshedWidgets.push_back (mapping->getWidget ());
 
                         MappingDTO dto;
                         dto.app = this;
@@ -509,75 +550,43 @@ void App::doRefresh (RefreshEvent *event)
                         dto.v2mModelObject = Core::Variant (event->controller->getModelAccessor ());
                         // dto.dataRange = event->widgetNameRange;
 
-                        ViewElementDTO elementDTO{ G_OBJECT (input) };
+                        ViewElementDTO elementDTO{ G_OBJECT (elem.second) };
                         dto.viewElement = &elementDTO;
 
-                        mapping->model2View (&dto);
+                        MappingMultiMap::const_iterator i;
+                        auto eq = mappings.equal_range (inputName);
+
+                        bool customMappingWasRun = false;
+                        for (i = eq.first; i != eq.second; ++i) {
+                                IMapping *mapping = i->second;
+
+                                if (impl->config->logMappings) {
+                                        BOOST_LOG (lg) << "Maping found. Input : [" << mapping->getWidget () << "], model : [" << mapping->getModel () << "]";
+                                }
+
+                                if (!event->propertyName.empty () && event->propertyName != mapping->getProperty ()) {
+                                        continue;
+                                }
+
+                                mapping->model2View (&dto);
+                                customMappingWasRun = true;
+                        }
+
+                        // Default.
+                        if (!customMappingWasRun) {
+                                IMapping *defaultMapping = Impl::getDefaultMapping (&elementDTO);
+
+                                if (!defaultMapping) {
+                                        throw Core::Exception ("No default conversion for widget : [" + inputName + "].");
+                                }
+
+                                defaultMapping->model2View (&dto, inputName, "", "");
+                        }
                 }
+
+                view->refresh (&impl->context);
+                view->runDecorators (IPageDecorator::POST_REFRESH, &impl->context);
         }
-
-        /*
-         * 2. From inputs
-         * If model range is empty, then we have to fall back to the default behavior, which
-         * would iterate over all the inputs and try to find models coresponding to those
-         * inputs.
-         */
-        AbstractView::WidgetMap inputMap = view->getInputOutputWidgets (event->widgetNameRange, true);
-        MappingMultiMap mappings = view->getMappingsByInputRange ();
-
-        for (auto elem : inputMap) {
-                std::string inputName = elem.first;
-
-                if (std::find (alreadyRefreshedWidgets.cbegin (), alreadyRefreshedWidgets.cend (), inputName) != alreadyRefreshedWidgets.cend ()) {
-                        continue;
-                }
-
-                if (impl->config->logMappings) {
-                        BOOST_LOG (lg) << "Refreshing widget named : \033[32m[" << inputName << "]\033[0m (refresh all event)";
-                }
-
-                MappingDTO dto;
-                dto.app = this;
-                dto.m2vModelObject = Core::Variant (event->controller->getModelAccessor ());
-                dto.v2mModelObject = Core::Variant (event->controller->getModelAccessor ());
-                // dto.dataRange = event->widgetNameRange;
-
-                ViewElementDTO elementDTO{ G_OBJECT (elem.second) };
-                dto.viewElement = &elementDTO;
-
-                MappingMultiMap::const_iterator i;
-                auto eq = mappings.equal_range (inputName);
-
-                bool customMappingWasRun = false;
-                for (i = eq.first; i != eq.second; ++i) {
-                        IMapping *mapping = i->second;
-
-                        if (impl->config->logMappings) {
-                                BOOST_LOG (lg) << "Maping found. Input : [" << mapping->getWidget () << "], model : [" << mapping->getModel () << "]";
-                        }
-
-                        if (!event->propertyName.empty () && event->propertyName != mapping->getProperty ()) {
-                                continue;
-                        }
-
-                        mapping->model2View (&dto);
-                        customMappingWasRun = true;
-                }
-
-                // Default.
-                if (!customMappingWasRun) {
-                        IMapping *defaultMapping = Impl::getDefaultMapping (&elementDTO);
-
-                        if (!defaultMapping) {
-                                throw Core::Exception ("No default conversion for widget : [" + inputName + "].");
-                        }
-
-                        defaultMapping->model2View (&dto, inputName, "", "");
-                }
-        }
-
-        view->refresh (&impl->context);
-        view->runDecorators (IPageDecorator::POST_REFRESH, &impl->context);
 }
 
 /*--------------------------------------------------------------------------*/

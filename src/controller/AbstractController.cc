@@ -23,7 +23,8 @@ struct AbstractController::Impl {
         AbstractController *parent = nullptr;
         ControllerVector children;
         std::string name;
-        AbstractView *view = nullptr;
+        // AbstractView *view = nullptr;
+        ViewVector views;
         App *app = nullptr;
         HierarchicalAccessor accessor;
 };
@@ -213,9 +214,11 @@ ValidationAndBindingResultContainer &AbstractController::getValidationResults ()
 
 int &AbstractController::getLastMs () { return impl->lastMs; }
 
-AbstractView *AbstractController::getView () { return impl->view; }
+ViewVector const &AbstractController::getViews () { return impl->views; }
 
-void AbstractController::setView (AbstractView *v) { impl->view = v; }
+// void AbstractController::setView (AbstractView *v) { impl->view = v; }
+void AbstractController::addView (AbstractView *v) { impl->views.push_back (v); }
+void AbstractController::clearViews () { impl->views.clear (); }
 
 Core::VariantMap &AbstractController::getControllerScope () { return impl->controllerScope; }
 
