@@ -14,6 +14,9 @@ namespace GtkForms {
 
 ViewsToOpen::ViewsToOpen (std::string const &s)
 {
+        if (s.empty ()) {
+                clear ();
+        }
 
         Core::StringVector viewNamesList;
         boost::split (viewNamesList, s, boost::is_any_of (", "), boost::token_compress_on);

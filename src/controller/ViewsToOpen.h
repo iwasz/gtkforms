@@ -29,7 +29,9 @@ public:
         ViewsToOpen (std::string const &s);
 
         void add (ViewSlot const &vs) { viewSlots.push_back (vs); }
+        void add (std::string const &vn, std::string const &sn = "") { viewSlots.push_back (ViewSlot (vn, sn)); }
         ViewSlotVector const &getViewSlots () const { return viewSlots; }
+        void clear () { viewSlots.clear (); }
 
 private:
         ViewSlotVector viewSlots;
