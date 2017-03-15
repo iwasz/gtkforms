@@ -13,7 +13,7 @@
 namespace GtkForms {
 static src::logger_mt &lg = logger::get ();
 
-void DimensionRestoreDecorator::preShow (AbstractView *view, Context *ctx)
+void DimensionRestoreDecorator::postShow (AbstractView *view, Context *ctx)
 {
         if (!database) {
                 BOOST_LOG (lg) << "DimensionRestoreDecorator::preShow : no database.";
@@ -40,11 +40,6 @@ void DimensionRestoreDecorator::preShow (AbstractView *view, Context *ctx)
                 DimensionRestoreDatabase::ValueVector values = database->get (widget, key);
 
                 if (values.size () < 1) {
-
-//                        if (defaultValueSet) {
-//                                gtk_paned_set_position (paned, defaultValue);
-//                        }
-
                         return;
                 }
 

@@ -146,12 +146,12 @@ void BuilderView::Impl::onUserClickedQuit (GtkWidget *object, gpointer userData)
         App *app = controller->getApp ();
 
         // Close this controller
-        if (controller->getParent ()) {
+//        if (controller->getParent ()) {
                 app->close (controller);
-        }
-        else {
-                app->userQuitRequest ();
-        }
+//        }
+//        else {
+//                app->userQuitRequest ();
+//        }
 }
 
 /*---------------------------------------------------------------------------*/

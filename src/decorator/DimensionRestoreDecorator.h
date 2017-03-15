@@ -18,7 +18,8 @@
 namespace GtkForms {
 
 /**
- * Container for storing parameters of widgets.
+ * Container for storing parameters of widgets. Use DimensionRestoreDatabaseDecorator
+ * for saving and restoring the database.
  */
 class __tiliae_reflect__ DimensionRestoreDatabase : public Core::Object {
 public:
@@ -27,7 +28,7 @@ public:
 
         virtual ~DimensionRestoreDatabase () { DimensionRestoreDatabase::save (); }
 
-        void init () { load (); }
+        // void init () { load (); }
         virtual void load () {}
         virtual void save () {}
 
@@ -46,7 +47,7 @@ protected:
 class __tiliae_reflect__ DimensionRestoreDecorator : public AbstractPageDecorator {
 public:
         virtual ~DimensionRestoreDecorator () {}
-        virtual void preShow (AbstractView *view, Context *ctx);
+        virtual void postShow (AbstractView *view, Context *ctx);
 
 public:
         std::string widget;
@@ -56,6 +57,20 @@ public:
 private:
         static void onSizeAllocate (GtkWidget *widget, GdkRectangle *allocation, gpointer user_data);
         static void onPanedPositionNotify (GObject *gobject, GParamSpec *pspec, gpointer userData);
+};
+
+/**
+ * This class is only for saving and restoring the database. Use it in the main window which
+ * gets destroyed when application quit.
+ */
+class __tiliae_reflect__ DimensionRestoreDatabaseDecorator : public AbstractPageDecorator {
+public:
+        virtual ~DimensionRestoreDatabaseDecorator () {}
+        virtual void preShow (AbstractView *view, Context *ctx) { database->load (); }
+        virtual void preClose (AbstractView *view, Context *ctx) { database->save (); }
+
+public:
+        DimensionRestoreDatabase *database = nullptr;
 };
 
 } // GtkForms

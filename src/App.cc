@@ -47,7 +47,7 @@ struct App::Impl {
                 std::string controllerName;
         };
 
-        void controllerRemoval (AbstractController *controller, bool removeFromParent);
+        void controllerRemoval (AbstractController *controller, bool removeFromParent, App *app);
         void controllerOpen (std::string const &controllerName, AbstractController *requestor, App *app);
         AbstractView *loadView (std::string const &viewAndSlot, AbstractController *controller);
         static IMapping *getDefaultMapping (ViewElementDTO *vd);
@@ -111,16 +111,16 @@ void App::run ()
 /*****************************************************************************/
 
 // TODO to spokojnie mogłaby być metoda kontrolera.
-void App::Impl::controllerRemoval (AbstractController *controller, bool removeFromParent)
+void App::Impl::controllerRemoval (AbstractController *controller, bool removeFromParent, App *app)
 {
         for (AbstractController *child : controller->getChildren ()) {
-                controllerRemoval (child, false);
+                controllerRemoval (child, false, app);
         }
 
         ViewVector const &views = controller->getViews ();
 
         for (AbstractView *view : views) {
-                // TODO jeśli controller jest singletonem, to tylkol hide.? na pewno? Kontorlery chyba tworzą te widoki od nowa.
+                // Jeśli controller jest singletonem, to tylkol hide.? na pewno? Kontorlery chyba tworzą te widoki od nowa. EDIT to działa ok, nie ruszać.
                 if (view) {
                         view->setControllerToUi (nullptr);
                         view->destroyUi ();
@@ -142,6 +142,8 @@ void App::Impl::controllerRemoval (AbstractController *controller, bool removeFr
         // Usuń zadany kontroler z aktualnej struktury drzewiastej
         if (!controller->getParent ()) {
                 rootController = nullptr;
+                // Close this controller
+                app->userQuitRequest ();
         }
         else {
                 AbstractController *parent = controller->getParent ();
@@ -215,7 +217,7 @@ void App::manageControllers ()
                                 controller = operation.requestor;
                         }
 
-                        impl->controllerRemoval (controller, true);
+                        impl->controllerRemoval (controller, true, this);
                 }
         }
 
