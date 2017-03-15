@@ -17,6 +17,7 @@
 #include <core/Typedefs.h>
 #include <gtk/gtk.h>
 #include <k202/K202.h>
+#include <memory>
 #include <string>
 
 namespace GtkForms {
@@ -32,7 +33,6 @@ class AbstractView;
  */
 class __tiliae_reflect__ App {
 public:
-//        App (std::string const &configurationFile, std::string const &initialControllerName) __tiliae_no_reflect__;
         virtual void init (std::string const &configurationFile, std::string const &initialControllerName) __tiliae_no_reflect__;
 
         virtual ~App ();
@@ -60,19 +60,6 @@ public:
          */
         void userQuitRequest ();
 
-        //        /*
-        //         * There is always exactly one active unit which reacts to user requests (in fact its controllers do this). If we want to
-        //         * navigate to other unit by invoking something like app->show ("otherController"), two
-        //         * scenarios may happen:
-        //         * - New controller replaces the old one. We can navigate back to the previous one by invoking
-        //         * app->back ().
-        //         * - New controller runs alongside with old one making a stack structure. Simply call app->end ()
-        //         * in child controller to close it and its view and return to the root controller. Issuing
-        //         * app->back () inside one of child controllers will result in returning to previous root controller.
-        //         * back and forward methods operate only on root controllers.
-        //         */
-        ////        void back ();
-
         /**
          *
          */
@@ -92,7 +79,7 @@ protected:
         virtual void initBeanWrapper ();
 
         /// Initialization of the container. Add custom conversions here.
-        virtual Ptr<Container::BeanFactoryContainer> createContainer (Ptr<Container::MetaContainer> metaContainer);
+        virtual std::unique_ptr<Container::BeanFactoryContainer> createContainer (Ptr<Container::MetaContainer> metaContainer);
 
 private:
         /**

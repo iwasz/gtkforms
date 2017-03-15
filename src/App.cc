@@ -38,6 +38,8 @@ gboolean guiThread (gpointer user_data);
  */
 struct App::Impl {
 
+        ~Impl () {}
+
         struct ControllerOperation {
                 /// true : open, false : close.
                 enum { OPEN, CLOSE } type;
@@ -56,7 +58,7 @@ struct App::Impl {
 
         EventStack events;
 
-        Ptr<BeanFactoryContainer> container;
+        std::unique_ptr<BeanFactoryContainer> container;
         Context context;
         Config *config = nullptr;
         bool controllersIdling = true;
@@ -67,10 +69,6 @@ struct App::Impl {
         DefaultQuitHandler defaultQuitHandler;
         bool beanWrapperInitialized = false;
         Wrapper::BeanWrapper *beanWrapper = 0;
-
-        //        TODO w forrest jest potrzbene cofanie
-        //        typedef std::stack<std::string> UnitNameStack;
-        //        UnitNameStack previousUnits;
 };
 
 /*--------------------------------------------------------------------------*/
@@ -179,7 +177,7 @@ void App::Impl::controllerOpen (std::string const &controllerName, AbstractContr
         ViewsToOpen vto = controller->onStart ();
 
         for (ViewsToOpen::ViewSlot const &vs : vto.getViewSlots ()) {
-                AbstractView *view = AbstractView::loadView (vs, controller, container);
+                AbstractView *view = AbstractView::loadView (vs, controller, container.get ());
                 controller->addView (view);
 
                 if (view) {
@@ -586,9 +584,9 @@ void App::doRefresh (RefreshEvent *event)
 
 /*--------------------------------------------------------------------------*/
 
-Ptr<Container::BeanFactoryContainer> App::createContainer (Ptr<Container::MetaContainer> metaContainer)
+std::unique_ptr<Container::BeanFactoryContainer> App::createContainer (Ptr<Container::MetaContainer> metaContainer)
 {
-        Ptr<Container::BeanFactoryContainer> container = ContainerFactory::create (metaContainer, true);
+        std::unique_ptr<Container::BeanFactoryContainer> container (ContainerFactory::create (metaContainer, true));
         // Example:
         // container->addConversion (typeid (Geometry::Point), Geometry::stringToPointVariant);
         // container->addSingleton (i->first.c_str (), i->second);

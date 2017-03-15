@@ -40,7 +40,7 @@ public:
 
         /*---------------------------------------------------------------------------*/
 
-        static AbstractView *loadView (ViewsToOpen::ViewSlot const &vs, AbstractController *controller, Ptr<Container::BeanFactoryContainer> container);
+        static AbstractView *loadView (ViewsToOpen::ViewSlot const &vs, AbstractController *controller, Container::BeanFactoryContainer *container);
 
         /**
          * Loads a UI file into memory (if not loaded allready), and gets pointer to widget with name

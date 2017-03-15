@@ -65,7 +65,7 @@ void AbstractView::hide () { gtk_widget_hide (GTK_WIDGET (getUi ())); }
 
 /*--------------------------------------------------------------------------*/
 
-AbstractView *AbstractView::loadView (ViewsToOpen::ViewSlot const &vs, AbstractController *controller, Ptr<Container::BeanFactoryContainer> container)
+AbstractView *AbstractView::loadView (ViewsToOpen::ViewSlot const &vs, AbstractController *controller, Container::BeanFactoryContainer *container)
 {
         AbstractView *view = ocast<AbstractView *> (container->getBean (vs.view));
         // Ustawi w polu impl->controller
