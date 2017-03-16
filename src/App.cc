@@ -15,6 +15,7 @@
 #include "controller/RefreshEvent.h"
 #include "controller/RefreshEvent.h"
 #include "controller/SubmitEvent.h"
+#include "mapping/AdjustmentMapping.h"
 #include "mapping/TableMapping.h"
 #include "mapping/TextViewMapping.h"
 #include "view/AbstractView.h"
@@ -283,34 +284,6 @@ unsigned int App::Impl::getCurrentMs () const
 
 /*--------------------------------------------------------------------------*/
 
-///**
-// * TODO wywalić gdzieś.
-// */
-// void guiLoadTheme (const char *directory, const char *theme_name, GObject *toplevel)
-//{
-//        GtkCssProvider *css_provider;
-//        GError *error = NULL;
-//        char buf[strlen (directory) + strlen (theme_name) + 32];
-//        /* Gtk theme is a directory containing gtk-3.0/gtkrc file */
-//        snprintf (buf, sizeof (buf), "%s/%s/gtk-3.0/gtk.css", directory, theme_name);
-//        css_provider = gtk_css_provider_new ();
-//        gtk_css_provider_load_from_file (css_provider, g_file_new_for_path (buf), &error);
-
-//        if (error) {
-//                g_warning ("%s\n", error->message);
-//                return;
-//        }
-
-//        GdkDisplay *display = gdk_display_get_default ();
-//        GdkScreen *screen = gdk_display_get_default_screen (display);
-
-//        gtk_style_context_add_provider_for_screen (screen, GTK_STYLE_PROVIDER (css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
-
-//        g_object_unref (css_provider);
-//}
-
-/*--------------------------------------------------------------------------*/
-
 void App::pushEvent (std::unique_ptr<IEvent> e) { impl->events.push (std::move (e)); }
 
 /*--------------------------------------------------------------------------*/
@@ -463,6 +436,10 @@ IMapping *App::Impl::getDefaultMapping (ViewElementDTO *vd)
         }
         else if (GTK_IS_TEXT_VIEW (inputWidget)) {
                 static TextViewMapping mapping;
+                return &mapping;
+        }
+        else if (GTK_IS_SPIN_BUTTON (inputWidget)) {
+                static AdjustmentMapping mapping;
                 return &mapping;
         }
 

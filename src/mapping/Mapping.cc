@@ -101,6 +101,9 @@ std::string Mapping::getDefaultProperty (App *app, ViewElementDTO *dto) const
         else if (GTK_IS_LABEL (inputWidget) || GTK_IS_BUTTON (inputWidget)) {
                 return "label";
         }
+        else if (GTK_IS_SPIN_BUTTON (inputWidget)) {
+                return "value";
+        }
 
         if (app->getConfig ()->logMappings) {
                 BOOST_LOG (lg) << "Mapping::getDefaultProperty : no default property found. Returning 'text'.";
@@ -198,7 +201,7 @@ ValidationAndBindingResult Mapping::setToModel (Wrapper::BeanWrapper *wrapper, C
         }
 
         Core::DebugContext ctx;
-        if (!wrapper->set (finalModelName, valueToSet, &ctx)) {
+        if (!wrapper->set (finalModelName, output, &ctx)) {
                 result.valid = false;
                 result.params["message"] = Core::Variant{ "Invalid attempt to assign a value to a model property." };
                 ctx.addMessage ("Mapping::view2Model : invalid attempt to assign a value to a model property. ");
