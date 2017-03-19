@@ -104,6 +104,12 @@ std::string Mapping::getDefaultProperty (App *app, ViewElementDTO *dto) const
         else if (GTK_IS_SPIN_BUTTON (inputWidget)) {
                 return "value";
         }
+        else if (GTK_IS_FONT_BUTTON (inputWidget)) {
+                return "font-name";
+        }
+        else if (GTK_IS_FONT_CHOOSER (inputWidget)) {
+                return "font";
+        }
 
         if (app->getConfig ()->logMappings) {
                 BOOST_LOG (lg) << "Mapping::getDefaultProperty : no default property found. Returning 'text'.";
