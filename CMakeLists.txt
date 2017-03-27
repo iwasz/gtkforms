@@ -1,13 +1,17 @@
 # Wymagaj tej wersji - dopiero w niej jest nowe makro FindPkgConfig
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.0 FATAL_ERROR)
 
-PROJECT (gtkforms)
-INCLUDE (../tiliae/tiliae.cmake)
-SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
+
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0048 NEW)
+endif(COMMAND cmake_policy)
+
+PROJECT (gtkforms VERSION 0.9)
+INCLUDE (../tiliae/tiliae.cmake)
+SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 SET (BUILD_LIB                 ON CACHE BOOL "")
 SET (BUILD_TEST                OFF CACHE BOOL "")
@@ -26,6 +30,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -DTILIAE_DLL" CACHE INTERNAL "cxx release 
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK "-pthread")
 ADD_DEFINITIONS (-DWITH_PARSER)
+SET (CMAKE_INSTALL_PREFIX /usr)
 
 INSTALL (
     DIRECTORY "${PROJECT_SOURCE_DIR}/src/"
@@ -239,3 +244,16 @@ IF(BUILD_CATALOG)
 ENDIF()
 
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/pc/${CMAKE_PROJECT_NAME}.pc.in ${CMAKE_CURRENT_BINARY_DIR}/pc/${CMAKE_PROJECT_NAME}.pc @ONLY)
+
+ADD_CUSTOM_TARGET("publish" DEPENDS gtkforms COMMAND rm -Rf /tmp/installdir)
+ADD_CUSTOM_COMMAND(TARGET "publish" COMMAND mkdir -p /tmp/installdir)
+ADD_CUSTOM_COMMAND(TARGET "publish" COMMAND make install DESTDIR=/tmp/installdir)
+
+FIND_PROGRAM (FPM fpm)
+ADD_CUSTOM_COMMAND (TARGET "publish" COMMAND ${FPM} -f -s dir -t deb -n libgtkforms -v ${PROJECT_VERSION} -C /tmp/installdir/ -p libgtkforms_VERSION_ARCH.deb -d 'libtiliae >= 0.9' -d 'libgtk-3-0 >= 3.20.9' usr/lib)
+ADD_CUSTOM_COMMAND (TARGET "publish" COMMAND ${FPM} -f -s dir -t deb -n libgtkforms-dev -v ${PROJECT_VERSION} -C /tmp/installdir/ -p libgtkforms-dev_VERSION_ARCH.deb -d 'libgtkforms = ${PROJECT_VERSION}' usr/include)
+FIND_PROGRAM (DPKGSIG dpkg-sig)
+ADD_CUSTOM_COMMAND (TARGET "publish" COMMAND ${DPKGSIG} -k 9EDE3F68 -s builder *.deb)
+FIND_PROGRAM (SCP scp)
+ADD_CUSTOM_COMMAND (TARGET "publish" COMMAND ${SCP} libgtkforms_${PROJECT_VERSION}_amd64.deb iwasz@iwasz.pl:/home/iwasz/domains/iwasz.pl/public_html/deb/)
+ADD_CUSTOM_COMMAND (TARGET "publish" COMMAND ${SCP} libgtkforms-dev_${PROJECT_VERSION}_amd64.deb iwasz@iwasz.pl:/home/iwasz/domains/iwasz.pl/public_html/deb/)
