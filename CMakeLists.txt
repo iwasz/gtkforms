@@ -174,7 +174,7 @@ ENDIF ()
         LIST (APPEND LIB_SOURCES "src/validator/Validator.h")
         LIST (APPEND LIB_SOURCES "src/RegexHelper.cc")
         LIST (APPEND LIB_SOURCES "src/ValidationAndBindingResult.h")
-        ADD_LIBRARY (${CMAKE_PROJECT_NAME} SHARED ${LIB_SOURCES})
+        ADD_LIBRARY (${CMAKE_PROJECT_NAME} ${LIB_SOURCES})
 
         INSTALL (
         TARGETS ${CMAKE_PROJECT_NAME}

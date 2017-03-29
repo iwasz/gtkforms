@@ -23,6 +23,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <memory>
 #include <time.h>
 
@@ -106,7 +108,8 @@ void App::run ()
                 }
         }
         else {
-                usleep (((impl->lastMs + impl->config->loopDelayMs) - currentMs) * 1000);
+                // usleep (((impl->lastMs + impl->config->loopDelayMs) - currentMs) * 1000);
+				boost::this_thread::sleep (boost::posix_time::milliseconds ((impl->lastMs + impl->config->loopDelayMs) - currentMs));
         }
 }
 
