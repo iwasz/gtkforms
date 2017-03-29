@@ -13,5 +13,3 @@ CMakeLists.txt.user
 build/gtkforms.cbp
 build
 doc/_build
-src/Reflection_output.cc.h
-Reflection_output_gtkforms.cc.h

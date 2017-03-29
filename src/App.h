@@ -33,7 +33,8 @@ class AbstractView;
  */
 class __tiliae_reflect__ App {
 public:
-        virtual void init (std::string const &configurationFile, std::string const &initialControllerName) __tiliae_no_reflect__;
+        virtual void init (std::string const &configurationFile, std::string const &initialControllerName,
+                           const Core::StringVector &directories = Core::StringVector ()) __tiliae_no_reflect__;
 
         virtual ~App ();
 
@@ -91,7 +92,7 @@ private:
         /**
          * Creates a tiliae container instance (pointer is in Impl).
          */
-        void initContainer (std::string const &configFile);
+        void initContainer (std::string const &configFile, const Core::StringVector &directories);
 
         /**
          * Method which has to be invoked in your main application loop.

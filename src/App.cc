@@ -21,6 +21,7 @@
 #include "view/AbstractView.h"
 #include <algorithm>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 #include <memory>
 #include <time.h>
@@ -78,10 +79,10 @@ struct App::Impl {
 
 /*---------------------------------------------------------------------------*/
 
-void App::init (std::string const &configurationFile, std::string const &initialControllerName)
+void App::init (std::string const &configurationFile, std::string const &initialControllerName, Core::StringVector const &directories)
 {
         impl = new Impl;
-        initContainer (configurationFile);
+        initContainer (configurationFile, directories);
         g_idle_add (guiThread, static_cast<gpointer> (this));
         getContext ().setToSessionScope ("app", Core::Variant (this));
         impl->controllerOperations.push_back (Impl::ControllerOperation{ Impl::ControllerOperation::OPEN, nullptr, initialControllerName });
@@ -574,8 +575,21 @@ std::unique_ptr<Container::BeanFactoryContainer> App::createContainer (Ptr<Conta
 
 /*---------------------------------------------------------------------------*/
 
-void App::initContainer (std::string const &configFile)
+void App::initContainer (std::string const &configFile, Core::StringVector const &directories)
 {
+        for (std::string const &d : directories) {
+                boost::filesystem::path dir (d);
+                boost::filesystem::path file (configFile);
+
+                if (boost::filesystem::is_regular_file (dir / configFile)) {
+#if 0
+                        std::cerr << dir << std::endl;
+#endif
+                        boost::filesystem::current_path (dir);
+                        break;
+                }
+        }
+
         Ptr<MetaContainer> metaContainer = CompactMetaService::parseFile (configFile);
         impl->container = createContainer (metaContainer);
         ContainerFactory::init (impl->container.get (), metaContainer.get ());

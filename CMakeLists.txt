@@ -13,6 +13,7 @@ PROJECT (gtkforms VERSION 0.9)
 INCLUDE (../tiliae/tiliae.cmake)
 SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+SET (WITH_PARSER               ON CACHE BOOL "")
 SET (BUILD_LIB                 ON CACHE BOOL "")
 SET (BUILD_TEST                OFF CACHE BOOL "")
 SET (BUILD_NAVIGATION          OFF CACHE BOOL "")
@@ -29,7 +30,9 @@ SET(CMAKE_C_FLAGS_RELEASE "-DNDEBUG -Wall -DTILIAE_DLL" CACHE INTERNAL "c releas
 SET(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG -DTILIAE_DLL" CACHE INTERNAL "cxx release compiler flags")
 
 ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK "-pthread")
+IF (WITH_PARSER)
 ADD_DEFINITIONS (-DWITH_PARSER)
+ENDIF ()
 SET (CMAKE_INSTALL_PREFIX /usr)
 
 INSTALL (
@@ -77,7 +80,9 @@ ENABLE_TESTING ()
 
 IF (BUILD_LIB)
 
+IF (WITH_PARSER)
         TILIAE_PARSE ("${PROJECT_SOURCE_DIR}/../tiliae/build/parser/tiliaeparser" "gtkforms" "src/Reflection_input.cc" "src/Reflection_output_gtkforms.cc.h")
+ENDIF ()
         LIST (APPEND LIB_SOURCES "src/Reflection_input.cc")
         LIST (APPEND LIB_SOURCES "src/Reflection_output_gtkforms.cc.h")
 
@@ -250,7 +255,7 @@ ADD_CUSTOM_COMMAND(TARGET "publish" COMMAND mkdir -p /tmp/installdir)
 ADD_CUSTOM_COMMAND(TARGET "publish" COMMAND make install DESTDIR=/tmp/installdir)
 
 FIND_PROGRAM (FPM fpm)
-ADD_CUSTOM_COMMAND (TARGET "publish" COMMAND ${FPM} -f -s dir -t deb -n libgtkforms -v ${PROJECT_VERSION} -C /tmp/installdir/ -p libgtkforms_VERSION_ARCH.deb -d 'libtiliae >= 0.9' -d 'libgtk-3-0 >= 3.20.9' usr/lib)
+ADD_CUSTOM_COMMAND (TARGET "publish" COMMAND ${FPM} -f -s dir -t deb -n libgtkforms -v ${PROJECT_VERSION} -C /tmp/installdir/ -p libgtkforms_VERSION_ARCH.deb -d 'libtiliae >= 0.9' -d 'libgtk-3-0 >= 3.20.9' -d 'libboost-log1.61.0 >= 1.61.0' -d 'libboost-regex1.61.0 >= 1.61.0' -d 'libboost-atomic1.61.0 >= 1.61.0' -d 'libboost-chrono1.61.0 >= 1.61.0' -d 'libboost-date-time1.61.0 >= 1.61.0' -d 'libboost-filesystem1.61.0 > 1.61.0' -d 'libboost-system1.61.0 >= 1.61.0' -d 'libboost-thread1.61.0 >= 1.61.0'  usr/lib)
 ADD_CUSTOM_COMMAND (TARGET "publish" COMMAND ${FPM} -f -s dir -t deb -n libgtkforms-dev -v ${PROJECT_VERSION} -C /tmp/installdir/ -p libgtkforms-dev_VERSION_ARCH.deb -d 'libgtkforms = ${PROJECT_VERSION}' usr/include)
 FIND_PROGRAM (DPKGSIG dpkg-sig)
 ADD_CUSTOM_COMMAND (TARGET "publish" COMMAND ${DPKGSIG} -k 9EDE3F68 -s builder *.deb)
