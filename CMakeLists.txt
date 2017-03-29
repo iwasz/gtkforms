@@ -14,6 +14,7 @@ INCLUDE (../tiliae/tiliae.cmake)
 SET (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 SET (WITH_PARSER               ON CACHE BOOL "")
+SET (WITH_CPPABI               ON CACHE BOOL "")
 SET (BUILD_LIB                 ON CACHE BOOL "")
 SET (BUILD_TEST                OFF CACHE BOOL "")
 SET (BUILD_NAVIGATION          OFF CACHE BOOL "")
