@@ -88,93 +88,97 @@ ENDIF ()
         LIST (APPEND LIB_SOURCES "src/Reflection_output_gtkforms.cc.h")
 
         INCLUDE_DIRECTORIES (src)
-        LIST (APPEND LIB_SOURCES "src/Config.h")
-        LIST (APPEND LIB_SOURCES "src/RegexHelper.h")
-        LIST (APPEND LIB_SOURCES "src/GtkForms.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/PixbufColumn.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/TableMapping.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/TextViewMapping.cc")
-        LIST (APPEND LIB_SOURCES "src/mapping/AdjustmentMapping.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/GValueVariant.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/IMapping.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/PixbufMapping.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/AssociationMap.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/RawData.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/Column.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/AdjustmentMapping.cc")
-        LIST (APPEND LIB_SOURCES "src/mapping/GValueVariant.cc")
-        LIST (APPEND LIB_SOURCES "src/mapping/MappingDTO.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/PixbufMapping.cc")
-        LIST (APPEND LIB_SOURCES "src/mapping/GObjectWrapperPlugin.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/Mapping.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/GObjectWrapperPlugin.cc")
-        LIST (APPEND LIB_SOURCES "src/mapping/TextViewMapping.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/Column.cc")
-        LIST (APPEND LIB_SOURCES "src/mapping/TableMapping.cc")
-        LIST (APPEND LIB_SOURCES "src/mapping/TableFilterMapping.h")
-        LIST (APPEND LIB_SOURCES "src/mapping/TableFilterMapping.cc")
-        LIST (APPEND LIB_SOURCES "src/mapping/Mapping.cc")
-        LIST (APPEND LIB_SOURCES "src/mapping/PixbufColumn.cc")
-        LIST (APPEND LIB_SOURCES "src/App.h")
-        LIST (APPEND LIB_SOURCES "src/decorator/ValidationDecorator.cc")
-        LIST (APPEND LIB_SOURCES "src/decorator/IPageDecorator.h")
-        LIST (APPEND LIB_SOURCES "src/decorator/Decorator.h")
-        LIST (APPEND LIB_SOURCES "src/decorator/ValidationDecorator.h")
-        LIST (APPEND LIB_SOURCES "src/decorator/AbstractPageDecorator.h")
-        LIST (APPEND LIB_SOURCES "src/decorator/AbstractPageDecorator.cc")
-        LIST (APPEND LIB_SOURCES "src/decorator/GtkTreeViewDecorator.h")
-        LIST (APPEND LIB_SOURCES "src/decorator/GtkTreeViewDecorator.cc")
-        LIST (APPEND LIB_SOURCES "src/decorator/DimensionRestoreDecorator.h")
-        LIST (APPEND LIB_SOURCES "src/decorator/DimensionRestoreDecorator.cc")
-        LIST (APPEND LIB_SOURCES "src/decorator/CloseOnEscapeDecorator.h")
-        LIST (APPEND LIB_SOURCES "src/decorator/CloseOnEscapeDecorator.cc")
-        LIST (APPEND LIB_SOURCES "src/view/AbstractView.h")
-        LIST (APPEND LIB_SOURCES "src/view/View.h")
-        LIST (APPEND LIB_SOURCES "src/view/Slot.cc")
-        LIST (APPEND LIB_SOURCES "src/view/AbstractView.cc")
-        LIST (APPEND LIB_SOURCES "src/view/Slot.h")
-        LIST (APPEND LIB_SOURCES "src/view/BuilderView.h")
-        LIST (APPEND LIB_SOURCES "src/view/BuilderView.cc")
-        LIST (APPEND LIB_SOURCES "src/view/EmptyView.h")
-        LIST (APPEND LIB_SOURCES "src/Context.cc")
-        LIST (APPEND LIB_SOURCES "src/ValidationAndBindingResult.cc")
-        LIST (APPEND LIB_SOURCES "src/signalAdapter/SignalAdapter.h")
-        LIST (APPEND LIB_SOURCES "src/signalAdapter/AbstractSignalAdapter.h")
-        LIST (APPEND LIB_SOURCES "src/signalAdapter/RowActivatedAdapter.h")
-        LIST (APPEND LIB_SOURCES "src/signalAdapter/RowActivatedAdapter.cc")
-        LIST (APPEND LIB_SOURCES "src/signalAdapter/ISignalAdapter.h")
-        LIST (APPEND LIB_SOURCES "src/signalAdapter/KeyPressEventAdapter.h")
-        LIST (APPEND LIB_SOURCES "src/signalAdapter/KeyPressEventAdapter.cc")
-        LIST (APPEND LIB_SOURCES "src/Logging.h")
-        LIST (APPEND LIB_SOURCES "src/controller/Controller.h")
-        LIST (APPEND LIB_SOURCES "src/controller/AbstractAccessor.h")
-        LIST (APPEND LIB_SOURCES "src/controller/AbstractAccessor.cc")
-        LIST (APPEND LIB_SOURCES "src/controller/HierarchicalAccessor.h")
-        LIST (APPEND LIB_SOURCES "src/controller/HierarchicalAccessor.cc")
-        LIST (APPEND LIB_SOURCES "src/controller/QuitEvent.cc")
-        LIST (APPEND LIB_SOURCES "src/controller/RefreshEvent.cc")
-        LIST (APPEND LIB_SOURCES "src/controller/QuitEvent.h")
-        LIST (APPEND LIB_SOURCES "src/controller/IEvent.h")
-        LIST (APPEND LIB_SOURCES "src/controller/DummyController.h")
-        LIST (APPEND LIB_SOURCES "src/controller/DefaultQuitHandler.cc")
-        LIST (APPEND LIB_SOURCES "src/controller/DefaultQuitHandler.h")
-        LIST (APPEND LIB_SOURCES "src/controller/SubmitEvent.cc")
-        LIST (APPEND LIB_SOURCES "src/controller/RefreshEvent.h")
-        LIST (APPEND LIB_SOURCES "src/controller/IHandler.h")
-        LIST (APPEND LIB_SOURCES "src/controller/AbstractController.h")
-        LIST (APPEND LIB_SOURCES "src/controller/SubmitEvent.h")
-        LIST (APPEND LIB_SOURCES "src/controller/AbstractController.cc")
-        LIST (APPEND LIB_SOURCES "src/controller/ViewsToOpen.h")
-        LIST (APPEND LIB_SOURCES "src/controller/ViewsToOpen.cc")
-        LIST (APPEND LIB_SOURCES "src/Context.h")
-        LIST (APPEND LIB_SOURCES "src/App.cc")
-        LIST (APPEND LIB_SOURCES "src/validator/IValidator.h")
-        LIST (APPEND LIB_SOURCES "src/validator/NotBlankValidator.cc")
-        LIST (APPEND LIB_SOURCES "src/validator/NotBlankValidator.h")
-        LIST (APPEND LIB_SOURCES "src/validator/AbstractValidator.h")
-        LIST (APPEND LIB_SOURCES "src/validator/Validator.h")
-        LIST (APPEND LIB_SOURCES "src/RegexHelper.cc")
-        LIST (APPEND LIB_SOURCES "src/ValidationAndBindingResult.h")
+        LIST (APPEND LIB_SOURCES
+                "src/Config.h"
+                "src/RegexHelper.h"
+                "src/GtkForms.h"
+                "src/mapping/PixbufColumn.h"
+                "src/mapping/TableMapping.h"
+                "src/mapping/TextViewMapping.cc"
+                "src/mapping/AdjustmentMapping.h"
+                "src/mapping/GValueVariant.h"
+                "src/mapping/IMapping.h"
+                "src/mapping/PixbufMapping.h"
+                "src/mapping/AssociationMap.h"
+                "src/mapping/RawData.h"
+                "src/mapping/Column.h"
+                "src/mapping/AdjustmentMapping.cc"
+                "src/mapping/GValueVariant.cc"
+                "src/mapping/MappingDTO.h"
+                "src/mapping/PixbufMapping.cc"
+                "src/mapping/GObjectWrapperPlugin.h"
+                "src/mapping/Mapping.h"
+                "src/mapping/GObjectWrapperPlugin.cc"
+                "src/mapping/TextViewMapping.h"
+                "src/mapping/Column.cc"
+                "src/mapping/TableMapping.cc"
+                "src/mapping/TableFilterMapping.h"
+                "src/mapping/TableFilterMapping.cc"
+                "src/mapping/Mapping.cc"
+                "src/mapping/PixbufColumn.cc"
+                "src/App.h"
+                "src/decorator/ValidationDecorator.cc"
+                "src/decorator/IPageDecorator.h"
+                "src/decorator/Decorator.h"
+                "src/decorator/ValidationDecorator.h"
+                "src/decorator/AbstractPageDecorator.h"
+                "src/decorator/AbstractPageDecorator.cc"
+                "src/decorator/GtkTreeViewDecorator.h"
+                "src/decorator/GtkTreeViewDecorator.cc"
+                "src/decorator/DimensionRestoreDecorator.h"
+                "src/decorator/DimensionRestoreDecorator.cc"
+                "src/decorator/CloseOnEscapeDecorator.h"
+                "src/decorator/CloseOnEscapeDecorator.cc"
+                "src/view/AbstractView.h"
+                "src/view/View.h"
+                "src/view/Slot.cc"
+                "src/view/AbstractView.cc"
+                "src/view/Slot.h"
+                "src/view/BuilderView.h"
+                "src/view/BuilderView.cc"
+                "src/view/EmptyView.h"
+                "src/Context.cc"
+                "src/ValidationAndBindingResult.cc"
+                "src/signalAdapter/SignalAdapter.h"
+                "src/signalAdapter/AbstractSignalAdapter.h"
+                "src/signalAdapter/RowActivatedAdapter.h"
+                "src/signalAdapter/RowActivatedAdapter.cc"
+                "src/signalAdapter/ISignalAdapter.h"
+                "src/signalAdapter/KeyPressEventAdapter.h"
+                "src/signalAdapter/KeyPressEventAdapter.cc"
+                "src/signalAdapter/FileChooserAdapter.h"
+                "src/signalAdapter/FileChooserAdapter.cc"
+                "src/Logging.h"
+                "src/controller/Controller.h"
+                "src/controller/AbstractAccessor.h"
+                "src/controller/AbstractAccessor.cc"
+                "src/controller/HierarchicalAccessor.h"
+                "src/controller/HierarchicalAccessor.cc"
+                "src/controller/QuitEvent.cc"
+                "src/controller/RefreshEvent.cc"
+                "src/controller/QuitEvent.h"
+                "src/controller/IEvent.h"
+                "src/controller/DummyController.h"
+                "src/controller/DefaultQuitHandler.cc"
+                "src/controller/DefaultQuitHandler.h"
+                "src/controller/SubmitEvent.cc"
+                "src/controller/RefreshEvent.h"
+                "src/controller/IHandler.h"
+                "src/controller/AbstractController.h"
+                "src/controller/SubmitEvent.h"
+                "src/controller/AbstractController.cc"
+                "src/controller/ViewsToOpen.h"
+                "src/controller/ViewsToOpen.cc"
+                "src/Context.h"
+                "src/App.cc"
+                "src/validator/IValidator.h"
+                "src/validator/NotBlankValidator.cc"
+                "src/validator/NotBlankValidator.h"
+                "src/validator/AbstractValidator.h"
+                "src/validator/Validator.h"
+                "src/RegexHelper.cc"
+                "src/ValidationAndBindingResult.h")
+
         ADD_LIBRARY (${CMAKE_PROJECT_NAME} ${LIB_SOURCES})
 
         INSTALL (

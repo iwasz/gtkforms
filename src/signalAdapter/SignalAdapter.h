@@ -12,5 +12,6 @@
 #include "ISignalAdapter.h"
 #include "KeyPressEventAdapter.h"
 #include "RowActivatedAdapter.h"
+#include "FileChooserAdapter.h"
 
 #endif /* SIGNALADAPTER_H_ */

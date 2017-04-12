@@ -656,6 +656,18 @@ void createReflectionDatabase_gtkforms ()
 		}
 	}
 	{
+		Class *clazz = new Class ("FileChooserAdapter", typeid (GtkForms::FileChooserAdapter &), new Reflection::PtrDeleter <GtkForms::FileChooserAdapter>);
+		if (!Manager::add (clazz)) {
+			delete clazz;
+		}
+		else {
+			clazz->addBaseClassName ("AbstractSignalAdapter");
+			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::FileChooserAdapter, void>::Level1Wrapper::newConstructorPointer ()));
+			clazz->addMethod (new Method ("adapt", createMethodWrapper (&GtkForms::FileChooserAdapter::adapt)));
+			clazz->addMethod (new Method ("getSignal", createMethodWrapper (&GtkForms::FileChooserAdapter::getSignal)));
+		}
+	}
+	{
 		Class *clazz = new Class ("AbstractValidator", typeid (GtkForms::AbstractValidator &), new Reflection::PtrDeleter <GtkForms::AbstractValidator>);
 		if (!Manager::add (clazz)) {
 			delete clazz;
