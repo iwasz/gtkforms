@@ -13,7 +13,7 @@
 namespace GtkForms {
 static src::logger_mt &lg = logger::get ();
 
-void DimensionRestoreDecorator::postShow (AbstractView *view, Context *ctx)
+void DimensionRestoreDecorator::preShow (AbstractView *view, Context *ctx)
 {
         if (!database) {
                 BOOST_LOG (lg) << "DimensionRestoreDecorator::preShow : no database.";
@@ -33,7 +33,20 @@ void DimensionRestoreDecorator::postShow (AbstractView *view, Context *ctx)
 
                 gtk_window_resize (win, values[0], values[1]);
         }
-        else if (GTK_IS_PANED (wid)) {
+}
+
+/*****************************************************************************/
+
+void DimensionRestoreDecorator::postShow (AbstractView *view, Context *ctx)
+{
+        if (!database) {
+                BOOST_LOG (lg) << "DimensionRestoreDecorator::preShow : no database.";
+                return;
+        }
+
+        GObject *wid = view->getUiOrThrow (widget);
+
+        if (GTK_IS_PANED (wid)) {
                 GtkPaned *paned = GTK_PANED (wid);
                 g_signal_connect (G_OBJECT (paned), "notify::position", G_CALLBACK (&DimensionRestoreDecorator::onPanedPositionNotify), this);
 

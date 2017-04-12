@@ -48,6 +48,7 @@ class __tiliae_reflect__ DimensionRestoreDecorator : public AbstractPageDecorato
 public:
         virtual ~DimensionRestoreDecorator () {}
         virtual void postShow (AbstractView *view, Context *ctx);
+        virtual void preShow (AbstractView *view, Context *ctx);
 
 public:
         std::string widget;
@@ -61,7 +62,7 @@ private:
 
 /**
  * This class is only for saving and restoring the database. Use it in the main window which
- * gets destroyed when application quit.
+ * gets destroyed when application quits.
  */
 class __tiliae_reflect__ DimensionRestoreDatabaseDecorator : public AbstractPageDecorator {
 public:
