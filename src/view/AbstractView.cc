@@ -81,6 +81,32 @@ AbstractView *AbstractView::loadView (ViewsToOpen::ViewSlot const &vs, AbstractC
                         BOOST_LOG (lg) << "Warn : could not reparent!";
                 }
         }
+#if 0
+        else {
+                AbstractController *parent = controller->getParent ();
+
+                if (!parent) {
+                        goto done;
+                }
+
+                ViewVector const &parentControllerViews = parent->getViews ();
+
+                if (parentControllerViews.empty ()) {
+                        goto done;
+                }
+
+                for (AbstractView *parentControllerView : parentControllerViews) {
+                        if (parentControllerView->getName () == "mainView") {
+                                GtkWindow *parentWindow = GTK_WINDOW (parentControllerView->getUi ());
+                                GtkWindow *thisWindow = GTK_WINDOW (view->getUi ());
+                                gtk_window_set_transient_for (thisWindow, parentWindow);
+                                std::cerr << "=======================TRANSIENT==========================" << std::endl;
+                                break;
+                        }
+                }
+        }
+done:
+#endif
 
         view->runDecorators (IPageDecorator::PRE_SHOW, &controller->getApp ()->getContext ());
         view->show ();
@@ -458,53 +484,57 @@ bool AbstractView::reparent (std::string const &slotName)
 #endif
                         }
 
-                        if (!GTK_IS_BIN (slot)) {
-                                throw Core::Exception ("AbstractView::reparent : !GTK_IS_BIN (slot)");
+                        if (!GTK_IS_CONTAINER (slot)) {
+                                throw Core::Exception ("AbstractView::reparent : !GTK_IS_CONTAINER (slot)");
                         }
 
-                        GtkBin *slotWidget = GTK_BIN (slot);
-                        GtkWidget *oldChild = gtk_bin_get_child (slotWidget);
+                        if (GTK_IS_BIN (slot)) {
+                                GtkBin *slotWidget = GTK_BIN (slot);
+                                GtkWidget *oldChild = gtk_bin_get_child (slotWidget);
 
-                        /*
-                         * Zawartość tego IF spowodowała wiele niejasności. Kiedy góra jest odkomentowana, to
-                         * podczas umieszczania nowego widoku w slocie, jeśli jest on już zajęty, to zostanie
-                         * opróżniony (wiok + jego kontroler).
-                         *
-                         * Natomiast kiedy dół jest odkomentowany, to jeśli slot jest zajęty, to zostanie na
-                         * konsoli zgłoszony warning i nic więcej się nie stanie.
-                         */
-                        if (oldChild) {
+                                /*
+                                 * Zawartość tego IF spowodowała wiele niejasności. Kiedy góra jest odkomentowana, to
+                                 * podczas umieszczania nowego widoku w slocie, jeśli jest on już zajęty, to zostanie
+                                 * opróżniony (wiok + jego kontroler).
+                                 *
+                                 * Natomiast kiedy dół jest odkomentowany, to jeśli slot jest zajęty, to zostanie na
+                                 * konsoli zgłoszony warning i nic więcej się nie stanie.
+                                 */
+                                if (oldChild) {
 #if 1
-                                gtk_widget_hide (oldChild);
-                                gtk_container_remove (GTK_CONTAINER (slotWidget), oldChild);
+                                        gtk_widget_hide (oldChild);
+                                        gtk_container_remove (GTK_CONTAINER (slotWidget), oldChild);
 
-                                AbstractController *c = AbstractView::getControllerByWidget (G_OBJECT (oldChild));
+                                        AbstractController *c = AbstractView::getControllerByWidget (G_OBJECT (oldChild));
 
-                                if (!c) {
-                                        throw Core::Exception ("Could not find controller assigned to thos GtkWidget");
-                                }
+                                        if (!c) {
+                                                throw Core::Exception ("Could not find controller assigned to thos GtkWidget");
+                                        }
 
-                                c->closeThis ();
+                                        c->closeThis ();
 
 #else
-                                BOOST_LOG (lg) << "Cannot reparent view named : [" << getName () << "] into slot named : [" << slotName
-                                               << "], because slot is not empty."
-                                               << "gtk_widget_get_name of the slot : [" << gtk_widget_get_name (slot)
-                                               << "],gtk_buildable_get_name of the slot : [" << gtk_buildable_get_name (GTK_BUILDABLE (slot)) << "],"
-                                               << "gtk_widget_get_name of its child : [" << gtk_widget_get_name (oldChild)
-                                               << "], gtk_buildable_get_name of its child : [" << gtk_buildable_get_name (GTK_BUILDABLE (oldChild)) << "].";
+                                        BOOST_LOG (lg) << "Cannot reparent view named : [" << getName () << "] into slot named : [" << slotName
+                                                       << "], because slot is not empty."
+                                                       << "gtk_widget_get_name of the slot : [" << gtk_widget_get_name (slot)
+                                                       << "],gtk_buildable_get_name of the slot : [" << gtk_buildable_get_name (GTK_BUILDABLE (slot)) << "],"
+                                                       << "gtk_widget_get_name of its child : [" << gtk_widget_get_name (oldChild)
+                                                       << "], gtk_buildable_get_name of its child : [" << gtk_buildable_get_name (GTK_BUILDABLE (oldChild))
+                                                       << "].";
 #endif
+                                }
                         }
 
                         // Add new.
                         GtkWidget *oldParent = 0;
+                        GtkContainer *slotWidget = GTK_CONTAINER (slot);
                         if ((oldParent = gtk_widget_get_parent (GTK_WIDGET (getUi ())))) {
                                 gtk_widget_reparent (GTK_WIDGET (getUi ()), GTK_WIDGET (slotWidget));
 
-                                //                        g_object_ref (tileWidget);
-                                //                        gtk_container_remove (GTK_CONTAINER (oldSlotWidget???), tileWidget);
-                                //                        gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
-                                //                        g_object_unref (tileWidget);
+                                // g_object_ref (tileWidget);
+                                // gtk_container_remove (GTK_CONTAINER (oldSlotWidget???), tileWidget);
+                                // gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
+                                // g_object_unref (tileWidget);
                         }
                         else {
                                 gtk_container_add (GTK_CONTAINER (slotWidget), GTK_WIDGET (getUi ()));
@@ -517,6 +547,57 @@ bool AbstractView::reparent (std::string const &slotName)
 
         return true;
 }
+
+/*****************************************************************************/
+
+// bool AbstractView::embed (std::string const &slotName)
+//{
+//        // Reparent..
+//        AbstractController *controller = getControllerFromUi ();
+
+//        while ((controller = controller->getParent ())) {
+
+//                ViewVector const &parentControllerViews = controller->getViews ();
+
+//                if (parentControllerViews.empty ()) {
+//                        continue;
+//                }
+
+//                for (AbstractView *parentControllerView : parentControllerViews) {
+
+//                        GtkWidget *slot = parentControllerView->getSlot (slotName);
+
+//                        if (!slot) {
+//                                continue;
+//                        }
+
+//                        if (!GTK_IS_CONTAINER (slot)) {
+//                                throw Core::Exception ("AbstractView::reparent : !GTK_IS_CONTAINER (slot)");
+//                        }
+
+//                        GtkContainer *slotWidget = GTK_CONTAINER (slot);
+
+//                        // Add new.
+//                        GtkWidget *oldParent = 0;
+//                        if ((oldParent = gtk_widget_get_parent (GTK_WIDGET (getUi ())))) {
+//                                gtk_widget_reparent (GTK_WIDGET (getUi ()), GTK_WIDGET (slotWidget));
+
+//                                // g_object_ref (tileWidget);
+//                                // gtk_container_remove (GTK_CONTAINER (oldSlotWidget???), tileWidget);
+//                                // gtk_container_add (GTK_CONTAINER (slotWidget), tileWidget);
+//                                // g_object_unref (tileWidget);
+//                        }
+//                        else {
+//                                gtk_container_add (GTK_CONTAINER (slotWidget), GTK_WIDGET (getUi ()));
+//                        }
+
+//                        BOOST_LOG (lg) << "Embedded view named : [" << getName () << "] into slot named : [" << slotName << "], tileWidget ["
+//                                       << (void *)getUi () << "], to slot [" << (void *)slotWidget << "]";
+//                }
+//        }
+
+//        return true;
+//}
 
 #if 0
 /*

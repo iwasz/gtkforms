@@ -21,10 +21,10 @@
 #include "view/AbstractView.h"
 #include <algorithm>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 #include <boost/thread/thread.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <memory>
 #include <time.h>
 
@@ -109,7 +109,7 @@ void App::run ()
         }
         else {
                 // usleep (((impl->lastMs + impl->config->loopDelayMs) - currentMs) * 1000);
-				boost::this_thread::sleep (boost::posix_time::milliseconds ((impl->lastMs + impl->config->loopDelayMs) - currentMs));
+                boost::this_thread::sleep (boost::posix_time::milliseconds ((impl->lastMs + impl->config->loopDelayMs) - currentMs));
         }
 }
 
@@ -141,6 +141,10 @@ void App::Impl::controllerRemoval (AbstractController *controller, bool removeFr
         controller->getChildren ().clear ();
 
         if (!removeFromParent) {
+                if (controller->isDeleteOnClose ()) {
+                        delete controller;
+                }
+
                 return;
         }
 
@@ -155,6 +159,10 @@ void App::Impl::controllerRemoval (AbstractController *controller, bool removeFr
                 ControllerVector &children = parent->getChildren ();
                 auto i = std::remove (children.begin (), children.end (), controller);
                 children.erase (i, children.end ());
+        }
+
+        if (controller->isDeleteOnClose ()) {
+                delete controller;
         }
 }
 

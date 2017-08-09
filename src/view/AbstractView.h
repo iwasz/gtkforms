@@ -52,6 +52,7 @@ public:
         virtual void hide ();
         virtual void refresh (Context *) {}
         virtual bool reparent (std::string const &slotName);
+//        virtual bool embed (std::string const &slotName);
 
         /**
          * Destroys

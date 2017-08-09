@@ -27,6 +27,7 @@ struct AbstractController::Impl {
         ViewVector views;
         App *app = nullptr;
         HierarchicalAccessor accessor;
+        bool deleteOnClose = false;
 };
 
 /*****************************************************************************/
@@ -223,5 +224,8 @@ void AbstractController::clearViews () { impl->views.clear (); }
 Core::VariantMap &AbstractController::getControllerScope () { return impl->controllerScope; }
 
 AbstractAccessor *AbstractController::getModelAccessor () { return &impl->accessor; }
+
+bool AbstractController::isDeleteOnClose () const { return impl->deleteOnClose; }
+void AbstractController::setDeleteOnClose (bool b) { impl->deleteOnClose = b; }
 
 } // namespace GtkForms

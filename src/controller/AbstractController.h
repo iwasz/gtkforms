@@ -71,6 +71,9 @@ public:
         std::string getName () const;
         void contId (std::string const &id);
 
+        bool isDeleteOnClose () const;
+        void setDeleteOnClose (bool b);
+
         AbstractController *findByName (std::string const &name);
 
         /*---------------------------------------------------------------------------*/
