@@ -146,12 +146,12 @@ void BuilderView::Impl::onUserClickedQuit (GtkWidget *object, gpointer userData)
         App *app = controller->getApp ();
 
         // Close this controller
-//        if (controller->getParent ()) {
-                app->close (controller);
-//        }
-//        else {
-//                app->userQuitRequest ();
-//        }
+        //        if (controller->getParent ()) {
+        app->close (controller);
+        //        }
+        //        else {
+        //                app->userQuitRequest ();
+        //        }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -182,22 +182,51 @@ void BuilderView::destroyUi ()
 
         hide ();
 
+#if 1
         GtkWidget *container = gtk_widget_get_parent (impl->widget);
-        // That's strange, but gtk_widget_get_ancestor will return the widget itself if it is a GtkContiner.
 
+        // That's strange, but gtk_widget_get_ancestor will return the widget itself if it is a GtkContiner. (What?)
+        // Why this is here?
         if (container) {
                 container = gtk_widget_get_ancestor (container, GTK_TYPE_CONTAINER);
         }
 
-        if (container) {
+        if (GTK_IS_CONTAINER (container)) {
                 BOOST_LOG (lg) << "Attempting to remove a widget : "
                                << "gtk_widget_get_name : [" << gtk_widget_get_name (impl->widget) << "], gtk_buildable_get_name : ["
                                << gtk_buildable_get_name (GTK_BUILDABLE (impl->widget)) << "], "
                                << "from container : gtk_widget_get_name : [" << gtk_widget_get_name (container) << "], gtk_buildable_get_name of its child : ["
                                << gtk_buildable_get_name (GTK_BUILDABLE (container)) << "].";
 
+                GList *children = gtk_container_get_children (GTK_CONTAINER (container));
+                bool found = false;
+
+                for (; children; children = g_list_next (children)) {
+
+                        GtkWidget *widget = GTK_WIDGET (children->data);
+
+                        if (widget == impl->widget) {
+                                found = true;
+                                break;
+                        }
+                }
+
+                /*
+                 * In this case the widget we are about to remove is contained in some other way than by GtkContainer.
+                 * For example it may be an tab-label in GtkNotebook, and thus it cannot be removed using gtk_container_remove.
+                 * The workaround is to use gtk_widget_unparent, which will make our widget dissapear, which we want.
+                 */
+                if (!found) {
+                        gtk_widget_unparent (impl->widget);
+                        impl->widget = nullptr;
+                        impl->loaded = false;
+                        impl->builder = nullptr;
+                        return;
+                }
+
                 gtk_container_remove (GTK_CONTAINER (container), impl->widget);
         }
+#endif
 
 #if 0
         BOOST_LOG (lg) << " -GtkBuilderView::destroyUi : [" << name << "]";

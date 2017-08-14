@@ -129,6 +129,10 @@ void App::Impl::controllerRemoval (AbstractController *controller, bool removeFr
                 if (view) {
                         view->setControllerToUi (nullptr);
                         view->destroyUi ();
+
+                        if (view->isDeleteOnClose ()) {
+                                delete view;
+                        }
                 }
         }
 

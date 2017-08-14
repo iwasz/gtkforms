@@ -23,6 +23,8 @@ public:
         virtual void preSubmit (AbstractView *view, Context *ctx) {}
         virtual void postRefresh (AbstractView *view, Context *ctx) {}
         virtual void preClose (AbstractView *view, Context *ctx) {}
+        virtual void preReparent (AbstractView *view, GtkContainer *slotWidget, Context *ctx) {}
+        virtual void postReparent (AbstractView *view, GtkContainer *slotWidget, Context *ctx) {}
 };
 
 } /* namespace GtkForms */

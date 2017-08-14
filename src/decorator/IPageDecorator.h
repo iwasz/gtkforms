@@ -10,6 +10,7 @@
 
 #include <ReflectionParserAnnotation.h>
 #include <Tiliae.h>
+#include <gtk/gtk.h>
 
 namespace GtkForms {
 class Context;
@@ -20,7 +21,7 @@ class AbstractView;
  */
 class __tiliae_reflect__ IPageDecorator : public Core::Object {
 public:
-        enum Stage { PRE_SHOW, POST_SHOW, PRE_SUBMIT, POST_REFRESH, PRE_CLOSE };
+        enum Stage { PRE_SHOW, POST_SHOW, PRE_SUBMIT, POST_REFRESH, PRE_CLOSE, PRE_REPARENT, POST_REPARENT };
 
         virtual ~IPageDecorator () {}
         /// On view start
@@ -33,6 +34,10 @@ public:
         virtual void postRefresh (AbstractView *view, Context *ctx) = 0;
         /// Before close (does not matter if window gets destroyed or not)
         virtual void preClose (AbstractView *view, Context *ctx) = 0;
+        /// Before this view is embedded in another one
+        virtual void preReparent (AbstractView *view, GtkContainer *slotWidget, Context *ctx) = 0;
+        /// After this view is embedded in another one
+        virtual void postReparent (AbstractView *view, GtkContainer *slotWidget, Context *ctx) = 0;
 };
 
 typedef __tiliae_reflect__ std::vector<IPageDecorator *> PageDecoratorVector;

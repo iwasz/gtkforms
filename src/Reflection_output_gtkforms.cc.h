@@ -173,6 +173,8 @@ void createReflectionDatabase_gtkforms ()
 			clazz->addMethod (new Method ("preSubmit", createMethodWrapper (&GtkForms::IPageDecorator::preSubmit)));
 			clazz->addMethod (new Method ("postRefresh", createMethodWrapper (&GtkForms::IPageDecorator::postRefresh)));
 			clazz->addMethod (new Method ("preClose", createMethodWrapper (&GtkForms::IPageDecorator::preClose)));
+			clazz->addMethod (new Method ("preReparent", createMethodWrapper (&GtkForms::IPageDecorator::preReparent)));
+			clazz->addMethod (new Method ("postReparent", createMethodWrapper (&GtkForms::IPageDecorator::postReparent)));
 		}
 	}
 	{
@@ -337,6 +339,8 @@ void createReflectionDatabase_gtkforms ()
 			clazz->addMethod (new Method ("getController", createMethodWrapper (&GtkForms::AbstractView::getController)));
 			clazz->addMethod (new Method ("setController", createMethodWrapper (&GtkForms::AbstractView::setController)));
 			clazz->addMethod (new Method ("setConfig", createMethodWrapper (&GtkForms::AbstractView::setConfig)));
+			clazz->addMethod (new Method ("isDeleteOnClose", createMethodWrapper (&GtkForms::AbstractView::isDeleteOnClose)));
+			clazz->addMethod (new Method ("setDeleteOnClose", createMethodWrapper (&GtkForms::AbstractView::setDeleteOnClose)));
 		}
 	}
 	{
@@ -458,33 +462,19 @@ void createReflectionDatabase_gtkforms ()
 			clazz->addMethod (new Method ("preSubmit", createMethodWrapper (&GtkForms::AbstractPageDecorator::preSubmit)));
 			clazz->addMethod (new Method ("postRefresh", createMethodWrapper (&GtkForms::AbstractPageDecorator::postRefresh)));
 			clazz->addMethod (new Method ("preClose", createMethodWrapper (&GtkForms::AbstractPageDecorator::preClose)));
+			clazz->addMethod (new Method ("preReparent", createMethodWrapper (&GtkForms::AbstractPageDecorator::preReparent)));
+			clazz->addMethod (new Method ("postReparent", createMethodWrapper (&GtkForms::AbstractPageDecorator::postReparent)));
 		}
 	}
 	{
-		Class *clazz = new Class ("GtkTreeViewDecorator", typeid (GtkForms::GtkTreeViewDecorator &), new Reflection::PtrDeleter <GtkForms::GtkTreeViewDecorator>);
+		Class *clazz = new Class ("CloseOnEscapeDecorator", typeid (GtkForms::CloseOnEscapeDecorator &), new Reflection::PtrDeleter <GtkForms::CloseOnEscapeDecorator>);
 		if (!Manager::add (clazz)) {
 			delete clazz;
 		}
 		else {
 			clazz->addBaseClassName ("AbstractPageDecorator");
-			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::GtkTreeViewDecorator, void>::Level1Wrapper::newConstructorPointer ()));
-			clazz->addField (new Field ("postRefreshExpandAll", Reflection::createFieldWrapper (&GtkForms::GtkTreeViewDecorator::postRefreshExpandAll)));
-			clazz->addField (new Field ("postStartExpandAll", Reflection::createFieldWrapper (&GtkForms::GtkTreeViewDecorator::postStartExpandAll)));
-			clazz->addMethod (new Method ("postShow", createMethodWrapper (&GtkForms::GtkTreeViewDecorator::postShow)));
-			clazz->addMethod (new Method ("postRefresh", createMethodWrapper (&GtkForms::GtkTreeViewDecorator::postRefresh)));
-			clazz->addMethod (new Method ("getWidget", createMethodWrapper (&GtkForms::GtkTreeViewDecorator::getWidget)));
-			clazz->addMethod (new Method ("setWidget", createMethodWrapper (&GtkForms::GtkTreeViewDecorator::setWidget)));
-		}
-	}
-	{
-		Class *clazz = new Class ("ValidationDecorator", typeid (GtkForms::ValidationDecorator &), new Reflection::PtrDeleter <GtkForms::ValidationDecorator>);
-		if (!Manager::add (clazz)) {
-			delete clazz;
-		}
-		else {
-			clazz->addBaseClassName ("AbstractPageDecorator");
-			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::ValidationDecorator, void>::Level1Wrapper::newConstructorPointer ()));
-			clazz->addMethod (new Method ("preSubmit", createMethodWrapper (&GtkForms::ValidationDecorator::preSubmit)));
+			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::CloseOnEscapeDecorator, void>::Level1Wrapper::newConstructorPointer ()));
+			clazz->addMethod (new Method ("preShow", createMethodWrapper (&GtkForms::CloseOnEscapeDecorator::preShow)));
 		}
 	}
 	{
@@ -530,14 +520,30 @@ void createReflectionDatabase_gtkforms ()
 		}
 	}
 	{
-		Class *clazz = new Class ("CloseOnEscapeDecorator", typeid (GtkForms::CloseOnEscapeDecorator &), new Reflection::PtrDeleter <GtkForms::CloseOnEscapeDecorator>);
+		Class *clazz = new Class ("GtkTreeViewDecorator", typeid (GtkForms::GtkTreeViewDecorator &), new Reflection::PtrDeleter <GtkForms::GtkTreeViewDecorator>);
 		if (!Manager::add (clazz)) {
 			delete clazz;
 		}
 		else {
 			clazz->addBaseClassName ("AbstractPageDecorator");
-			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::CloseOnEscapeDecorator, void>::Level1Wrapper::newConstructorPointer ()));
-			clazz->addMethod (new Method ("preShow", createMethodWrapper (&GtkForms::CloseOnEscapeDecorator::preShow)));
+			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::GtkTreeViewDecorator, void>::Level1Wrapper::newConstructorPointer ()));
+			clazz->addField (new Field ("postRefreshExpandAll", Reflection::createFieldWrapper (&GtkForms::GtkTreeViewDecorator::postRefreshExpandAll)));
+			clazz->addField (new Field ("postStartExpandAll", Reflection::createFieldWrapper (&GtkForms::GtkTreeViewDecorator::postStartExpandAll)));
+			clazz->addMethod (new Method ("postShow", createMethodWrapper (&GtkForms::GtkTreeViewDecorator::postShow)));
+			clazz->addMethod (new Method ("postRefresh", createMethodWrapper (&GtkForms::GtkTreeViewDecorator::postRefresh)));
+			clazz->addMethod (new Method ("getWidget", createMethodWrapper (&GtkForms::GtkTreeViewDecorator::getWidget)));
+			clazz->addMethod (new Method ("setWidget", createMethodWrapper (&GtkForms::GtkTreeViewDecorator::setWidget)));
+		}
+	}
+	{
+		Class *clazz = new Class ("ValidationDecorator", typeid (GtkForms::ValidationDecorator &), new Reflection::PtrDeleter <GtkForms::ValidationDecorator>);
+		if (!Manager::add (clazz)) {
+			delete clazz;
+		}
+		else {
+			clazz->addBaseClassName ("AbstractPageDecorator");
+			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::ValidationDecorator, void>::Level1Wrapper::newConstructorPointer ()));
+			clazz->addMethod (new Method ("preSubmit", createMethodWrapper (&GtkForms::ValidationDecorator::preSubmit)));
 		}
 	}
 	{
@@ -719,6 +725,18 @@ void createReflectionDatabase_gtkforms ()
 		}
 	}
 	{
+		Class *clazz = new Class ("TableFilterMapping", typeid (GtkForms::TableFilterMapping &), new Reflection::PtrDeleter <GtkForms::TableFilterMapping>);
+		if (!Manager::add (clazz)) {
+			delete clazz;
+		}
+		else {
+			clazz->addBaseClassName ("Mapping");
+			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::TableFilterMapping, void>::Level1Wrapper::newConstructorPointer ()));
+			clazz->addMethod (new Method ("getColumnNumber", createMethodWrapper (&GtkForms::TableFilterMapping::getColumnNumber)));
+			clazz->addMethod (new Method ("setColumnNumber", createMethodWrapper (&GtkForms::TableFilterMapping::setColumnNumber)));
+		}
+	}
+	{
 		Class *clazz = new Class ("TableMapping", typeid (GtkForms::TableMapping &), new Reflection::PtrDeleter <GtkForms::TableMapping>);
 		if (!Manager::add (clazz)) {
 			delete clazz;
@@ -736,18 +754,6 @@ void createReflectionDatabase_gtkforms ()
 			clazz->addMethod (new Method ("getModel", createMethodWrapper (&GtkForms::TableMapping::getModel)));
 			clazz->addMethod (new Method ("getProperty", createMethodWrapper (&GtkForms::TableMapping::getProperty)));
 			clazz->addMethod (new Method ("getConstValue", createMethodWrapper (&GtkForms::TableMapping::getConstValue)));
-		}
-	}
-	{
-		Class *clazz = new Class ("TableFilterMapping", typeid (GtkForms::TableFilterMapping &), new Reflection::PtrDeleter <GtkForms::TableFilterMapping>);
-		if (!Manager::add (clazz)) {
-			delete clazz;
-		}
-		else {
-			clazz->addBaseClassName ("Mapping");
-			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::TableFilterMapping, void>::Level1Wrapper::newConstructorPointer ()));
-			clazz->addMethod (new Method ("getColumnNumber", createMethodWrapper (&GtkForms::TableFilterMapping::getColumnNumber)));
-			clazz->addMethod (new Method ("setColumnNumber", createMethodWrapper (&GtkForms::TableFilterMapping::setColumnNumber)));
 		}
 	}
 	{

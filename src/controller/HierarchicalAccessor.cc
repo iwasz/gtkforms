@@ -9,6 +9,9 @@ Core::Variant HierarchicalAccessor::get (const std::string &name)
         if (name == "controller") {
                 return Core::Variant (controller);
         }
+        else if (name == "parent" || name == "controller.parent") {
+                return Core::Variant (controller->getParent ());
+        }
 
         Core::VariantMap::iterator i;
 
@@ -43,5 +46,4 @@ void HierarchicalAccessor::set (const std::string &name, Core::Variant v)
 
         currentController->getControllerScope ()[name] = v;
 }
-
 }

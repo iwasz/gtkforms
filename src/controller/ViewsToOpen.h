@@ -17,9 +17,10 @@ namespace GtkForms {
 class ViewsToOpen {
 public:
         struct ViewSlot {
-                ViewSlot (std::string const &v, std::string const &s = "") : view (v), slot (s) {}
+                ViewSlot (std::string const &v, std::string const &s = "", std::string const &sf = "") : view (v), slot (s), slotFeature (sf) {}
                 std::string view;
                 std::string slot;
+                std::string slotFeature;
         };
 
         typedef std::vector<ViewSlot> ViewSlotVector;

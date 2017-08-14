@@ -51,8 +51,7 @@ public:
         virtual void show ();
         virtual void hide ();
         virtual void refresh (Context *) {}
-        virtual bool reparent (std::string const &slotName);
-//        virtual bool embed (std::string const &slotName);
+        virtual bool reparent (const ViewsToOpen::ViewSlot &vs);
 
         /**
          * Destroys
@@ -86,7 +85,7 @@ public:
         MappingMultiMap getMappingsByModelRange (std::string const &modelRange) const;
 
         PageDecoratorVector &getDecorators () __tiliae_no_reflect__ { return decorators; }
-        virtual void runDecorators (IPageDecorator::Stage stage, Context *ctx);
+        virtual void runDecorators (IPageDecorator::Stage stage, Context *ctx, GtkContainer *slotWidget = nullptr);
 
         /*---------------------------------------------------------------------------*/
 
@@ -108,6 +107,9 @@ public:
         virtual void setController (AbstractController *c);
 
         void setConfig (Config const *c);
+
+        bool isDeleteOnClose () const;
+        void setDeleteOnClose (bool b);
 
 public:
         std::string name;
