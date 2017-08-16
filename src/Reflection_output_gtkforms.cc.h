@@ -708,6 +708,8 @@ void createReflectionDatabase_gtkforms ()
 			clazz->addBaseClassName ("Column");
 			clazz->addConstructor (new Constructor (Reflection::ConstructorPointerWrapper2 <GtkForms::PixbufColumn, void>::Level1Wrapper::newConstructorPointer ()));
 			clazz->addField (new Field ("dict", Reflection::createFieldWrapper (&GtkForms::PixbufColumn::dict)));
+			clazz->addField (new Field ("cache", Reflection::createFieldWrapper (&GtkForms::PixbufColumn::cache)));
+			clazz->addMethod (new Method ("init", createMethodWrapper (&GtkForms::PixbufColumn::init)));
 			clazz->addMethod (new Method ("view2Model", createMethodWrapper (&GtkForms::PixbufColumn::view2Model)));
 		}
 	}

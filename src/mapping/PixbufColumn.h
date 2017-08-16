@@ -21,7 +21,8 @@ namespace GtkForms {
  */
 class __tiliae_reflect__ PixbufColumn : public Column {
 public:
-        virtual ~PixbufColumn () {}
+        virtual ~PixbufColumn ();
+        void init ();
         virtual ValidationAndBindingResult view2Model (MappingDTO *dto) { return ValidationAndBindingResult {}; /* Not implemented and won't be */ }
 
 protected:
@@ -30,7 +31,9 @@ protected:
 
 public:
 
+        typedef std::map <std::string, GdkPixbuf *> PixBufMap;
         AssociationMap dict;
+        PixBufMap cache;
 
 };
 

@@ -15,7 +15,49 @@
 namespace GtkForms {
 static src::logger_mt &lg = logger::get ();
 
-// TODO create pixbufs on startup, not everytime setToView is called. Total waste of memory.
+void PixbufColumn::init ()
+{
+        GError *e = nullptr;
+        GdkPixbuf *pixbuf;
+
+        for (AssociationMap::value_type const &el : dict) {
+                std::string key = el.first;
+                std::string val = el.second;
+
+                pixbuf = gdk_pixbuf_new_from_file (val.c_str (), &e);
+
+                if (!pixbuf) {
+                        throw Core::Exception ("PixbufColumn::init : failed to create GtkPixbuf from a file [" + val + "]. Message : ["
+                                               + std::string (e->message) + "]");
+                }
+
+                cache[key] = pixbuf;
+        }
+
+        if (!getConstValue ().isNone ()) {
+                std::string path = vcast<std::string> (getConstValue ());
+                pixbuf = gdk_pixbuf_new_from_file (vcast<std::string> (getConstValue ()).c_str (), &e);
+
+                if (!pixbuf) {
+                        throw Core::Exception ("PixbufColumn::init : failed to create GtkPixbuf from a constValue [" + path + "]. Message : ["
+                                               + std::string (e->message) + "]");
+                }
+
+                cache[path] = pixbuf;
+        }
+}
+
+/*****************************************************************************/
+
+PixbufColumn::~PixbufColumn ()
+{
+        for (PixBufMap::value_type &el : cache) {
+                g_object_unref (el.second);
+        }
+}
+
+/*****************************************************************************/
+
 void PixbufColumn::setToView (ViewElementDTO *viewObject, std::string const &, Core::Variant valueToSet)
 {
         ColumnElementDTO *colElem = dynamic_cast<ColumnElementDTO *> (viewObject);
@@ -25,25 +67,12 @@ void PixbufColumn::setToView (ViewElementDTO *viewObject, std::string const &, C
         }
 
         GdkPixbuf *pixbuf = nullptr;
-        GError *e = nullptr;
 
         if (getConstValue ().isNone ()) {
-                std::string index = lcast<std::string> (valueToSet);
-
-                AssociationMap::const_iterator it;
-                if ((it = dict.find (index)) == dict.end ()) {
-                        return;
-                }
-
-                pixbuf = gdk_pixbuf_new_from_file (it->second.c_str (), &e);
+                pixbuf = cache.at (lcast<std::string> (valueToSet));
         }
         else {
-                pixbuf = gdk_pixbuf_new_from_file (vcast<std::string> (getConstValue ()).c_str (), &e);
-        }
-
-        if (!pixbuf) {
-                throw Core::Exception ("ConstantToPixbufMapping::model2View : failed to create GtkPixbuf from RawData. Message : [" + std::string (e->message)
-                                       + "]");
+                pixbuf = cache.at (vcast<std::string> (getConstValue ()));
         }
 
         if (colElem->listStore) {
