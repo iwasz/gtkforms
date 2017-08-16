@@ -233,9 +233,9 @@ void BuilderView::destroyUi ()
 #endif
 
         //        Sholud I? Or shouldn't?
-        //        if (GTK_IS_WINDOW (impl->widget)) {
-        //                g_object_unref (impl->widget);
-        //        }
+//        if (GTK_IS_WINDOW (impl->widget)) {
+//                g_object_unref (impl->widget);
+//        }
 
         impl->widget = nullptr;
 

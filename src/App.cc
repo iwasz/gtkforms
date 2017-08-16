@@ -42,7 +42,7 @@ gboolean guiThread (gpointer user_data);
  */
 struct App::Impl {
 
-        ~Impl () {}
+        ~Impl () { delete beanWrapper; }
 
         struct ControllerOperation {
                 /// true : open, false : close.
@@ -55,6 +55,7 @@ struct App::Impl {
         void controllerOpen (std::string const &controllerName, AbstractController *requestor, App *app);
         AbstractView *loadView (std::string const &viewAndSlot, AbstractController *controller);
         static IMapping *getDefaultMapping (ViewElementDTO *vd);
+        void initBeanWrapper ();
 
         typedef std::vector<ControllerOperation> ControllerOperationVector;
         ControllerOperationVector controllerOperations;
@@ -73,7 +74,10 @@ struct App::Impl {
         DefaultQuitHandler defaultQuitHandler;
         bool beanWrapperInitialized = false;
         Wrapper::BeanWrapper *beanWrapper = 0;
+        static Ptr<k202::K202> k202;
 };
+
+Ptr<k202::K202> App::Impl::k202;
 
 /*--------------------------------------------------------------------------*/
 
@@ -634,19 +638,26 @@ Context &App::getContext ()
 
 k202::K202 *App::getK202 ()
 {
-        static Ptr<k202::K202> k202 = k202::K202::create ();
-        return k202.get ();
+        if (!App::Impl::k202) {
+                App::Impl::k202 = k202::K202::create ();
+        }
+
+        return App::Impl::k202.get ();
 }
 
 /*--------------------------------------------------------------------------*/
 
-void App::initBeanWrapper ()
+void App::initBeanWrapper () { impl->initBeanWrapper (); }
+
+/*--------------------------------------------------------------------------*/
+
+void App::Impl::initBeanWrapper ()
 {
-        impl->beanWrapper = new Wrapper::BeanWrapper (true);
-        //                beanWrapper->addPlugin (new GObjectWrapperPlugin);
-        impl->beanWrapper->addPlugin (new Wrapper::PropertyRWBeanWrapperPlugin ());
-        impl->beanWrapper->addPlugin (new Wrapper::GetPutMethodRWBeanWrapperPlugin ());
-        impl->beanWrapper->addPlugin (new Wrapper::MethodPlugin (Wrapper::MethodPlugin::METHOD));
+        beanWrapper = new Wrapper::BeanWrapper (true);
+        // beanWrapper->addPlugin (new GObjectWrapperPlugin);
+        beanWrapper->addPlugin (new Wrapper::PropertyRWBeanWrapperPlugin ());
+        beanWrapper->addPlugin (new Wrapper::GetPutMethodRWBeanWrapperPlugin ());
+        beanWrapper->addPlugin (new Wrapper::MethodPlugin (Wrapper::MethodPlugin::METHOD));
 
         Editor::TypeEditor *typeEditor = new Editor::TypeEditor (true);
         typeEditor->setEqType (new Editor::NoopEditor ());
@@ -666,10 +677,10 @@ void App::initBeanWrapper ()
         chain->addEditor (typeEditor);
         chain->addEditor (new Editor::NoopEditor ());
 
-        impl->beanWrapper->setEditor (chain);
-        impl->beanWrapperInitialized = true;
+        beanWrapper->setEditor (chain);
+        beanWrapperInitialized = true;
 
-        impl->context.setBeanWrapper (impl->beanWrapper);
+        context.setBeanWrapper (beanWrapper);
 }
 
 /*--------------------------------------------------------------------------*/
